@@ -1,4 +1,4 @@
-# fe-meshnet
+# fe-mesh
 
 ## Project setup
 ```
