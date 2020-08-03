@@ -3,7 +3,6 @@ import store from './index'
 import contractService from '@/services/contractService'
 
 const PAYMENT_STATUS_FREE_CREDITS = Number(process.env.VUE_APP_SESSION_PAYMENT_STATUS_FREE_CREDITS)
-const NUMB_ENTICERS = Number(process.env.VUE_APP_SESSION_NUMB_ENTICERS)
 const NUMB_FREE_CREDITS = Number(process.env.VUE_APP_SESSION_NUMB_FREE_CREDITS)
 
 const contractStore = {
@@ -26,14 +25,14 @@ const contractStore = {
     freeSession: { freeSessionInProgress: false, freeSessionUsed: true }
   },
   getters: {
-    getTempUserId: (state: { tempUserId: any }) => {
+    getTempUserId: (state) => {
       if (state.tempUserId) {
         const tuid = localStorage.getItem('RADICLE_TUID') || ''
         return JSON.parse(tuid)
       }
       return ''
     },
-    getConfiguration: (state: { rootFile: { sessions: any[] }; apiKey: any; paymentOptions: { mainOption: any }; creditAttributes: any }) => (opcode: any) => {
+    getConfiguration: (state) => (opcode) => {
       const session = state.rootFile.sessions[0]
       return {
         apiKey: state.apiKey,
@@ -45,36 +44,36 @@ const contractStore = {
         creditAttributes: state.creditAttributes
       }
     },
-    paymentOptions: (state: { paymentOptions: any }) => {
+    paymentOptions: (state) => {
       return state.paymentOptions
     },
-    getLoopSession: (state: { rootFile: { sessions: any[] } }) => {
+    getLoopSession: (state) => {
       return state.rootFile.sessions[0]
     },
-    getFreeSession: (state: { freeSession: any }) => {
+    getFreeSession: (state) => {
       if (state.freeSession) {
         return state.freeSession
       }
       return { freeSessionInProgress: false, freeSessionUsed: true }
     },
-    getRootFile: (state: { rootFile: any }) => {
+    getRootFile: (state) => {
       return state.rootFile
     },
-    isInitialised: (state: { initialised: any }) => {
+    isInitialised: (state) => {
       return state.initialised
     },
-    isGameOn: (state: { rootFile: { sessions: { clientData: any }[] } }) => {
+    isGameOn: (state) => {
       const cd = state.rootFile.sessions[0].clientData
       return cd.creditsUsed < cd.creditsPurchased
     },
-    isPaid: (state: { rootFile: { sessions: { status: number }[] } }) => {
+    isPaid: (state) => {
       return state.rootFile.sessions[0].status > 3
     },
-    getCredits: (state: { rootFile: { sessions: { clientData: any }[] } }) => {
+    getCredits: (state) => {
       const cd = state.rootFile.sessions[0].clientData
       return { used: cd.creditsUsed, purchased: cd.creditsPurchased }
     },
-    getTestSpin: (state: { rootFile: { sessions: { status: number }[] } }) => {
+    getTestSpin: (state) => {
       const profile = store.getters['authStore/getMyProfile']
       if (!profile.loggedIn) {
         return true
@@ -82,40 +81,32 @@ const contractStore = {
       // let hasCredits = state.loopSession.clientData.creditsUsed <= state.loopSession.clientData.creditsPurchased
       return state.rootFile.sessions[0].status === 3
     },
-    getAmountFiatPerSpin: (state: { creditAttributes: { amountFiatPerSpin: any } }) => {
+    getAmountFiatPerSpin: (state) => {
       return state.creditAttributes.amountFiatPerSpin
     }
   },
   mutations: {
-    initialised (state: { initialised: boolean }) {
+    initialised (state) {
       state.initialised = true
     },
-    paymentOptions (state: { paymentOptions: any }, paymentOptions: any) {
+    paymentOptions (state, paymentOptions) {
       state.paymentOptions = paymentOptions
     },
-    freeSession (state: { freeSession: any }, freeSession: any) {
+    freeSession (state, freeSession) {
       state.freeSession = freeSession
     },
-    rootFile (state: { rootFile: any }, rootFile: any) {
+    rootFile (state, rootFile) {
       state.rootFile = rootFile
     },
-    numbCredits (state: { numbCredits: any }, numbCredits: any) {
+    numbCredits (state, numbCredits) {
       state.numbCredits = numbCredits
     }
   },
   actions: {
-    initApplication ({ commit }: any, loggedIn: any) {
+    initApplication ({ commit }, loggedIn) {
       return new Promise((resolve) => {
-        contractService.initSchema(loggedIn).then((rootFile: any) => {
-          commit('rootFile', rootFile)
+        contractService.initSchema(loggedIn).then((rootFile) => {
           const loopSession = rootFile.sessions[0]
-          const enticers = rootFile.sessions.filter((sess: { status: number }) => sess.status === PAYMENT_STATUS_FREE_CREDITS)
-          const freeSessionUsed = enticers.length >= NUMB_ENTICERS || loopSession.clientData.creditsUsed >= loopSession.clientData.creditsPurchased
-          const freeSession = {
-            freeSessionUsed: freeSessionUsed,
-            freeSessionInProgress: loopSession.clientData.creditsUsed > 0 && loopSession.status === PAYMENT_STATUS_FREE_CREDITS
-          }
-          commit('freeSession', freeSession)
           commit('rootFile', rootFile)
           commit('initialised')
           resolve(loopSession)
@@ -129,15 +120,14 @@ const contractStore = {
         **/
       })
     },
-
-    startFreeSession ({ commit, state }: any) {
+    startFreeSession ({ commit, state }) {
       return new Promise(resolve => {
         const loopSession = state.rootFile.sessions[0]
         loopSession.clientData.creditsPurchased = NUMB_FREE_CREDITS
         loopSession.status = PAYMENT_STATUS_FREE_CREDITS
         loopSession.testSpin = false
         loopSession.freeSessionUsed = true
-        contractService.updateSession(state.rootFile).then((rootFile: any) => {
+        contractService.updateSession(state.rootFile).then((rootFile) => {
           state.freeSession.freeSessionUsed = false
           state.freeSession.freeSessionInProgress = true
           commit('rootFile', rootFile)
@@ -149,8 +139,7 @@ const contractStore = {
           })
       })
     },
-
-    receivePayment ({ commit, state }: any, data: { status: any; paymentId: any; numbCredits: any; opcode: string }) {
+    receivePayment ({ commit, state }, data) {
       return new Promise(resolve => {
         const loopSession = state.rootFile.sessions[0]
         loopSession.status = (data.status) ? data.status : 3
@@ -171,7 +160,7 @@ const contractStore = {
       })
     },
 
-    startNewSession ({ commit, state }: any, profile: { loggedIn: any }) {
+    startNewSession ({ commit, state }, profile) {
       return new Promise((resolve) => {
         const loopSession = state.rootFile.sessions[0]
         if (!profile.loggedIn) {
@@ -199,7 +188,7 @@ const contractStore = {
       })
     },
 
-    updateAssets ({ commit, state }: any, data: { assetHash: any }) {
+    updateAssets ({ commit, state }, data) {
       return new Promise(resolve => {
         const loopSession = state.rootFile.sessions[0]
         if (!loopSession.paymentId) {
@@ -220,7 +209,7 @@ const contractStore = {
       })
     },
 
-    debitSession ({ commit, state }: any) {
+    debitSession ({ commit, state }) {
       return new Promise((resolve) => {
         const loopSession = state.rootFile.sessions[0]
         if (loopSession.clientData.creditsUsed < loopSession.clientData.creditsPurchased) {
@@ -234,9 +223,9 @@ const contractStore = {
         }
       })
     },
-    storeGlobalConfig ({ commit }: any, config: any) {
+    storeGlobalConfig ({ commit }, config) {
       return new Promise((resolve) => {
-        contractService.storeGlobalConfig(config).then((config: any) => {
+        contractService.storeGlobalConfig(config).then((config) => {
           commit('paymentOptions', config.paymentOptions)
           resolve(config)
         })

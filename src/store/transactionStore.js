@@ -5,8 +5,7 @@ import {
   broadcastTransaction,
   broadcastRawTransaction,
   makeSTXTokenTransfer,
-  getAddressFromPrivateKey,
-  createStacksPublicKey
+  getAddressFromPrivateKey
   // makeStandardSTXPostCondition,
   // makeContractCall
 } from '@blockstack/stacks-transactions'
@@ -25,12 +24,12 @@ const transactionStore = {
   getters: {
   },
   mutations: {
-    addContract: (state: { contractName: string }, contractName: string) => {
+    addContract: (state, contractName) => {
       state.contractName = contractName
     }
   },
   actions: {
-    sendTx ({ commit }: any, transaction: any) {
+    sendTx ({ commit }, transaction) {
       return new Promise((resolve) => {
         network.coreApiUrl = 'http://localhost:20443'
         broadcastRawTransaction(transaction.serialize(), network.coreApiUrl).then(() => {
@@ -38,7 +37,7 @@ const transactionStore = {
         })
       })
     },
-    transferFunds ({ commit }: any, data: any) {
+    transferFunds ({ commit }, data) {
       return new Promise((resolve, reject) => {
         network.coreApiUrl = 'http://localhost:20443'
         const txOptions = {
@@ -80,7 +79,7 @@ const transactionStore = {
         })
       })
     },
-    deployContract ({ commit }: any, data: any) {
+    deployContract ({ commit }, data) {
       return new Promise((resolve, reject) => {
         console.log('deploying contract: ' + data.contractName)
         network.coreApiUrl = 'http://localhost:20443'

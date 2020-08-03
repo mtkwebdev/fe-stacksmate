@@ -192,7 +192,6 @@ export default {
       cvs.height = vid.clientHeight
       const cvsCtx = cvs.getContext('2d')
       vid.currentTime = 0
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const $self = this
       document.querySelector('#video1').addEventListener('timeupdate', function () {
         // You are now ready to grab the thumbnail from the <canvas> element
@@ -261,7 +260,6 @@ export default {
       this.load(e, this.mediaObjects, 1)
     },
     load: function (e, arrayToLoad, limit) {
-      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const $self = this
       this.internalError = null
       let userFiles

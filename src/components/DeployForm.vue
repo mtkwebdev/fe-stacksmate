@@ -22,7 +22,7 @@
           <div class="mb-3">
             <b-textarea
               ref="contractCode"
-              v-model="decodedString"
+              :value="decodedString"
               class="mt-3"
               rows="10"
               placeholder="Contract Code"
@@ -48,7 +48,6 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import MediaFilesUpload from '@/components/utils/MediaFilesUpload'
-// import { openContractDeploy } from '@blockstack/connect'
 
 export default {
   name: 'DeployForm',
@@ -90,28 +89,23 @@ export default {
       return decodedString
     },
     deployContract: function () {
+      const provider = this.$store.getters[APP_CONSTANTS.KEY_AUTHENTICATOR]
       const filename = this.files[0].name
+      const sender = this.$store.getters[APP_CONSTANTS.KEY_CURRENT_ACCOUNT]
       const data = {
         contractName: filename.split(/\./)[0],
-        codeBody: this.plainFile()
+        codeBody: this.plainFile(),
+        senderKey: sender.sk // using same key allows contract-call?
       }
-      const codeBody = data.codeBody
-      /**
-      const authOrigin = 'http://localhost:20443'
-      openContractDeploy({
-        contractName: data.contractName,
-        codeBody,
-        authOrigin,
-        appDetails: {
-          name: 'Mesh App',
-          icon: 'http://localhost:8080/img/logo/Risidio_logo_1024x1024.png'
-        },
-        finished: this.finished
-      })
-      **/
-    },
-    finished: function (data) {
-      console.log(data.txId)
+      if (provider === 'blockstack') {
+        this.$store.dispatch('authStore/deployContractBlockstack', data)
+      } else {
+        this.$store.dispatch('authStore/deployContractRisidio', data).then((result) => {
+          this.result = result
+        }).catch((error) => {
+          this.result = error
+        })
+      }
     },
     deployContract1: function () {
       const sender = this.$store.getters[APP_CONSTANTS.KEY_CURRENT_ACCOUNT]

@@ -3,10 +3,21 @@ import {
   Person,
   UserSession
 } from 'blockstack'
-import { MeshProfile } from '@/types'
-// import { showBlockstackConnect } from '@blockstack/connect'
+import { openContractDeploy, showBlockstackConnect, authenticate } from '@blockstack/connect'
 import router from '@/router'
 import store from '@/store'
+import lsatHelper from 'lsat-entry.js'
+import {
+  makeContractDeploy,
+  // makeRandomPrivKey,
+  // StacksTestnet,
+  // broadcastTransaction,
+  // broadcastRawTransaction,
+  // makeSTXTokenTransfer,
+  // getAddressFromPrivateKey
+  // makeStandardSTXPostCondition,
+  // makeContractCall
+} from '@blockstack/stacks-transactions'
 
 const BLOCKSTACK_LOGIN = Number(process.env.VUE_APP_BLOCKSTACK_LOGIN)
 
@@ -26,12 +37,12 @@ const authOptions = {
   // authOrigin: 'http://localhost:8080',
   // userSession: userSession,
   appDetails: {
-    name: 'loopbomb',
-    icon: origin + '/img/logo/android_chrome_256x256.png'
+    name: 'Risidio Meshnet',
+    icon: origin + '/img/logo/risidio_black.svg'
   }
 }
 const getProfile = function () {
-  let myProfile: MeshProfile = {
+  let myProfile = {
     loggedIn: false
   }
   try {
@@ -113,40 +124,50 @@ const authStore = {
       loggedIn: false,
       showAdmin: false
     },
+    appName: 'Risidio Mesh',
+    appLogo: '/img/logo/Risidio_logo_256x256.png',
     authHeaders: null,
-    authenticator: null
+    networkId: 'testnet',
+    provider: 'blockstack'
   },
   getters: {
-    getMyProfile: (state: { myProfile: any }) => {
-      if (state.myProfile) {
-        return state.myProfile
-      } else {
-        return userSession.loadUserData()
+    getMyProfile: state => {
+      if (!state.myProfile) {
+        return {
+          loggedIn: false
+        }
       }
+      return state.myProfile
     },
-    getAuthenticator: (state: { authenticator: any }) => {
-      return state.authenticator
+    getProvider: (state) => {
+      return state.provider
     },
-    getAuthHeaders: (state: { authHeaders: any }) => {
+    getNetworkId: (state) => {
+      return state.networkId
+    },
+    getAuthHeaders: (state) => {
       return state.authHeaders
     }
   },
   mutations: {
-    loggedIn (state: { myProfile: MeshProfile }, loggedIn: boolean) {
+    loggedIn (state, loggedIn) {
       state.myProfile.loggedIn = loggedIn
     },
-    setAuthenticator (state: { authenticator: string }, authenticator: string) {
-      state.authenticator = authenticator
+    setProvider (state, provider) {
+      state.provider = provider
     },
-    myProfile (state: { myProfile: any }, myProfile: any) {
+    setNetworkId (state, networkId) {
+      state.networkId = networkId
+    },
+    myProfile (state, myProfile) {
       state.myProfile = myProfile
     },
-    authHeaders (state: { authHeaders: any }, authHeaders: any) {
+    authHeaders (state, authHeaders) {
       state.authHeaders = authHeaders
     }
   },
   actions: {
-    fetchMyAccount ({ commit }: any) {
+    fetchMyAccount ({ commit }) {
       return new Promise(resolve => {
         if (userSession.isUserSignedIn()) {
           // userSession.signUserOut(window.location.origin)
@@ -172,9 +193,9 @@ const authStore = {
     startLogin({ }) {
       return new Promise(resolve => {
         if (BLOCKSTACK_LOGIN === 1) {
-          // showBlockstackConnect(authOptions)
+          showBlockstackConnect(authOptions)
         } else if (BLOCKSTACK_LOGIN === 2) {
-          // authenticate(authOptions)
+          authenticate(authOptions)
         } else {
           const origin = window.location.origin
           const transitKey = userSession.generateAndStoreTransitKey()
@@ -188,12 +209,61 @@ const authStore = {
         }
       })
     },
-    startLogout ({ commit }: any) {
+    startLogout ({ commit }) {
       return new Promise(() => {
         if (userSession.isUserSignedIn()) {
           userSession.signUserOut(window.location.origin)
           commit('myProfile', getProfile())
         }
+      })
+    },
+    deployContractBlockstack ({ commit }, data) {
+      return new Promise(() => {
+        const authOrigin = (state.provider === 'local-network') ? 'http://localhost:20443' : null
+        openContractDeploy({
+          contractName: data.contractName,
+          codeBody: data.codeBody,
+          authOrigin,
+          appDetails: {
+            name: state.appName,
+            icon: state.appLogo
+          },
+          finished: (trans) => {
+            console.log(trans.txId)
+            store.dispatch('contractStore/saveContract', data)
+          }
+        })
+      })
+    },
+    deployContractRisidio ({ commit }, data) {
+      return new Promise((resolve, reject) => {
+        network.coreApiUrl = 'http://localhost:20443'
+        const txOptions = {
+          contractName: data.contractName,
+          codeBody: data.codeBody,
+          senderKey: data.senderKey,
+          // nonce: new BigNum(data.nonce), // watch for nonce increments if this works - may need to restart mocknet!
+          fee: new BigNum(3000), // set a tx fee if you don't want the builder to estimate
+          network
+        }
+        makeContractDeploy(txOptions).then((transaction) => {
+          commit('addContract', data.contractName)
+          const array = new Uint8Array(transaction.serialize())
+          const blobby = new Blob([array])
+          const formData = new FormData()
+          formData.append('filename', 'broadcastRawTransaction')
+          formData.append('bar', blobby, 'filename')
+          const headers = {
+            'Content-Type': 'multipart/form-data;'
+          }
+          axios.post(MESH_API + '/v2/deploy', formData, { headers: headers }).then(response => {
+            commit('addResponse', response.data)
+            resolve(response)
+          }).catch((error) => {
+            commit('addResponse', error.response.data)
+            resolve(error.response.data)
+          })
+        })
       })
     }
   }

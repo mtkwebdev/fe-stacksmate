@@ -15,7 +15,7 @@ const numberOfCredits = 2
 const API_PATH = process.env.VUE_APP_RADICLE_API
 const CONFIG_PROVIDER = process.env.VUE_APP_CONFIG_PROVIDER
 
-const getNewSession = function (now: any) {
+const getNewSession = function (now) {
   if (!now) now = moment({}).valueOf()
   return {
     paymentId: null,
@@ -33,7 +33,7 @@ const getNewSession = function (now: any) {
 
 const getNewRootFile = function () {
   const now = moment({}).valueOf()
-  const newRootFile: any = {
+  const newRootFile = {
     created: now,
     profile: {},
     sessions: []
@@ -42,7 +42,7 @@ const getNewRootFile = function () {
   return newRootFile
 }
 
-const httpParams = function (httpMethod: string, btcMethod: string, postData: any) {
+const httpParams = function (httpMethod, btcMethod, postData) {
   const headers = store.getters['authStore/getAuthHeaders']
   return {
     url: API_PATH + btcMethod,
@@ -52,20 +52,20 @@ const httpParams = function (httpMethod: string, btcMethod: string, postData: an
 }
 
 const contractService = {
-  httpParams: function (method: any, path: any, data: any) {
+  httpParams: function (method, path, data) {
     return httpParams(method, path, data)
   },
   freeSession: {
     freeSessionUsed: false,
     freeSessionInProgress: false
   },
-  initSchema: function (loggedIn: any) {
+  initSchema: function (loggedIn) {
     return new Promise((resolve) => {
       if (!loggedIn) {
         resolve(getNewRootFile())
         return
       }
-      userSession.getFile(sessionRootFileName, { decrypt: true }).then(function (file: any) {
+      userSession.getFile(sessionRootFileName, { decrypt: true }).then(function (file) {
         if (!file) {
           const rootFile = getNewRootFile()
           userSession.putFile(sessionRootFileName, JSON.stringify(rootFile), { encrypt: true }).then((gaiaPath) => {
@@ -84,7 +84,7 @@ const contractService = {
       })
     })
   },
-  updateSession: function (rootFile: any) {
+  updateSession: function (rootFile) {
     return new Promise((resolve) => {
       if (!rootFile.sessions) {
         throw new Error('Unexpected root file?')
@@ -95,7 +95,7 @@ const contractService = {
       })
     })
   },
-  newSession: function (rootFile: any) {
+  newSession: function (rootFile) {
     if (!rootFile.sessions) {
       throw new Error('Unexpected root file?')
     }
@@ -110,7 +110,7 @@ const contractService = {
 
   fetchGlobalConfig: function () {
     return new Promise((resolve) => {
-      userSession.getFile(configRootFileName, { username: CONFIG_PROVIDER }).then((file: any) => {
+      userSession.getFile(configRootFileName, { username: CONFIG_PROVIDER }).then((file) => {
         resolve(JSON.parse(file))
       }).catch(() => {
         resolve()
@@ -118,7 +118,7 @@ const contractService = {
     })
   },
 
-  storeGlobalConfig: function (configFile: any) {
+  storeGlobalConfig: function (configFile) {
     return new Promise((resolve) => {
       userSession.putFile(configRootFileName, JSON.stringify(configFile), { encrypt: false }).then((gaiaPath) => {
         configFile.gaiaPath = gaiaPath
@@ -129,7 +129,7 @@ const contractService = {
     })
   },
 
-  updateAssets: function (paymentId: string, assetHash: string) {
+  updateAssets: function (paymentId, assetHash) {
     return new Promise((resolve, reject) => {
       const params = httpParams('put', '/lsat/payment/assets/' + paymentId + '/' + assetHash, null)
       axios.put(params.url, params).then(response => {

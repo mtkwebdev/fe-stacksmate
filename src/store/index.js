@@ -4,9 +4,6 @@ import axios from 'axios'
 import transactionStore from './transactionStore'
 import authStore from './authStore'
 import store from './index'
-import {
-  UserSession
-} from 'blockstack'
 import contractStore from './contractStore'
 
 Vue.use(Vuex)
@@ -18,30 +15,6 @@ const alice = JSON.parse(process.env.VUE_APP_WALLET_ALICE || '')
 const bob = JSON.parse(process.env.VUE_APP_WALLET_BOB || '')
 const charlie = JSON.parse(process.env.VUE_APP_WALLET_CHARLIE || '')
 const doreen = JSON.parse(process.env.VUE_APP_WALLET_DOREEN || '')
-const userSession = new UserSession()
-/**
-const authHeaders = function (configuration: { apiKey: any }) {
-  let authResponseToken
-  let decodedToken
-  let publicKey
-  let token = 'v1:no-token' // note: not all requests require auth token - e.g. getPaymentAddress
-  if (userSession.isUserSignedIn()) {
-    const account = userSession.loadUserData()
-    if (account) {
-      authResponseToken = account.authResponseToken
-      decodedToken = decodeToken(authResponseToken)
-      token = 'v1:' + account.authResponseToken
-    }
-  }
-  const headers = {
-    ApiKey: configuration.apiKey,
-    IdentityAddress: publicKey,
-    'Content-Type': 'application/json',
-    Authorization: 'Bearer ' + token
-  }
-  return headers
-}
-**/
 
 export default new Vuex.Store({
   modules: {
@@ -51,7 +24,6 @@ export default new Vuex.Store({
   },
   state: {
     windims: { innerWidth: window.innerWidth, innerHeight: window.innerHeight },
-    account: null,
     apiKey: 'blockstack-loopbomb-01234',
     creditAttributes: {
       amountFiatPerCredit: 0.5,
@@ -127,7 +99,7 @@ export default new Vuex.Store({
     ]
   },
   getters: {
-    getLsatConfiguration: state => (opcode: string) => {
+    getLsatConfiguration: state => (opcode) => {
       return {
         apiKey: state.apiKey,
         ratesWatch: true,
@@ -150,11 +122,11 @@ export default new Vuex.Store({
     getResponse: state => {
       return state.response
     },
-    getEndpoints: state => (type: string) => {
+    getEndpoints: state => (type) => {
       const ep = state.endpoints.find(item => item.type === type)
       return (ep) ? ep.values : null
     },
-    getWallet: state => (address: string) => {
+    getWallet: state => (address) => {
       const wallet = state.wallets.find(item => item.keyInfo.address === address)
       return wallet
     },
@@ -181,9 +153,6 @@ export default new Vuex.Store({
     addResponse (state, response) {
       state.response = response
     },
-    setAccount (state, account) {
-      state.account = account
-    },
     setBalance (state, data) {
       const wallet = state.wallets.find(item => item.keyInfo.address === data.address)
       if (wallet) {
@@ -194,9 +163,7 @@ export default new Vuex.Store({
   actions: {
     initApplication ({ commit }) {
       return new Promise(resolve => {
-        const account = userSession.loadUserData()
         store.dispatch('authStore/fetchMyAccount').then((profile) => {
-          commit('setAccount', account)
           if (profile.loggedIn) {
             // store.dispatch('myItemStore/initSchema')
             store.dispatch('contractStore/initApplication', profile.loggedIn).then(() => {
@@ -213,9 +180,7 @@ export default new Vuex.Store({
     },
     fireEvent ({ commit }, data) {
       return new Promise((resolve, reject) => {
-        const account = userSession.loadUserData()
         axios.post(MESH_API + '/v2/accounts', data).then(response => {
-          commit('setAccount', account)
           commit('addResponse', response.data)
           resolve(response.data)
         }).catch((error) => {

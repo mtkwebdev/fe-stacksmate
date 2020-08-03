@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import VueRouter, { RouteConfig } from 'vue-router'
+import VueRouter from 'vue-router'
 import DeployContract from '@/views/DeployContract.vue'
 import Contracts from '@/views/Contracts.vue'
 import ApiFramework from '@/views/ApiFramework.vue'
@@ -11,7 +11,7 @@ import MainFooter from '@/layout/MainFooter.vue'
 
 Vue.use(VueRouter)
 
-const routes: Array<RouteConfig> = [
+const routes = [
   {
     path: '/',
     name: 'home',
