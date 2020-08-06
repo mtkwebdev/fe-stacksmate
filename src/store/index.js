@@ -5,6 +5,7 @@ import transactionStore from './transactionStore'
 import authStore from './authStore'
 import store from './index'
 import contractStore from './contractStore'
+import rates from 'risidio-rates'
 
 Vue.use(Vuex)
 
@@ -23,6 +24,9 @@ export default new Vuex.Store({
     contractStore: contractStore
   },
   state: {
+    xgeRates: null,
+    playMode: false,
+    fiatCurrency: 'EUR',
     windims: { innerWidth: window.innerWidth, innerHeight: window.innerHeight },
     apiKey: 'blockstack-loopbomb-01234',
     creditAttributes: {
@@ -109,6 +113,18 @@ export default new Vuex.Store({
         creditAttributes: state.creditAttributes
       }
     },
+    getExchangeRates: state => {
+      return state.xgeRates
+    },
+    getExchangeRate: state => {
+      if (!state.xgeRates) {
+        return null
+      }
+      return state.xgeRates.find(item => item.fiatCurrency === state.fiatCurrency)
+    },
+    getFiatCurrency: state => {
+      return state.fiatCurrency
+    },
     getLsatLoginConfiguration: state => {
       return {
         apiKey: state.apiKey,
@@ -122,6 +138,9 @@ export default new Vuex.Store({
     getResponse: state => {
       return state.response
     },
+    getPlayMode: state => {
+      return state.playMode
+    },
     getEndpoints: state => (type) => {
       const ep = state.endpoints.find(item => item.type === type)
       return (ep) ? ep.values : null
@@ -130,7 +149,7 @@ export default new Vuex.Store({
       const wallet = state.wallets.find(item => item.keyInfo.address === address)
       return wallet
     },
-    getCurrentAccount: state => {
+    getTestWallet: state => {
       const wallet = state.wallets.find(item => item.keyInfo.address === state.currentAccount)
       return wallet
     },
@@ -150,8 +169,14 @@ export default new Vuex.Store({
     setCurrentAccount (state, currentAccount) {
       state.currentAccount = currentAccount
     },
-    addResponse (state, response) {
-      state.response = response
+    setXgeRates (state, xgeRates) {
+      state.xgeRates = xgeRates
+    },
+    setFiatCurrency (state, fiatCurrency) {
+      state.fiatCurrency = fiatCurrency
+    },
+    setPlayMode (state) {
+      state.playMode = !state.playMode
     },
     setBalance (state, data) {
       const wallet = state.wallets.find(item => item.keyInfo.address === data.address)
@@ -163,9 +188,9 @@ export default new Vuex.Store({
   actions: {
     initApplication ({ commit }) {
       return new Promise(resolve => {
+        store.dispatch('fetchRates')
         store.dispatch('authStore/fetchMyAccount').then((profile) => {
           if (profile.loggedIn) {
-            // store.dispatch('myItemStore/initSchema')
             store.dispatch('contractStore/initApplication', profile.loggedIn).then(() => {
               resolve(profile)
             })
@@ -178,10 +203,21 @@ export default new Vuex.Store({
         })
       })
     },
+    fetchRates ({ commit }, data) {
+      return new Promise((resolve, reject) => {
+        rates.fetchSTXRates().then((rates) => {
+          commit('setXgeRates', rates)
+        })
+        setInterval(function () {
+          rates.fetchSTXRates().then((rates) => {
+            commit('setXgeRates', rates)
+          })
+        }, 10000)
+      })
+    },
     fireEvent ({ commit }, data) {
       return new Promise((resolve, reject) => {
         axios.post(MESH_API + '/v2/accounts', data).then(response => {
-          commit('addResponse', response.data)
           resolve(response.data)
         }).catch((error) => {
           const msg = error.response.data.status + ' - ' + error.response.data.message

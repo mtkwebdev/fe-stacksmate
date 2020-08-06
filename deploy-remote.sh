@@ -36,6 +36,9 @@ BUILD_PATH=./
 __build
 cp -r ./dist/* $PATH_DEPLOY/.
 
+SERVER=hume.brightblock.org
+__pushcode
+SERVER=zeno.brightblock.org
 __pushcode
 
 exit 0;

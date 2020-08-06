@@ -3,30 +3,46 @@ import {
   Person,
   UserSession
 } from 'blockstack'
-import { openContractDeploy, showBlockstackConnect, authenticate } from '@blockstack/connect'
+import { openSTXTransfer, openContractDeploy, showBlockstackConnect, authenticate } from '@blockstack/connect'
 import router from '@/router'
 import store from '@/store'
-import lsatHelper from 'lsat-entry.js'
 import {
+  addressToString,
   makeContractDeploy,
-  // makeRandomPrivKey,
-  // StacksTestnet,
-  // broadcastTransaction,
-  // broadcastRawTransaction,
-  // makeSTXTokenTransfer,
-  // getAddressFromPrivateKey
-  // makeStandardSTXPostCondition,
-  // makeContractCall
+  makeSTXTokenTransfer,
+  StacksTestnet,
+  createStacksPrivateKey,
+  getPublicKey,
+  addressFromPublicKeys,
+  AddressVersion,
+  AddressHashMode
 } from '@blockstack/stacks-transactions'
+import BigNum from 'bn.js'
+import axios from 'axios'
 
 const BLOCKSTACK_LOGIN = Number(process.env.VUE_APP_BLOCKSTACK_LOGIN)
-
+const network = new StacksTestnet()
+const MESH_API = process.env.VUE_APP_MESH_API
 const userSession = new UserSession()
 
 const origin = window.location.origin
+
+const getStacksAccount = function (appPrivateKey) {
+  const privateKey = createStacksPrivateKey(appPrivateKey)
+  const publicKey = getPublicKey(privateKey)
+  const address = addressFromPublicKeys(
+    AddressVersion.TestnetSingleSig,
+    AddressHashMode.SerializeP2PKH,
+    1,
+    [publicKey]
+  )
+  return { privateKey, address }
+}
 const authFinished = function() {
   store.dispatch('initApplication').then(() => {
-    router.push('/')
+    if (window.location.pathname !== '/') {
+      router.push('/')
+    }
   })
 }
 const authOptions = {
@@ -40,6 +56,24 @@ const authOptions = {
     name: 'Risidio Meshnet',
     icon: origin + '/img/logo/risidio_black.svg'
   }
+}
+const getUserWallet = function () {
+  if (userSession.isUserSignedIn()) {
+    const userData = userSession.loadUserData()
+    const appPrivateKey = userData.appPrivateKey
+    const id = getStacksAccount(appPrivateKey)
+    const userAddress = addressToString(id.address)
+    store.dispatch('fetchWalletInfo', userAddress).then((response) => {
+      const wallet = {
+        keyInfo: {
+          address: response.data.address
+        },
+        balance: parseInt(response.data.balance, 16)
+      }
+      store.commit('authStore/userWallet', wallet)
+    })
+  }
+  return ''
 }
 const getProfile = function () {
   let myProfile = {
@@ -119,6 +153,7 @@ const authHeaders = function () {
 const authStore = {
   namespaced: true,
   state: {
+    userWallet: '',
     myProfile: {
       username: null,
       loggedIn: false,
@@ -138,6 +173,9 @@ const authStore = {
         }
       }
       return state.myProfile
+    },
+    getUserWallet: (state) => {
+      return state.userWallet
     },
     getProvider: (state) => {
       return state.provider
@@ -162,6 +200,9 @@ const authStore = {
     myProfile (state, myProfile) {
       state.myProfile = myProfile
     },
+    userWallet (state, userWallet) {
+      state.userWallet = userWallet
+    },
     authHeaders (state, authHeaders) {
       state.authHeaders = authHeaders
     }
@@ -174,12 +215,14 @@ const authStore = {
           const profile = getProfile()
           commit('myProfile', profile)
           commit('authHeaders', authHeaders())
+          getUserWallet()
           resolve(profile)
         } else if (userSession.isSignInPending()) {
           userSession.handlePendingSignIn().then(() => {
             const profile = getProfile()
             commit('myProfile', profile)
             commit('authHeaders', authHeaders())
+            getUserWallet()
             resolve(profile)
           })
         } else {
@@ -217,7 +260,7 @@ const authStore = {
         }
       })
     },
-    deployContractBlockstack ({ commit }, data) {
+    deployContractBlockstack ({ state }, data) {
       return new Promise(() => {
         const authOrigin = (state.provider === 'local-network') ? 'http://localhost:20443' : null
         openContractDeploy({
@@ -257,6 +300,54 @@ const authStore = {
             'Content-Type': 'multipart/form-data;'
           }
           axios.post(MESH_API + '/v2/deploy', formData, { headers: headers }).then(response => {
+            commit('addResponse', response.data)
+            resolve(response)
+          }).catch((error) => {
+            commit('addResponse', error.response.data)
+            resolve(error.response.data)
+          })
+        })
+      })
+    },
+    makeTransferBlockstack ({ state }, data) {
+      return new Promise(() => {
+        const authOrigin = (state.provider === 'local-network') ? 'http://localhost:20443' : null
+        openSTXTransfer({
+          recipient: data.recipient,
+          amount: data.amount,
+          memo: data.memo,
+          authOrigin,
+          appDetails: {
+            name: state.appName,
+            icon: state.appLogo
+          },
+          finished: data => {
+            console.log(data.txId);
+          },
+        })
+      })
+    },
+    makeTransferRisidio ({ commit }, data) {
+      return new Promise((resolve, reject) => {
+        network.coreApiUrl = 'http://localhost:20443'
+        let amount = new BigNum(data.amount)
+        amount = amount.div(new BigNum(1000000))
+        const txOptions = {
+          recipient: data.recipient,
+          amount: amount,
+          senderKey: data.senderKey,
+          network,
+          memo: data.memo,
+          // nonce: new BigNum(0), // set a nonce manually if you don't want builder to fetch from a Stacks node
+          fee: new BigNum(200) // set a tx fee if you don't want the builder to estimate
+        }
+        makeSTXTokenTransfer(txOptions).then((transaction) => {
+          commit('addContract', data.contractName)
+          const txdata = new Uint8Array(transaction.serialize())
+          const headers = {
+            'Content-Type': 'application/octet-stream'
+          }
+          axios.post(MESH_API + '/v2/broadcast', txdata, { headers: headers }).then(response => {
             commit('addResponse', response.data)
             resolve(response)
           }).catch((error) => {

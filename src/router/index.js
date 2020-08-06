@@ -1,11 +1,12 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import DeployContract from '@/views/DeployContract.vue'
+import ContractManagement from '@/views/ContractManagement.vue'
+import TransferManagement from '@/views/TransferManagement.vue'
+import Wallets from '@/components/Wallets.vue'
 import Contracts from '@/views/Contracts.vue'
 import ApiFramework from '@/views/ApiFramework.vue'
-import StaxHub from '@/views/StaxHub.vue'
+import CommunityHub from '@/views/CommunityHub.vue'
 import Login from '@/views/Login.vue'
-import TransferStax from '@/views/TransferStax.vue'
 import MainNavbar from '@/layout/MainNavbar.vue'
 import MainFooter from '@/layout/MainFooter.vue'
 
@@ -15,27 +16,27 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    components: { default: DeployContract, header: MainNavbar, footer: MainFooter }
+    components: { default: ContractManagement, wallets: Wallets, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/api-demo',
     name: 'api-demo',
-    components: { default: ApiFramework, header: MainNavbar, footer: MainFooter }
+    components: { default: ApiFramework, wallets: Wallets, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/staxhub',
     name: 'staxhub',
-    components: { default: StaxHub, header: MainNavbar, footer: MainFooter }
+    components: { default: CommunityHub, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/contracts',
     name: 'contracts',
-    components: { default: Contracts, header: MainNavbar, footer: MainFooter }
+    components: { default: Contracts, wallets: Wallets, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/transfers',
     name: 'transfers',
-    components: { default: TransferStax, header: MainNavbar, footer: MainFooter }
+    components: { default: TransferManagement, wallets: Wallets, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/login',

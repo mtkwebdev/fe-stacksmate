@@ -1,30 +1,10 @@
 <template>
-<!-- droppable area 1 -->
-
 <div class="m-0">
-  <!--
-  <b-popover :target="popoverId" triggers="hover" placement="bottom">
-    <template v-slot:title>{{contentModel.title}}</template>
-    <div class="popover">
-      <div class="popover-body" v-html="contentModel.popoverBody"></div>
-    </div>
-  </b-popover>
-  <b-button :id="popoverId" class="bg-light">
-    {{contentModel.title}} <i class="far fa-question-circle"></i>
-  </b-button>
-  -->
-  <div class="mt-2  mx-0" v-if="!readonly">
-    <!-- Drop area -->
-    <div class="row mb-0 ">
-      <div class="col-8">
-        <div >
-          <label class="btn btn-default btn-file text-white" :class="(checkQuantity) ? 'bg-info' : 'bg-warning'" style="cursor: pointer; width: 300px;">
-            Choose: {{contentModel.title}} (max {{limit}}) <input v-if="checkQuantity" type="file" style="display: none;" id="file-input" @change.prevent="loadMediaObjects"/>
-          </label>
-        </div>
-      </div>
-      <div class="col-8 text-right">
-      </div>
+  <div class="" v-if="!readonly">
+    <div >
+      <label class="btn btn-default btn-file text-white" :class="(checkQuantity) ? 'bg-info' : 'bg-warning'" style="cursor: pointer; width: 300px;">
+        {{contentModel.title}} <input v-if="checkQuantity" type="file" style="display: none;" id="file-input" @change.prevent="loadMediaObjects"/>
+      </label>
     </div>
     <div class="invalid-feedback d-block" v-if="showError">
       {{contentModel.errorMessage}}

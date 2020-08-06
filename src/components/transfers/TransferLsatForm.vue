@@ -1,42 +1,9 @@
 <template>
 <div class="container">
-  <div class="row">
-    <div class="col-12">
-      <wallets />
-    </div>
-  </div>
   <div>
-    <h4>Transfer Stax Form</h4>
-    <b-form>
-      <label class="mb-2 sr-only" for="inline-form-input-name">Transfers</label>
-      <b-input
-        ref="recipient"
-        v-model="recipient"
-        class="mt-3"
-        placeholder="Recipient Stax Address"></b-input>
-      <b-input
-        ref="amount"
-        :value="amountStax"
-        class="mt-3"
-        placeholder="Amount of Stax to send"></b-input>
-      <b-input
-        ref="memo"
-        class="mt-3"
-        maxlength=34
-        v-model="memo"
-        placeholder="Notes..."></b-input>
-      <b-form-text v-if="memo">
-        {{memo.length}} / 34
-      </b-form-text>
-      <b-button v-if="amountStax > 0 && recipient" class="mt-3 btn-sm bg-info" @click="sendEvent()">Transfer</b-button>
-    </b-form>
-    <div class="container m-5">
-      {{result}}
-    </div>
+    <h4>Buy Stax Form</h4>
     <div class="d-flex justify-content-center mt-5 mb-4">
-      <div>
-        <lsat-entry :paymentConfig="configuration" @paymentEvent="paymentEvent"/>
-      </div>
+      <lsat-entry :paymentConfig="configuration" @paymentEvent="paymentEvent"/>
     </div>
   </div>
 </div>
@@ -44,20 +11,17 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import BigNum from 'bn.js'
-import Wallets from '@/components/Wallets'
 
 export default {
-  name: 'TransferStax',
+  name: 'TransferLsatForm',
   components: {
-    Wallets
   },
   props: ['lookAndFeel'],
   data () {
     return {
       loading: true,
+      amountMicroStax: null,
       sender: null,
-      recipient: null,
       memo: '',
       result: null
     }
@@ -73,15 +37,43 @@ export default {
         // this.demoMode = false
       }
     },
+    makeTransfer: function () {
+      const provider = this.$store.getters[APP_CONSTANTS.KEY_PROVIDER]
+      const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
+      if (provider === 'risidio' && !sender) {
+        this.result = 'Please select a test wallet to use with risidio provider.'
+        return
+      }
+      const data = {
+        recipient: this.recipient,
+        senderKey: (sender) ? sender.keyInfo.privateKey : null,
+        amount: this.amountMicroStax,
+        memo: this.memo
+      }
+      if (provider === 'blockstack') {
+        this.$store.dispatch('authStore/makeTransferBlockstack', data).then((result) => {
+          this.result = result
+        }).catch((error) => {
+          this.result = error
+        })
+      } else {
+        this.$store.dispatch('authStore/makeTransferRisidio', data).then((result) => {
+          this.result = result
+        }).catch((error) => {
+          this.result = error
+        })
+      }
+    }
+    /**
     sendEvent: function () {
-      const sender = this.$store.getters[APP_CONSTANTS.KEY_CURRENT_ACCOUNT]
+      const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
       if (!sender || !sender.balance) {
         return
       }
       const data = {
         recipient: this.recipient,
-        senderKey: sender.sk,
-        amount: new BigNum(this.amountStax),
+        senderKey: sender.keyInfo.privateKey,
+        amount: new BigNum(this.amountMicroStax),
         memo: this.memo
       }
       this.$store.dispatch('transactionStore/transferFunds', data).then((txid) => {
@@ -94,10 +86,11 @@ export default {
         this.result = 'Transaction failed: error=' + error
       })
     }
+    **/
   },
   computed: {
     amountStax () {
-      const sender = this.$store.getters[APP_CONSTANTS.KEY_CURRENT_ACCOUNT]
+      const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
       if (!sender || !sender.balance) {
         return
       }

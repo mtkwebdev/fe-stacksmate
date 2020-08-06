@@ -1,14 +1,13 @@
 <template>
 <div class="container">
-  <div class="row">
-    <div class="col-12">
-      <wallets />
-    </div>
+  <div>
+    <b-tabs content-class="mt-3">
+      <b-tab title="Contract History" active><contract-history/></b-tab>
+      <b-tab title="Lookup Contract"><contract-lookup/></b-tab>
+      <b-tab title="Deploy New Contract"><contract-source-code @lookupEvent="lookupEvent"/></b-tab>
+    </b-tabs>
   </div>
   <div class="row">
-    <div class="mb-5 col-12">
-      <deploy-form/>
-    </div>
     <div class="col-12">
       <pre>{{getResponse}}</pre>
     </div>
@@ -27,21 +26,24 @@
 </template>
 
 <script>
-import Wallets from '@/components/Wallets'
-import DeployForm from '@/components/DeployForm'
+import ContractHistory from '@/components/contracts/ContractHistory'
+import ContractSourceCode from '@/components/contracts/ContractSourceCode'
+import ContractLookup from '@/components/contracts/ContractLookup'
 import { APP_CONSTANTS } from '@/app-constants'
 
 export default {
-  name: 'DeployContract',
+  name: 'ContractManagement',
   components: {
-    Wallets,
-    DeployForm
+    ContractSourceCode,
+    ContractHistory,
+    ContractLookup
   },
   props: ['lookAndFeel'],
   data () {
     return {
-      section: 1,
+      operation: 0,
       loading: true,
+      lookup: false,
       response: null
     }
   },
@@ -49,6 +51,9 @@ export default {
     this.loading = false
   },
   methods: {
+    lookupEvent: function () {
+      this.lookup = true
+    }
   },
   computed: {
     getResponse () {

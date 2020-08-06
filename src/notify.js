@@ -1,7 +1,7 @@
 import Vue from 'vue'
 
 const notify = {
-  info (note: { title: any; text: any }) {
+  info (note) {
     Vue.notify({
       duration: 6000,
       type: 'success',
@@ -10,7 +10,7 @@ const notify = {
       text: note.text
     })
   },
-  warn (note: { title: any; text: any }) {
+  warn (note) {
     Vue.notify({
       duration: 6000,
       type: 'warn',
@@ -19,7 +19,7 @@ const notify = {
       text: note.text
     })
   },
-  error (note: { title: any; text: any }) {
+  error (note) {
     Vue.notify({
       duration: 6000,
       type: 'error',

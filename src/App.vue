@@ -2,7 +2,11 @@
 <div id="app">
   <div>
     <router-view class="navbar" name="header"/>
-    <router-view class="main" id="nav"/>
+    <div class="container mt-5 main d-flex justify-content-start">
+      <router-view id="nav"/>
+      <router-view class="w-25" name="wallets"/>
+    </div>
+    <notifications position="top left" width="30%" style="margin: 20px;"/>
     <router-view name="footer" />
   </div>
 </div>

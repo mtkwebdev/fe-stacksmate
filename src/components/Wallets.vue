@@ -3,32 +3,42 @@
   <loopbomb-spinner />
 </div>
 <div v-else>
-  <div class="container text-right d-flex justify-content-end">
-    <b-form inline>
-      <div class="mt-4">
-        <div class="mb-3">
-          <label for="address" class="mb-2 sr-only">Select Account</label>
-          <b-form-select @change="changeAccount" v-model="address" :options="wallets" placeholder="Choose Test Wallet"></b-form-select>
-          <b-form-text>
-            <span v-if="address">Address: {{address}} <br/> Balance {{balance}} <br/></span>
-            <a href="#" @click.prevent="openImportCreate(1)">import account</a> |
-            <a href="#" @click.prevent="openImportCreate(2)">make account</a>
-          </b-form-text>
-        </div>
+  <div v-if="playMode">
+    <div class="container">
+      <h1>Play Mode On!</h1>
+      <!--
+      <div class="mt-4 container text-right d-flex justify-content-start">
+        {{truncMe(getStaxAddress)}}
       </div>
-    </b-form>
-  </div>
-  <div class="container text-right d-flex justify-content-end">
-    <wallet-import-account v-if=" accounting === 1" @importAccount="importCreateAccount"/>
-    <wallet-create-account v-else-if=" accounting === 2" @createAccount="importCreateAccount"/>
-  </div>
-  <div class="container text-right d-flex justify-content-end">
-    <b-form-text class="mt-3" v-if="accounting < 3">
-      <div  class="text-danger"></div>
-    </b-form-text>
-    <b-form-text class="mt-3">
-      <div class="text-danger" style="display: block;">{{feedback}}</div>
-    </b-form-text>
+      -->
+      <b-form inline>
+        <div class="mt-2">
+          <div class="mb-3">
+            <label for="address" class="mb-2 sr-only">Select Account</label>
+            <b-form-select @change="changeAccount" v-model="address" :options="wallets" placeholder="Choose Test Wallet"></b-form-select>
+            <b-form-text class="">
+              <span v-if="address">Address <span style="font-size: 0.7rem;">{{truncMe(address)}}</span> <br/> Balance {{balance}} <br/></span>
+            </b-form-text>
+            <b-form-text class="text-right">
+              <a href="#" @click.prevent="openImportCreate(1)">import</a> |
+              <a href="#" @click.prevent="openImportCreate(2)">create</a>
+            </b-form-text>
+          </div>
+        </div>
+      </b-form>
+    </div>
+    <div class="container text-right d-flex justify-content-end">
+      <wallet-import-account v-if=" accounting === 1" @importAccount="importCreateAccount"/>
+      <wallet-create-account v-else-if=" accounting === 2" @createAccount="importCreateAccount"/>
+    </div>
+    <div class="container d-flex justify-content-end">
+      <b-form-text class="mt-3" v-if="accounting < 3">
+        <div  class="text-danger"></div>
+      </b-form-text>
+      <b-form-text class="mt-3">
+        <div class="text-danger" style="display: block;">{{feedback}}</div>
+      </b-form-text>
+    </div>
   </div>
 </div>
 </template>
@@ -38,6 +48,7 @@ import { APP_CONSTANTS } from '@/app-constants'
 import LoopbombSpinner from '@/components/utils/LoopbombSpinner'
 import WalletImportAccount from '@/components/wallet/WalletImportAccount'
 import WalletCreateAccount from '@/components/wallet/WalletCreateAccount'
+// import { Wallet } from '@blockstack/keychain'
 
 export default {
   name: 'Wallets',
@@ -65,6 +76,10 @@ export default {
       this.feedback = null
       this.address = null
       this.feedback = this.warningMsg
+    },
+    truncMe: function (address) {
+      address = address.substring(0, 5) + '...' + address.substring(address.length - 5, address.length)
+      return address
     },
     importCreateAccount: function (data) {
       if (!data.text) {
@@ -101,9 +116,21 @@ export default {
       })
       return options
     },
+    playMode () {
+      const playMode = this.$store.getters[APP_CONSTANTS.KEY_PLAY_MODE]
+      return playMode
+    },
+    profile () {
+      const profile = this.$store.getters[APP_CONSTANTS.KEY_MY_PROFILE]
+      return profile.name
+    },
     balance () {
       const wallet = this.$store.getters[APP_CONSTANTS.KEY_WALLET](this.address)
       return (wallet && wallet.balance) ? wallet.balance : 0
+    },
+    getStaxAddress () {
+      const wallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
+      return wallet.keyInfo.address
     }
   }
 }

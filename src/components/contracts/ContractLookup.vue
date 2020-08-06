@@ -1,43 +1,24 @@
 <template>
 <div class="container">
-  <div class="row">
-    <div class="col-12">
-      <wallets />
-    </div>
-  </div>
   <div>
-    <h4>Find Contract on the Stacks Blockchain</h4>
-      <!-- <b-form-select v-model="selected" :options="endpoints"></b-form-select> -->
+    <h4>Lookup Contract</h4>
       <b-input
         ref="stacksAddress"
         v-model="contractAddress"
         class="mt-3"
         placeholder="Stacks Address"></b-input>
-        <a v-if="currentWallet" href="#" @click.prevent="useWalletAddress">use wallet</a>
+        <a v-if="currentWallet" href="#" @click.prevent="useWalletAddress">use my address</a>
       <b-input
         ref="contractName"
         v-model="contractName"
         class="mt-3"
         placeholder="Contract Name"></b-input>
-      <div v-if="contractFound">
-        <b-input v-if="mapName"
-          ref="mapName"
-          class="mt-3"
-          placeholder="Map Name"></b-input>
-        <b-input v-if="functionName"
-          ref="functionName"
-          class="mt-3"
-          placeholder="Function Name"></b-input>
-      </div>
       <b-row>
         <b-col lg="4" class="pb-2">
           <button size="sm" v-if="contractAddress && contractName" class="mr-2 mt-3 bg-info" @click="lookupContract()">Lookup Contract</button>
           <button size="sm" v-if="contractSource" class="mt-3 bg-info" @click="lookupInterface()">Fetch Interface</button>
         </b-col>
       </b-row>
-  </div>
-  <div v-if="contractInterface" class="iface-code">
-    <interface-explorer :iface="contractInterface"/>
   </div>
   <div v-if="contractSource" class="source-code">
     <div v-html="contractSource"/>
@@ -50,14 +31,10 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import Wallets from '@/components/Wallets'
-import InterfaceExplorer from '@/components/contracts/InterfaceExplorer'
 
 export default {
-  name: 'Contracts',
+  name: 'ContractLookup',
   components: {
-    Wallets,
-    InterfaceExplorer
   },
   props: ['lookAndFeel'],
   data () {
@@ -68,7 +45,6 @@ export default {
       contractFound: false,
       contractSource: null,
       contractSourceError: null,
-      contractInterface: null,
       response: null
     }
   },
@@ -77,21 +53,15 @@ export default {
   },
   methods: {
     useWalletAddress: function () {
-      this.contractAddress = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET].keyInfo.address
-    },
-    lookupInterface: function () {
-      this.selected = '/v2/contracts/interface/{stacks_address}/{contract_name}'
-      const address = this.doSubstitutions()
-      const endpoints = this.$store.getters[APP_CONSTANTS.KEY_ENDPOINTS]('contract')
-      const ep = endpoints.find(item => item.value === this.selected)
-      this.response = null
-      this.$store.dispatch('fireEvent', { path: address, httpMethod: ep.method, postData: null }).then(response => {
-        this.response = response
-        this.contractInterface = response
-      }).catch((error) => {
-        console.log(error)
-        this.contractInterface = error
-      })
+      const address = this.$store.getters[APP_CONSTANTS.KEY_STAX_ADDRESS]
+      if (address) {
+        this.contractAddress = address
+        return
+      }
+      const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
+      if (sender && sender.keyInfo.address) {
+        this.contractAddress = sender.keyInfo.address
+      }
     },
     lookupContract: function () {
       this.selected = '/v2/contracts/source/{stacks_address}/{contract_name}'
@@ -109,17 +79,8 @@ export default {
     },
     doSubstitutions: function () {
       let address = this.selected
-      if (this.selected && this.selected.indexOf('contract_id') > -1) {
-        address = address.replace('{contract_id}', this.$refs.contractId.$el.value)
-      }
       if (this.selected && this.selected.indexOf('contract_name') > -1) {
         address = address.replace('{contract_name}', this.contractName)
-      }
-      if (this.selected && this.selected.indexOf('map_name') > -1) {
-        address = address.replace('{map_name}', this.$refs.mapName.$el.value)
-      }
-      if (this.selected && this.selected.indexOf('function_name') > -1) {
-        address = address.replace('{function_name}', this.$refs.functionName.$el.value)
       }
       if (this.selected && this.selected.indexOf('stacks_address') > -1) {
         address = address.replace('{stacks_address}', this.contractAddress)
@@ -129,6 +90,10 @@ export default {
   },
   computed: {
     currentWallet () {
+      const address = this.$store.getters[APP_CONSTANTS.KEY_STAX_ADDRESS]
+      if (address) {
+        return true
+      }
       const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
       if (!sender || !sender.keyInfo.address) {
         return false
@@ -139,15 +104,6 @@ export default {
       const endpoints = this.$store.getters[APP_CONSTANTS.KEY_ENDPOINTS]('contract')
       // endpoints = endpoints.map(item => item.value)
       return endpoints
-    },
-    contractId () {
-      return (this.selected && this.selected.indexOf('contract_id') > -1)
-    },
-    mapName () {
-      return (this.selected && this.selected.indexOf('map_name') > -1)
-    },
-    functionName () {
-      return (this.selected && this.selected.indexOf('function_name') > -1)
     }
   }
 }

@@ -1,41 +1,42 @@
 <template>
 <div>
   <div class="container">
-    <h4>Deploy Contract</h4>
     <b-form >
       <div class="mt-4">
         <div>
-          <media-files-upload class="mb-3" :readonly="false" :contentModel="contentModel1" popoverId="'popover-target-1'" :parentalError="parentalError" :showFiles="true" :mediaFiles="mediaFiles1" :limit="1" :sizeLimit="2000000" :mediaTypes="'plain'" @updateMedia="setByEventLogo1($event)"/>
-          <div class="mb-3">
-            <b-input
-              id="contractName"
-              ref="contractName"
-              v-model="fileName"
-              class=""
-              placeholder="Contract Name"
-            ></b-input>
-            <b-form-text>
-              The contract file name must have a .clar extension and forms part of the contract address on the network.
-            </b-form-text>
-          </div>
+          <media-files-upload @lookupEvent="$emit('lookupEvent')" class="mb-3" :readonly="false" :contentModel="contentModel1" popoverId="'popover-target-1'" :parentalError="parentalError" :showFiles="true" :mediaFiles="mediaFiles1" :limit="1" :sizeLimit="2000000" :mediaTypes="'plain'" @updateMedia="setByEventLogo1($event)"/>
+          <div v-if="uploadable">
+            <div class="mb-3">
+              <b-input
+                id="contractName"
+                ref="contractName"
+                v-model="fileName"
+                class=""
+                placeholder="Contract Name"
+              ></b-input>
+              <b-form-text>
+                The contract file name must have a .clar extension and forms part of the contract address on the network.
+              </b-form-text>
+            </div>
 
-          <div class="mb-3">
-            <b-textarea
-              ref="contractCode"
-              :value="decodedString"
-              class="mt-3"
-              rows="10"
-              placeholder="Contract Code"
-            ></b-textarea>
-            <b-form-text>
-              Your clarity contract to be deployed on the blockchain.
-            </b-form-text>
+            <div class="mb-3">
+              <b-textarea
+                ref="contractCode"
+                :value="decodedString"
+                class="mt-3"
+                rows="10"
+                placeholder="Contract Code"
+              ></b-textarea>
+              <b-form-text>
+                Your clarity contract to be deployed on the blockchain.
+              </b-form-text>
+            </div>
+            <div class="mt-3">
+              <b-button class="mr-3 btn-sm bg-info" @click="deployContract()">Deploy Contract</b-button>
+            </div>
+            <!-- <pre class="mt-3 mb-0">{{ plainFile }}</pre> -->
           </div>
-          <!-- <pre class="mt-3 mb-0">{{ plainFile }}</pre> -->
         </div>
-      </div>
-      <div class="mt-3">
-        <b-button v-if="uploadable" class="mr-3 btn-sm bg-info" @click="deployContract()">Deploy Contract</b-button>
       </div>
     </b-form>
     <div class="container m-5">
@@ -50,7 +51,7 @@ import { APP_CONSTANTS } from '@/app-constants'
 import MediaFilesUpload from '@/components/utils/MediaFilesUpload'
 
 export default {
-  name: 'DeployForm',
+  name: 'ContractSourceCode',
   components: {
     MediaFilesUpload
   },
@@ -65,7 +66,7 @@ export default {
       loading: true,
       parentalError: null,
       contentModel1: {
-        title: 'Clarity File',
+        title: 'Load Contract Source',
         errorMessage: 'A file is required.',
         popoverBody: 'Your clarity  file.'
       },
@@ -89,40 +90,27 @@ export default {
       return decodedString
     },
     deployContract: function () {
-      const provider = this.$store.getters[APP_CONSTANTS.KEY_AUTHENTICATOR]
+      const provider = this.$store.getters[APP_CONSTANTS.KEY_PROVIDER]
       const filename = this.files[0].name
-      const sender = this.$store.getters[APP_CONSTANTS.KEY_CURRENT_ACCOUNT]
       const data = {
         contractName: filename.split(/\./)[0],
-        codeBody: this.plainFile(),
-        senderKey: sender.sk // using same key allows contract-call?
+        codeBody: this.plainFile()
       }
       if (provider === 'blockstack') {
         this.$store.dispatch('authStore/deployContractBlockstack', data)
       } else {
+        const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
+        data.senderKey = (sender && sender.keyInfo) ? sender.keyInfo.privateKey : null
+        if (!data.senderKey) {
+          this.result = 'no sender key'
+          return
+        }
         this.$store.dispatch('authStore/deployContractRisidio', data).then((result) => {
           this.result = result
         }).catch((error) => {
           this.result = error
         })
       }
-    },
-    deployContract1: function () {
-      const sender = this.$store.getters[APP_CONSTANTS.KEY_CURRENT_ACCOUNT]
-      if (!sender || !sender.balance) {
-        return
-      }
-      const filename = this.files[0].name
-      const data = {
-        contractName: filename.split(/\./)[0],
-        codeBody: this.plainFile(),
-        senderKey: sender.sk // using same key allows contract-call?
-      }
-      this.$store.dispatch('transactionStore/deployContract', data).then((result) => {
-        this.result = result
-      }).catch((error) => {
-        this.result = error
-      })
     }
   },
   computed: {
@@ -154,14 +142,14 @@ export default {
       return endpoints
     },
     validAccount () {
-      const sender = this.$store.getters[APP_CONSTANTS.KEY_CURRENT_ACCOUNT]
+      const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
       if (!sender || !sender.balance) {
         return false
       }
       return true
     },
     uploadable () {
-      // const sender = this.$store.getters[APP_CONSTANTS.KEY_CURRENT_ACCOUNT]
+      // const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
       // if (!sender || !sender.balance) {
       //  return false
       // }
