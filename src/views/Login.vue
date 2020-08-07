@@ -22,7 +22,7 @@
           </template>
           <b-card-text class="mt-5 d-flex justify-content-center" style="height: 10vh;">
             A Blockstack ID enables you to store your<br/> loopbombs securely in an encrypted wallet / library.
-            <lsat-entry :paymentConfig="configuration" v-if="showLogin"/>
+            <rpay-entry :paymentConfig="configuration" v-if="showLogin"/>
           </b-card-text>
           <b-card-text  style="height: 8vh;">
             <a href="#" class="btn bg-success text-white px-5" style="border-radius: 20px;" @click.prevent="loginBanter">Login</a>

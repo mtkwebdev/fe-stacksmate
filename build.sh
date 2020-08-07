@@ -20,9 +20,9 @@ function __build() {
 
 if [ -z "${SERVICE}" ]; then
   rm -rf $PATH_DEPLOY/*
-  BUILD_PATH=../fe-lsat
+  BUILD_PATH=../fe-rpay
   __build
-  cp $BUILD_PATH/dist/lsat-entry*.js $PATH_DEPLOY/.
+  cp $BUILD_PATH/dist/rpay-entry*.js $PATH_DEPLOY/.
 
   BUILD_PATH=./
   __build
@@ -30,9 +30,9 @@ if [ -z "${SERVICE}" ]; then
 fi
 
 if [ "$SERVICE" == "lsat" ]; then
-  BUILD_PATH=../fe-lsat
+  BUILD_PATH=../fe-rpay
   __build
-  cp $BUILD_PATH/dist/lsat-entry*.js $PATH_DEPLOY/.
+  cp $BUILD_PATH/dist/rpay-entry*.js $PATH_DEPLOY/.
 fi
 if [ "$SERVICE" == "mesh" ]; then
   BUILD_PATH=./

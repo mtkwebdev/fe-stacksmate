@@ -3,7 +3,7 @@
   <div>
     <h4>Buy Stax Form</h4>
     <div class="d-flex justify-content-center mt-5 mb-4">
-      <lsat-entry :paymentConfig="configuration" @paymentEvent="paymentEvent"/>
+      <rpay-entry :paymentConfig="configuration" @paymentEvent="paymentEvent"/>
     </div>
   </div>
 </div>
@@ -33,7 +33,7 @@ export default {
     paymentEvent: function (event) {
       const paymentData = event.detail[0]
       this.eventData += '<p><pre style="color: #fff;">' + JSON.stringify(paymentData) + '</pre></p>'
-      if (paymentData.opcode === 'lsat-payment-confirmed') {
+      if (paymentData.opcode === 'rpay-payment-confirmed') {
         // this.demoMode = false
       }
     },
@@ -141,7 +141,7 @@ export default {
       }
       const productOrder = {
         paymentId: myKey,
-        opcode: 'lsat-place-order',
+        opcode: 'rpay-place-order',
         purchaseEndpoint: '/assets/buy-now',
         apiKey: 'demo-digital-01234',
         lookAndFeel: lookAndFeel,

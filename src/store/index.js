@@ -106,7 +106,6 @@ export default new Vuex.Store({
     getLsatConfiguration: state => (opcode) => {
       return {
         apiKey: state.apiKey,
-        ratesWatch: true,
         opcode: opcode,
         paymentOptions: state.paymentOptions,
         paymentOption: state.paymentOptions.mainOption,
@@ -128,7 +127,6 @@ export default new Vuex.Store({
     getLsatLoginConfiguration: state => {
       return {
         apiKey: state.apiKey,
-        ratesWatch: true,
         opcode: 'login',
         paymentOptions: state.paymentOptions,
         paymentOption: state.paymentOptions.mainOption,
