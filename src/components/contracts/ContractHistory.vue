@@ -1,10 +1,12 @@
 <template>
 <b-form inline>
   <div class="mt-4">
+    <p>Select a previously deployed contract from your Gaia storage - we automatically
+      remember your deployed contracts.</p>
     <div class="mb-3">
       <b-form-select @change="changeContract" v-model="contractName" :options="contractHistory" placeholder="Contract History"></b-form-select>
       <b-form-text>
-        <span>Select contract to see deployment details and call functions.</span>
+        <span>Select contract from Gaia storage.</span>
       </b-form-text>
     </div>
   </div>

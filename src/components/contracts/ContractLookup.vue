@@ -1,24 +1,25 @@
 <template>
 <div class="container">
   <div>
-    <h4>Lookup Contract</h4>
-      <b-input
-        ref="stacksAddress"
-        v-model="contractAddress"
-        class="mt-3"
-        placeholder="Stacks Address"></b-input>
-        <a v-if="currentWallet" href="#" @click.prevent="useWalletAddress">use my address</a>
-      <b-input
-        ref="contractName"
-        v-model="contractName"
-        class="mt-3"
-        placeholder="Contract Name"></b-input>
-      <b-row>
-        <b-col lg="4" class="pb-2">
-          <button size="sm" v-if="contractAddress && contractName" class="mr-2 mt-3 bg-info" @click="lookupContract()">Lookup Contract</button>
-          <button size="sm" v-if="contractSource" class="mt-3 bg-info" @click="lookupInterface()">Fetch Interface</button>
-        </b-col>
-      </b-row>
+    <p>Lookup a contract - enter the contract address and name to fetch it directly from the Stack 2.0
+    blockchain.</p>
+    <b-input
+      ref="stacksAddress"
+      v-model="contractAddress"
+      class="mt-3"
+      placeholder="Stacks Address"></b-input>
+      <a v-if="currentWallet" href="#" @click.prevent="useWalletAddress">use my address</a>
+    <b-input
+      ref="contractName"
+      v-model="contractName"
+      class="mt-3"
+      placeholder="Contract Name"></b-input>
+    <b-row>
+      <b-col lg="4" class="pb-2">
+        <button size="sm" v-if="contractAddress && contractName" class="mr-2 mt-3 bg-info" @click="lookupContract()">Lookup Contract</button>
+        <button size="sm" v-if="contractSource" class="mt-3 bg-info" @click="lookupInterface()">Fetch Interface</button>
+      </b-col>
+    </b-row>
   </div>
   <div v-if="contractSource" class="source-code">
     <div v-html="contractSource"/>

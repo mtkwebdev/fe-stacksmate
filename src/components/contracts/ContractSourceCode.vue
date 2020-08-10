@@ -4,6 +4,8 @@
     <b-form >
       <div class="mt-4">
         <div>
+          <p>Deploy a contract - your contract will be broadcast to the Stacks 2.0 blockchain
+          and uploaded to your Gaia storage.</p>
           <media-files-upload @lookupEvent="$emit('lookupEvent')" class="mb-3" :readonly="false" :contentModel="contentModel1" popoverId="'popover-target-1'" :parentalError="parentalError" :showFiles="true" :mediaFiles="mediaFiles1" :limit="1" :sizeLimit="2000000" :mediaTypes="'plain'" @updateMedia="setByEventLogo1($event)"/>
           <div v-if="uploadable">
             <div class="mb-3">
@@ -96,6 +98,12 @@ export default {
         contractName: filename.split(/\./)[0],
         codeBody: this.plainFile()
       }
+
+      const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
+      if (!this.validate(data, provider, sender)) {
+        return
+      }
+
       if (provider === 'blockstack') {
         this.$store.dispatch('authStore/deployContractBlockstack', data)
       } else {
@@ -111,6 +119,27 @@ export default {
           this.result = error
         })
       }
+    },
+    validate: function (data, provider, sender) {
+      let result = true
+
+      if (!data || !data.contractName || !data.codeBody) {
+        this.$notify({ type: 'error', title: 'Contracts', text: 'Load the contract source code to continue.' })
+        result = false
+      }
+
+      if (provider === 'blockstack') {
+        return result
+      }
+
+      if (!sender) {
+        this.$notify({ type: 'error', title: 'Contracts', text: 'Select a test wallet (with enough funds to cover the transaction fee) to continue.' })
+        result = false
+      } else if (!sender.balance) {
+        this.$notify({ type: 'error', title: 'Contracts', text: 'Not enough enough funds to cover the transaction fee.' })
+        result = false
+      }
+      return result
     }
   },
   computed: {
@@ -141,18 +170,7 @@ export default {
       const endpoints = this.$store.getters[APP_CONSTANTS.KEY_ENDPOINTS]('deployment')
       return endpoints
     },
-    validAccount () {
-      const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
-      if (!sender || !sender.balance) {
-        return false
-      }
-      return true
-    },
     uploadable () {
-      // const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
-      // if (!sender || !sender.balance) {
-      //  return false
-      // }
       return this.files && this.files.length > 0
     }
   }

@@ -66,7 +66,7 @@ export default {
     this.loading = false
   },
   methods: {
-    validateTransfer: function (provider, sender) {
+    validate: function (provider, sender) {
       let result = true
       if (!this.recipient || !this.sender) {
         this.$notify({ type: 'error', title: 'Transfers', text: 'Sender and reecipient both required!' })
@@ -96,8 +96,12 @@ export default {
     },
     makeTransfer: function () {
       const provider = this.$store.getters[APP_CONSTANTS.KEY_PROVIDER]
-      const wallet1 = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
+      let wallet1 = this.$store.getters[APP_CONSTANTS.KEY_WALLET](this.sender)
+      if (!wallet1) {
+        wallet1 = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
+      }
       const wallet2 = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
+
       let sender = null
       if (wallet1 && this.sender === wallet1.keyInfo.address) {
         sender = wallet1
@@ -105,7 +109,7 @@ export default {
         sender = wallet2
       }
 
-      if (!this.validateTransfer(provider, sender)) {
+      if (!this.validate(provider, sender)) {
         return
       }
 
@@ -131,6 +135,10 @@ export default {
     },
     useMyWallet: function (field) {
       const wallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
+      if (!wallet || !wallet.keyInfo) {
+        this.$notify({ type: 'error', title: 'Network Error', text: 'No network detected - is stax 2.0 blockchain running?!' })
+        return
+      }
       if (field === 'sender') {
         this.sender = (wallet && wallet.keyInfo) ? wallet.keyInfo.address : ''
       } else {

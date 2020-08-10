@@ -2,9 +2,9 @@
 <div class="container">
   <div>
     <b-tabs content-class="mt-3">
-      <b-tab title="Contract History" active><contract-history/></b-tab>
+      <b-tab title="Deploy New Contract" active><contract-source-code @lookupEvent="lookupEvent"/></b-tab>
       <b-tab title="Lookup Contract"><contract-lookup/></b-tab>
-      <b-tab title="Deploy New Contract"><contract-source-code @lookupEvent="lookupEvent"/></b-tab>
+      <b-tab title="Contract History"><contract-history/></b-tab>
     </b-tabs>
   </div>
   <div class="row">

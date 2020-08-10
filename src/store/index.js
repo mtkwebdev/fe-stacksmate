@@ -210,7 +210,7 @@ export default new Vuex.Store({
           rates.fetchSTXRates().then((rates) => {
             commit('setXgeRates', rates)
           })
-        }, 10000)
+        }, 3600000)
       })
     },
     fireEvent ({ commit }, data) {

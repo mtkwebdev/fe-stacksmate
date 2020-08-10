@@ -1,8 +1,14 @@
 <template>
 <div class="container">
   <div>
-    <h4>Buy Stax Form</h4>
-    <div class="d-flex justify-content-center mt-5 mb-4">
+    <p>Transfer stax to your;
+      <ul>
+        <li><a href="#" @click.prevent="useMyWallet()">own account</a></li>
+        <li><a href="#" @click.prevent="useTestWallet()">to a test account (switch play mode on))</a></li>
+      </ul>
+    </p>
+    <div>To address: {{recipient}}</div>
+    <div class="d-flex justify-content-center">
       <rpay-entry :paymentConfig="configuration" @paymentEvent="paymentEvent"/>
     </div>
   </div>
@@ -21,7 +27,7 @@ export default {
     return {
       loading: true,
       amountMicroStax: null,
-      sender: null,
+      recipient: null,
       memo: '',
       result: null
     }
@@ -36,6 +42,22 @@ export default {
       if (paymentData.opcode === 'rpay-payment-confirmed') {
         // this.demoMode = false
       }
+    },
+    useMyWallet: function () {
+      const wallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
+      if (!wallet || !wallet.keyInfo) {
+        this.$notify({ type: 'error', title: 'Play Mode', text: 'No network detected - is stax 2.0 blockchain running?!' })
+        return
+      }
+      this.recipient = (wallet && wallet.keyInfo) ? wallet.keyInfo.address : ''
+    },
+    useTestWallet: function () {
+      const wallet = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
+      if (!wallet || !wallet.keyInfo) {
+        this.$notify({ type: 'warn', title: 'Play Mode', text: 'No test wallet selected!' })
+        return
+      }
+      this.recipient = (wallet && wallet.keyInfo) ? wallet.keyInfo.address : ''
     },
     makeTransfer: function () {
       const provider = this.$store.getters[APP_CONSTANTS.KEY_PROVIDER]
@@ -98,21 +120,21 @@ export default {
     },
     configuration () {
       // const content = this.$store.getters['contentStore/getProductPage']('lsat')
-      const myKey = 'satoshi-jokes'
       // const height = this.$store.getters[SITE_CONSTANTS.KEY_SECTION_HEIGHT]
       const lookAndFeel = {
         labels: {
           orderMsg: 'Place order for \'Satoshi Jokes\' select number required and pay.',
-          title: 'Pay With',
-          subtitle: 'LSAT Pay',
+          successMsg: 'Your STX order for has been received with thanks.',
+          title: 'R-Pay',
+          subtitle: 'Stacks Lightning Exchange',
           card1Label: 'Select payment option',
-          card2Label1: 'Number of jokes required?',
+          card2Label1: 'Number of tokens required?',
           card2Label2: 'Select operation',
           card2Label3: 'Make Payment',
           card2Label4: 'Open Channel',
           button1Label: 'Back',
           button2Label: 'Next',
-          quantityLabel: 'Jokes'
+          quantityLabel: 'Token(s)'
         },
         sections: {
           stepper: true
@@ -140,10 +162,10 @@ export default {
         }
       }
       const productOrder = {
-        paymentId: myKey,
+        paymentId: null,
         opcode: 'rpay-place-order',
         purchaseEndpoint: '/assets/buy-now',
-        apiKey: 'demo-digital-01234',
+        apiKey: 'stax-lightning-exchange',
         lookAndFeel: lookAndFeel,
         paymentOptions: { allowLightning: true, allowEthereum: false, allowBitcoin: false, allowStacks: true },
         paymentOption: 'lightning',

@@ -6,7 +6,7 @@
       <router-view id="nav"/>
       <router-view class="w-25" name="wallets"/>
     </div>
-    <notifications position="top left" width="30%" style="margin: 20px;"/>
+    <notifications position="top right" width="30%" style="margin: 20px; top: 100px;"/>
     <router-view name="footer" />
   </div>
 </div>

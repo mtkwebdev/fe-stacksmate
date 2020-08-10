@@ -71,6 +71,8 @@ const getUserWallet = function () {
         balance: parseInt(response.data.balance, 16)
       }
       store.commit('authStore/userWallet', wallet)
+    }).catch((err) => {
+      console.log(err)
     })
   }
   return ''
