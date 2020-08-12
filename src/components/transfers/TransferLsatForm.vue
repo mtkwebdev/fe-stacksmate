@@ -1,16 +1,21 @@
 <template>
 <div class="container">
-  <div>
-    <p>Transfer stax to your;
-      <ul>
-        <li><a href="#" @click.prevent="useMyWallet()">own account</a></li>
-        <li><a href="#" @click.prevent="useTestWallet()">to a test account (switch play mode on))</a></li>
-      </ul>
-    </p>
-    <div>To address: {{recipient}}</div>
-    <div class="d-flex justify-content-center">
-      <rpay-entry :paymentConfig="configuration" @paymentEvent="paymentEvent"/>
+  <div class="d-flex justify-content-between">
+    <div class="col-2">
+      <p>Account</p>
+      <p>Balance</p>
     </div>
+    <div class="col-10" v-if="wallet">
+      <p>{{wallet.keyInfo.address}}</p>
+    </div>
+  </div>
+  <div class="d-flex justify-content-between col-12">
+    <p>Note: On testnet we set rates to 1% of Binance Rates 24hr average.
+      - equivalent to sending us a tip over lightning network.
+    </p>
+  </div>
+  <div class="d-flex justify-content-center">
+    <rpay-entry :paymentConfig="configuration" @paymentEvent="paymentEvent"/>
   </div>
 </div>
 </template>
@@ -46,7 +51,7 @@ export default {
     useMyWallet: function () {
       const wallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
       if (!wallet || !wallet.keyInfo) {
-        this.$notify({ type: 'error', title: 'Play Mode', text: 'No network detected - is stax 2.0 blockchain running?!' })
+        this.$notify({ type: 'error', title: 'Error Detected', text: 'No network detected - is Stacks 2.0 blockchain running?' })
         return
       }
       this.recipient = (wallet && wallet.keyInfo) ? wallet.keyInfo.address : ''
@@ -54,7 +59,7 @@ export default {
     useTestWallet: function () {
       const wallet = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
       if (!wallet || !wallet.keyInfo) {
-        this.$notify({ type: 'warn', title: 'Play Mode', text: 'No test wallet selected!' })
+        this.$notify({ type: 'warn', title: 'Error Detected', text: 'No test wallet selected!' })
         return
       }
       this.recipient = (wallet && wallet.keyInfo) ? wallet.keyInfo.address : ''
@@ -111,6 +116,22 @@ export default {
     **/
   },
   computed: {
+    wallet () {
+      let wallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
+      if (!wallet) {
+        wallet = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
+      }
+      return wallet
+    },
+    testWallet () {
+      const wallet = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
+      return wallet
+    },
+    amountTrunc () {
+      const exchangeRate = this.$store.getters[APP_CONSTANTS.KEY_EXCHANGE_RATE]
+      // const tunced = Math.round(exchangeRate.amountStx * 10000)
+      return (1 / (exchangeRate.amountStx)).toFixed(4)
+    },
     amountStax () {
       const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
       if (!sender || !sender.balance) {
@@ -123,7 +144,7 @@ export default {
       // const height = this.$store.getters[SITE_CONSTANTS.KEY_SECTION_HEIGHT]
       const lookAndFeel = {
         labels: {
-          orderMsg: 'Place order for \'Satoshi Jokes\' select number required and pay.',
+          orderMsg: 'Send us a tip on lightning in exchange for some testnet \'STX Tokens\'.',
           successMsg: 'Your STX order for has been received with thanks.',
           title: 'R-Pay',
           subtitle: 'Stacks Lightning Exchange',
@@ -145,6 +166,15 @@ export default {
           'border-radius': '0',
           'font-family': '"Arial", sans-serif'
         },
+        text1Color: {
+          color: '#fff'
+        },
+        text2Color: {
+          color: '#FFCE00'
+        },
+        text3Color: {
+          color: '#000'
+        },
         background: {
           padding: '0px 0 0 0',
           height: 'auto',
@@ -158,9 +188,15 @@ export default {
           '-o-background-size': 'cover',
           'background-size': 'cover',
           'background-color': '#fff',
+          'background-image': 'url("https://images.prismic.io/risidio-journal/59455bcb-a954-4713-9afd-cfe6130f0b26_Group+994.svg?auto=compress,format")',
           opacity: 0.9
         }
       }
+      const exchangeRate = this.$store.getters[APP_CONSTANTS.KEY_EXCHANGE_RATE]
+      if (!exchangeRate) {
+        return
+      }
+      const testnetRate = exchangeRate.amountStx / 100
       const productOrder = {
         paymentId: null,
         opcode: 'rpay-place-order',
@@ -170,13 +206,14 @@ export default {
         paymentOptions: { allowLightning: true, allowEthereum: false, allowBitcoin: false, allowStacks: true },
         paymentOption: 'lightning',
         creditAttributes: {
-          amountFiatPerCredit: 0.1,
+          // amountFiatFixed: 0.20,
+          amountFiatPerCredit: testnetRate,
           fiatCurrency: 'EUR',
           useCredits: true,
-          start: 1,
-          step: 1,
-          min: 1,
-          max: 20
+          start: 500,
+          step: 100,
+          min: 100,
+          max: 2000
         }
       }
       const po = JSON.stringify(productOrder)

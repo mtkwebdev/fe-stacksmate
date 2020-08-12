@@ -10,6 +10,7 @@ import rates from 'risidio-rates'
 Vue.use(Vuex)
 
 const MESH_API = process.env.VUE_APP_MESH_API
+const MESH_API_RISIDIO = process.env.VUE_APP_MESH_API_RISIDIO
 
 const mac = JSON.parse(process.env.VUE_APP_WALLET_MAC || '')
 const alice = JSON.parse(process.env.VUE_APP_WALLET_ALICE || '')
@@ -28,17 +29,6 @@ export default new Vuex.Store({
     playMode: false,
     fiatCurrency: 'EUR',
     windims: { innerWidth: window.innerWidth, innerHeight: window.innerHeight },
-    apiKey: 'blockstack-loopbomb-01234',
-    creditAttributes: {
-      amountFiatPerCredit: 0.5,
-      fiatCurrency: 'EUR',
-      useCredits: true,
-      start: 2,
-      step: 2,
-      min: 2,
-      max: 20
-    },
-    paymentOptions: { mainOption: 'ethereum', allowLightning: false, allowEthereum: true, allowBitcoin: false, allowStacks: false },
     response: null,
     status: true,
     currentAccount: null,
@@ -103,15 +93,6 @@ export default new Vuex.Store({
     ]
   },
   getters: {
-    getLsatConfiguration: state => (opcode) => {
-      return {
-        apiKey: state.apiKey,
-        opcode: opcode,
-        paymentOptions: state.paymentOptions,
-        paymentOption: state.paymentOptions.mainOption,
-        creditAttributes: state.creditAttributes
-      }
-    },
     getExchangeRates: state => {
       return state.xgeRates
     },
@@ -123,15 +104,6 @@ export default new Vuex.Store({
     },
     getFiatCurrency: state => {
       return state.fiatCurrency
-    },
-    getLsatLoginConfiguration: state => {
-      return {
-        apiKey: state.apiKey,
-        opcode: 'login',
-        paymentOptions: state.paymentOptions,
-        paymentOption: state.paymentOptions.mainOption,
-        creditAttributes: state.creditAttributes
-      }
     },
     getResponse: state => {
       return state.response
@@ -180,6 +152,7 @@ export default new Vuex.Store({
       const wallet = state.wallets.find(item => item.keyInfo.address === data.address)
       if (wallet) {
         wallet.balance = data.balance
+        wallet.nonce = data.nonce
       }
     }
   },
@@ -215,7 +188,9 @@ export default new Vuex.Store({
     },
     fireEvent ({ commit }, data) {
       return new Promise((resolve, reject) => {
-        axios.post(MESH_API + '/v2/accounts', data).then(response => {
+        const provider = store.getters['authStore/getProvider']
+        const useApi = (provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
+        axios.post(useApi + '/v2/accounts', data).then(response => {
           resolve(response.data)
         }).catch((error) => {
           const msg = error.response.data.status + ' - ' + error.response.data.message
@@ -230,9 +205,12 @@ export default new Vuex.Store({
           httpMethod: 'get',
           postData: null
         }
-        axios.post(MESH_API + '/v2/accounts', data).then(response => {
+        const provider = store.getters['authStore/getProvider']
+        const useApi = (provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
+        axios.post(useApi + '/v2/accounts', data).then(response => {
           const info = response.data
           info.address = address
+          info.nonce = response.data.nonce
           info.balance = parseInt(response.data.balance, 16)
           commit('setBalance', info)
           resolve(response)

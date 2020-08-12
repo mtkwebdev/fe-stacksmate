@@ -107,16 +107,11 @@ export default {
       if (provider === 'blockstack') {
         this.$store.dispatch('authStore/deployContractBlockstack', data)
       } else {
-        const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
-        data.senderKey = (sender && sender.keyInfo) ? sender.keyInfo.privateKey : null
-        if (!data.senderKey) {
-          this.result = 'no sender key'
-          return
-        }
+        data.senderKey = sender.keyInfo.privateKey
         this.$store.dispatch('authStore/deployContractRisidio', data).then((result) => {
           this.result = result
         }).catch((error) => {
-          this.result = error
+          this.$notify({ type: 'error', title: 'Contracts', text: 'Error during deployment. ', error })
         })
       }
     },

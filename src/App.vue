@@ -3,8 +3,11 @@
   <div>
     <router-view class="navbar" name="header"/>
     <div class="container mt-5 main d-flex justify-content-start">
-      <router-view id="nav"/>
-      <router-view class="w-25" name="wallets"/>
+      <router-view id="nav"  class="w-75"/>
+      <div class="w-25 container mt-5">
+        <router-view class="" name="wallets"/>
+        <router-view class="" name="converter"/>
+      </div>
     </div>
     <notifications position="top right" width="30%" style="margin: 20px; top: 100px;"/>
     <router-view name="footer" />

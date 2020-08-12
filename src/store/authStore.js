@@ -23,6 +23,7 @@ import axios from 'axios'
 const BLOCKSTACK_LOGIN = Number(process.env.VUE_APP_BLOCKSTACK_LOGIN)
 const network = new StacksTestnet()
 const MESH_API = process.env.VUE_APP_MESH_API
+const MESH_API_RISIDIO = process.env.VUE_APP_MESH_API_RISIDIO
 const userSession = new UserSession()
 
 const origin = window.location.origin
@@ -68,7 +69,8 @@ const getUserWallet = function () {
         keyInfo: {
           address: response.data.address
         },
-        balance: parseInt(response.data.balance, 16)
+        balance: parseInt(response.data.balance, 16),
+        nonce: response.data.nonce
       }
       store.commit('authStore/userWallet', wallet)
     }).catch((err) => {
@@ -288,7 +290,7 @@ const authStore = {
           codeBody: data.codeBody,
           senderKey: data.senderKey,
           // nonce: new BigNum(data.nonce), // watch for nonce increments if this works - may need to restart mocknet!
-          fee: new BigNum(3000), // set a tx fee if you don't want the builder to estimate
+          // fee: new BigNum(3000), // set a tx fee if you don't want the builder to estimate
           network
         }
         makeContractDeploy(txOptions).then((transaction) => {
@@ -301,13 +303,15 @@ const authStore = {
           const headers = {
             'Content-Type': 'multipart/form-data;'
           }
-          axios.post(MESH_API + '/v2/deploy', formData, { headers: headers }).then(response => {
+          const useApi = (state.provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
+          axios.post(useApi + '/v2/deploy', formData, { headers: headers }).then(response => {
             commit('addResponse', response.data)
             resolve(response)
           }).catch((error) => {
-            commit('addResponse', error.response.data)
-            resolve(error.response.data)
+            reject(error)
           })
+        }).catch((error) => {
+          reject(error)
         })
       })
     },
@@ -349,7 +353,8 @@ const authStore = {
           const headers = {
             'Content-Type': 'application/octet-stream'
           }
-          axios.post(MESH_API + '/v2/broadcast', txdata, { headers: headers }).then(response => {
+          const useApi = (state.provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
+          axios.post(useApi + '/v2/broadcast', txdata, { headers: headers }).then(response => {
             commit('addResponse', response.data)
             resolve(response)
           }).catch((error) => {

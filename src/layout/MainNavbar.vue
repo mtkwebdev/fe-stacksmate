@@ -6,10 +6,12 @@
     <b-navbar-toggle class="ml-auto" target="nav-collapse"></b-navbar-toggle>
     <b-collapse class="mr-auto" id="nav-collapse" is-nav>
       <b-navbar-nav class="mr-auto">
-        <b-nav-item class="joinUsButton" to='/staxhub'>Community</b-nav-item>
-        <b-nav-item class="joinUsButton" to='/'>Contracts</b-nav-item>
-        <!-- <b-nav-item class="joinUsButton" to='/contracts'>Contracts</b-nav-item> -->
-        <b-nav-item class="joinUsButton" to='/transfers'>Transfers</b-nav-item>
+        <b-nav-item :class="isActive('staxhub')" to='/staxhub'>Community</b-nav-item>
+        <b-nav-item :class="isActive('home')" to='/'>Stackers</b-nav-item>
+        <!--
+          <b-nav-item class="joinUsButton" to='/contracts'>Contracts</b-nav-item>
+          <b-nav-item class="joinUsButton" to='/transfers'>Transfers</b-nav-item>
+         -->
         <!-- <b-nav-item class="joinUsButton" to='/api-demo'>API Demo</b-nav-item> -->
       </b-navbar-nav>
 
@@ -101,10 +103,16 @@ export default {
     changeProvider (provider) {
       if (provider) {
         this.$store.commit(APP_CONSTANTS.COMMIT_PROVIDER, provider)
+        this.$store.dispatch('authStore/fetchMyAccount').then(profile => {
+          this.$notify({ type: 'success', title: 'Wallets', text: 'Fetched wallet balance!' })
+        })
       }
     },
     changePlayMode () {
       // this.$store.commit(APP_CONSTANTS.COMMIT_TOGGLE_PLAY_MODE)
+    },
+    isActive (route) {
+      return (this.$route.name === route) ? 'active' : ''
     },
     changeNetworkId (networkId) {
       if (networkId && networkId === 'testnet') {
@@ -115,14 +123,6 @@ export default {
     }
   },
   computed: {
-    configuration () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_LSAT_LOGIN_CONFIGURATION]
-      configuration.lookAndFeel = {
-        loginStyles: 'color: white; text-decoration: none;'
-      }
-      window.risidioPaymentConfig = JSON.stringify(configuration)
-      return configuration
-    },
     isLoginPage () {
       return this.$route.name === 'login'
     },

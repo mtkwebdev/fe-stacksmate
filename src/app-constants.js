@@ -5,8 +5,6 @@ export const APP_CONSTANTS = {
   KEY_WALLET: 'getWallet',
   KEY_WALLETS: 'getWallets',
   KEY_NON_EMPTY_WALLETS: 'getNonEmptyWallets',
-  KEY_LSAT_CONFIGURATION: 'getLsatConfiguration',
-  KEY_LSAT_LOGIN_CONFIGURATION: 'getLsatLoginConfiguration',
   COMMIT_FIAT_CURRENCY: 'setFiatCurrency',
   KEY_FIAT_CURRENCY: 'getFiatCurrency',
   KEY_EXCHANGE_RATE: 'getExchangeRate',
