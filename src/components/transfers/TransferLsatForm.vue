@@ -241,7 +241,6 @@ export default {
         opcode: 'rpay-place-order',
         purchaseEndpoint: '/assets/buy-now',
         serviceKey: 'stax-lightning-exchange',
-        serviceStatus: -1,
         apiKey: 'mesh-1',
         lookAndFeel: lookAndFeel,
         paymentOptions: { allowLightning: true, allowEthereum: false, allowBitcoin: false, allowStacks: false },
