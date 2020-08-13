@@ -8,9 +8,9 @@
       <b-navbar-nav class="mr-auto">
         <b-nav-item :class="isActive('staxhub')" to='/staxhub'>Community</b-nav-item>
         <b-nav-item :class="isActive('home')" to='/'>Stackers</b-nav-item>
+        <b-nav-item :class="isActive('transfers')" to='/transfers'>Transfers</b-nav-item>
         <!--
           <b-nav-item class="joinUsButton" to='/contracts'>Contracts</b-nav-item>
-          <b-nav-item class="joinUsButton" to='/transfers'>Transfers</b-nav-item>
          -->
         <!-- <b-nav-item class="joinUsButton" to='/api-demo'>API Demo</b-nav-item> -->
       </b-navbar-nav>

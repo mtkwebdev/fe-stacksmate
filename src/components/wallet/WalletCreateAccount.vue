@@ -48,8 +48,8 @@ export default {
   },
   mounted () {
     this.$store.dispatch('transactionStore/makeKey').then((account) => {
+      if (account && account.keyInfo) this.account = account
       this.loading = false
-      this.account = account
     })
   },
   methods: {

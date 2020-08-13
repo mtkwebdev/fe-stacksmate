@@ -76,7 +76,7 @@ export default {
         this.$notify({ type: 'error', title: 'Transfers', text: 'Sender and recipient can\'t be the same!' })
         result = false
       }
-      if (!this.amountMicroStax || this.amountMicroStax < 1) {
+      if (!this.amountMicroStax || this.amountMicroStax < 0.0000001) {
         this.$notify({ type: 'error', title: 'Transfers', text: 'Amount of STX to send must be at least 1 micro stax!' })
         result = false
       }

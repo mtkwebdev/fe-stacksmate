@@ -11,7 +11,7 @@
     </p>
     <p>We provide a test wallet if you just want to try out the process - ensure your
       logged out and click 'play mode' for test wallets.<p>
-    <p>We also provide submarine swaps Lightning BTC into STX tokens (using the LSAT 402 payments flow).</p>
+    <p>Our LSAT Swaps feature lets you purchase STX tokens directly with your Lightning wallet.</p>
   </div>
   <div>
     <transfer-lsat-form @paymentEvent="paymentEvent"/>
@@ -29,7 +29,7 @@ import { APP_CONSTANTS } from '@/app-constants'
 import TransferLsatForm from '@/components/transfers/TransferLsatForm'
 
 export default {
-  name: 'SubmarineSwaps',
+  name: 'Stackers',
   components: {
     TransferLsatForm
   },

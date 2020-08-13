@@ -1,22 +1,42 @@
 <template>
-<div class="container">
-  <div class="d-flex justify-content-between">
+<div class="">
+  <div class="d-flex justify-content-between" v-if="wallet">
     <div class="col-2">
       <p>Account</p>
       <p>Balance</p>
     </div>
-    <div class="col-10" v-if="wallet">
+    <div class="col-10">
       <p>{{wallet.keyInfo.address}}</p>
+      <p>{{wallet.balance}}</p>
     </div>
   </div>
-  <div class="d-flex justify-content-between col-12">
-    <p>Note: On testnet we set rates to 1% of Binance Rates 24hr average.
-      - equivalent to sending us a tip over lightning network.
+  <div class="d-flex justify-content-start" v-else>
+    <div class="mx-5">
+      <p>Log in to use your stacks address or select 'play mode' to generate a test wallet.
+      </p>
+    </div>
+  </div>
+  <div class="">
+    <p>Note: On testnet we set our rate to 0.1% of Binance 24hr average.
+      - equivalent to sending us a tip over the lightning network.
     </p>
   </div>
-  <div class="d-flex justify-content-center">
+  <div class="d-flex justify-content-center" v-if="configuration">
     <rpay-entry :paymentConfig="configuration" @paymentEvent="paymentEvent"/>
   </div>
+  <b-modal scrollable id="modal-1" title="LSAT Events">
+    <div class="row" v-if="paymentData">
+      <div class="col-12 my-1">
+        <div>Payment Received</div>
+        <div>For {{paymentData.numbCredits}} STX Tokens</div>
+        <div>Transfer to STX Address {{addressTrunc}} begun</div>
+        <div v-if="loggedIn">Saving proof of payment (LSAT Macaroon) to your Gaia storage</div>
+        <div v-else>Login to save proof of payment (LSAT Macaroon) to your Gaia storage</div>
+      </div>
+    </div>
+    <template v-slot:modal-footer>
+    </template>
+  </b-modal>
 </div>
 </template>
 
@@ -34,7 +54,8 @@ export default {
       amountMicroStax: null,
       recipient: null,
       memo: '',
-      result: null
+      result: null,
+      paymentData: null
     }
   },
   mounted () {
@@ -42,10 +63,11 @@ export default {
   },
   methods: {
     paymentEvent: function (event) {
-      const paymentData = event.detail[0]
-      this.eventData += '<p><pre style="color: #fff;">' + JSON.stringify(paymentData) + '</pre></p>'
-      if (paymentData.opcode === 'rpay-payment-confirmed') {
-        // this.demoMode = false
+      this.paymentData = event.detail[0]
+      if (this.paymentData.opcode === 'lsat-payment-confirmed') {
+        this.$bvModal.show('modal-1')
+        this.$store.dispatch('saveMacaroon')
+        this.$store.dispatch('transferStax')
       }
     },
     useMyWallet: function () {
@@ -123,6 +145,10 @@ export default {
       }
       return wallet
     },
+    loggedIn () {
+      const profile = this.$store.getters[APP_CONSTANTS.KEY_MY_PROFILE]
+      return profile.loggedIn
+    },
     testWallet () {
       const wallet = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
       return wallet
@@ -131,6 +157,22 @@ export default {
       const exchangeRate = this.$store.getters[APP_CONSTANTS.KEY_EXCHANGE_RATE]
       // const tunced = Math.round(exchangeRate.amountStx * 10000)
       return (1 / (exchangeRate.amountStx)).toFixed(4)
+    },
+    truncMe: function (address) {
+      address = address.substring(0, 5) + '...' + address.substring(address.length - 5, address.length)
+      return address
+    },
+    addressTrunc () {
+      let wallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
+      if (!wallet) {
+        wallet = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
+      }
+      if (!wallet || !wallet.keyInfo) {
+        return ''
+      }
+      let address = wallet.keyInfo.address
+      address = address.substring(0, 5) + '...' + address.substring(address.length - 5, address.length)
+      return address
     },
     amountStax () {
       const sender = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
@@ -161,10 +203,6 @@ export default {
           stepper: true
         },
         cardStyle: {
-          margin: '0',
-          border: '0pt solid #232323',
-          'border-radius': '0',
-          'font-family': '"Arial", sans-serif'
         },
         text1Color: {
           color: '#fff'
@@ -180,14 +218,15 @@ export default {
           height: 'auto',
           'max-width': '400px',
           position: 'relative',
+          'border-radius': '15px',
           top: '0px',
           'background-repeat': 'no-repeat',
-          'background-position': 'center center',
+          'background-position': 'top left',
           '-webkit-background-size': 'cover',
           '-moz-background-size': 'cover',
           '-o-background-size': 'cover',
           'background-size': 'cover',
-          'background-color': '#fff',
+          'background-color': '#000',
           'background-image': 'url("https://images.prismic.io/risidio-journal/59455bcb-a954-4713-9afd-cfe6130f0b26_Group+994.svg?auto=compress,format")',
           opacity: 0.9
         }
@@ -196,14 +235,16 @@ export default {
       if (!exchangeRate) {
         return
       }
-      const testnetRate = exchangeRate.amountStx / 100
+      const testnetRate = exchangeRate.amountStx / 10000
       const productOrder = {
         paymentId: null,
         opcode: 'rpay-place-order',
         purchaseEndpoint: '/assets/buy-now',
-        apiKey: 'stax-lightning-exchange',
+        serviceKey: 'stax-lightning-exchange',
+        serviceStatus: -1,
+        apiKey: 'mesh-1',
         lookAndFeel: lookAndFeel,
-        paymentOptions: { allowLightning: true, allowEthereum: false, allowBitcoin: false, allowStacks: true },
+        paymentOptions: { allowLightning: true, allowEthereum: false, allowBitcoin: false, allowStacks: false },
         paymentOption: 'lightning',
         creditAttributes: {
           // amountFiatFixed: 0.20,

@@ -1,10 +1,16 @@
 <template>
 <div class="container">
+  <h1 class="mb-4">Stack Transfers!</h1>
+  <p>To move stacks around you can;
+    <ul>
+      <li>drop in your stacks address or use your blockstack id</li>
+      <li>Use blockstacks network (default) or our risidio provider - or run your own stacks 2.0 blockchain</li>
+      <li>tell us the Bitcoin adress to send your rewards to.</li>
+    </ul>
+  </p>
+  <p>Remember that to broadcast transactions you'll need to sign them with a private key!</p>
   <div>
-    <b-tabs content-class="mt-3">
-      <b-tab title="Transfer Stax" active><transfer-direct-form/></b-tab>
-      <b-tab title="Buy Stax"><transfer-lsat-form @paymentEvent="paymentEvent"/></b-tab>
-    </b-tabs>
+    <transfer-direct-form/>
   </div>
   <div>
     <div class="container m-5">
@@ -17,13 +23,11 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import TransferDirectForm from '@/components/transfers/TransferDirectForm'
-import TransferLsatForm from '@/components/transfers/TransferLsatForm'
 
 export default {
   name: 'TransferManagement',
   components: {
-    TransferDirectForm,
-    TransferLsatForm
+    TransferDirectForm
   },
   props: ['lookAndFeel'],
   data () {

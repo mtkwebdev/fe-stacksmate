@@ -22,8 +22,8 @@ import axios from 'axios'
 
 const BLOCKSTACK_LOGIN = Number(process.env.VUE_APP_BLOCKSTACK_LOGIN)
 const network = new StacksTestnet()
-const MESH_API = process.env.VUE_APP_MESH_API
-const MESH_API_RISIDIO = process.env.VUE_APP_MESH_API_RISIDIO
+const MESH_API = process.env.VUE_APP_API_RISIDIO_LOCAL + '/mesh'
+const MESH_API_RISIDIO = process.env.VUE_APP_API_RISIDIO + '/mesh'
 const userSession = new UserSession()
 
 const origin = window.location.origin
@@ -73,6 +73,7 @@ const getUserWallet = function () {
         nonce: response.data.nonce
       }
       store.commit('authStore/userWallet', wallet)
+      store.dispatch('startWebsockets', userData.username)
     }).catch((err) => {
       console.log(err)
     })
@@ -220,6 +221,7 @@ const authStore = {
           commit('myProfile', profile)
           commit('authHeaders', authHeaders())
           getUserWallet()
+          store.dispatch
           resolve(profile)
         } else if (userSession.isSignInPending()) {
           userSession.handlePendingSignIn().then(() => {
@@ -333,7 +335,7 @@ const authStore = {
         })
       })
     },
-    makeTransferRisidio ({ commit }, data) {
+    makeTransferRisidio ({ state, commit }, data) {
       return new Promise((resolve, reject) => {
         network.coreApiUrl = 'http://localhost:20443'
         let amount = new BigNum(data.amount)
@@ -348,13 +350,11 @@ const authStore = {
           fee: new BigNum(200) // set a tx fee if you don't want the builder to estimate
         }
         makeSTXTokenTransfer(txOptions).then((transaction) => {
-          commit('addContract', data.contractName)
           const txdata = new Uint8Array(transaction.serialize())
           const headers = {
             'Content-Type': 'application/octet-stream'
           }
-          const useApi = (state.provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
-          axios.post(useApi + '/v2/broadcast', txdata, { headers: headers }).then(response => {
+          axios.post(MESH_API + '/v2/broadcast', txdata, { headers: headers }).then(response => {
             commit('addResponse', response.data)
             resolve(response)
           }).catch((error) => {

@@ -30,6 +30,9 @@ export default {
   mounted () {
     this.$store.dispatch('fetchWalletBalances')
   },
+  beforeDestory () {
+    this.$store.dispatch('stopWebsockets')
+  },
   methods: {
     meshEvent: function (data) {
       this.$emit('meshEvent', data)

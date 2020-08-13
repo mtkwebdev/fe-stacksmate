@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import ContractManagement from '@/views/ContractManagement.vue'
 import TransferManagement from '@/views/TransferManagement.vue'
-import SubmarineSwaps from '@/views/SubmarineSwaps.vue'
+import Stackers from '@/views/Stackers.vue'
 import Wallets from '@/components/Wallets.vue'
 import Converter from '@/components/Converter.vue'
 import Contracts from '@/views/Contracts.vue'
@@ -18,7 +18,7 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    components: { default: SubmarineSwaps, wallets: Wallets, converter: Converter, header: MainNavbar, footer: MainFooter }
+    components: { default: Stackers, wallets: Wallets, converter: Converter, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/contracts',

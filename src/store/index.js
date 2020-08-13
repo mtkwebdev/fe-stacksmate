@@ -6,11 +6,17 @@ import authStore from './authStore'
 import store from './index'
 import contractStore from './contractStore'
 import rates from 'risidio-rates'
+import SockJS from 'sockjs-client'
+import Stomp from '@stomp/stompjs'
 
 Vue.use(Vuex)
 
-const MESH_API = process.env.VUE_APP_MESH_API
-const MESH_API_RISIDIO = process.env.VUE_APP_MESH_API_RISIDIO
+const MESH_API = process.env.VUE_APP_API_RISIDIO_LOCAL + '/mesh'
+const MESH_API_RISIDIO = process.env.VUE_APP_API_RISIDIO + '/mesh'
+const API_PATH = process.env.VUE_APP_API_RISIDIO
+
+let socket = null
+let stompClient = null
 
 const mac = JSON.parse(process.env.VUE_APP_WALLET_MAC || '')
 const alice = JSON.parse(process.env.VUE_APP_WALLET_ALICE || '')
@@ -31,6 +37,7 @@ export default new Vuex.Store({
     windims: { innerWidth: window.innerWidth, innerHeight: window.innerHeight },
     response: null,
     status: true,
+    transfer: null,
     currentAccount: null,
     wallets: [mac, alice, bob, charlie, doreen],
     endpoints: [
@@ -148,6 +155,9 @@ export default new Vuex.Store({
     setPlayMode (state) {
       state.playMode = !state.playMode
     },
+    setTransfer (state, transfer) {
+      state.transfer = transfer
+    },
     setBalance (state, data) {
       const wallet = state.wallets.find(item => item.keyInfo.address === data.address)
       if (wallet) {
@@ -234,6 +244,30 @@ export default new Vuex.Store({
           }
         })
       })
+    },
+    startWebsockets ({ commit }, userId) {
+      return new Promise((resolve) => {
+        socket = new SockJS(API_PATH + '/lsat/ws1/mynews')
+        stompClient = Stomp.over(socket)
+        stompClient.connect({}, function () {
+          stompClient.subscribe('/queue/mynews-' + userId, function (response) {
+            const transfer = JSON.parse(response.body)
+            commit('addTransfer', transfer)
+          })
+          if (userId === 'mijoco.id.blockstack') {
+            stompClient.subscribe('/queue/transfers-' + userId, function (response) {
+              const transfer = JSON.parse(response.body)
+              commit('addTransfer', transfer)
+            })
+          }
+        },
+        function (error) {
+          console.log(error)
+        })
+      })
+    },
+    stopWebsockets ({ state, dispatch, commit }) {
+      if (stompClient) stompClient.disconnect()
     }
   }
 })
