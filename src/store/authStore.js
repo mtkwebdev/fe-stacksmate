@@ -22,11 +22,12 @@ import axios from 'axios'
 
 const BLOCKSTACK_LOGIN = Number(process.env.VUE_APP_BLOCKSTACK_LOGIN)
 const network = new StacksTestnet()
-const MESH_API = process.env.VUE_APP_API_RISIDIO_LOCAL + '/mesh'
-const MESH_API_RISIDIO = process.env.VUE_APP_API_RISIDIO + '/mesh'
+const MESH_API = process.env.VUE_APP_API_RISIDIO + '/mesh'
+const MESH_API_RISIDIO = process.env.VUE_APP_API_RISIDIO_REMOTE + '/mesh'
 const userSession = new UserSession()
 
 const origin = window.location.origin
+const precision = 1000000
 
 const getStacksAccount = function (appPrivateKey) {
   const privateKey = createStacksPrivateKey(appPrivateKey)
@@ -63,17 +64,19 @@ const getUserWallet = function () {
     const userData = userSession.loadUserData()
     const appPrivateKey = userData.appPrivateKey
     const id = getStacksAccount(appPrivateKey)
-    const userAddress = addressToString(id.address)
+    // const userData = userSession.loadUserData()
+    const userAddress = userData.profile.stxAddress // addressToString(id.address)
     store.dispatch('fetchWalletInfo', userAddress).then((response) => {
       const wallet = {
         keyInfo: {
           address: response.data.address
         },
-        balance: parseInt(response.data.balance, 16),
-        nonce: response.data.nonce
+        balance: response.data.balance, // parseInt(response.data.balance, 16),
+        nonce: response.data.nonce,
+        label: userData.username
       }
       store.commit('authStore/userWallet', wallet)
-      store.dispatch('startWebsockets', userData.username)
+      store.dispatch('startWebsockets', getProfile())
     }).catch((err) => {
       console.log(err)
     })
@@ -119,8 +122,10 @@ const getProfile = function () {
       const loggedIn = true
       myProfile = {
         loggedIn: loggedIn,
+        stxAddress: account.profile.stxAddress,
+        senderKey: account.privateKey,
         showAdmin: showAdmin,
-        showSuperAdmin: uname === 'mijoco.id.blockstack',
+        superAdmin: uname === 'mijoco.id.blockstack',
         name: name,
         description: person.description(),
         avatarUrl: avatarUrl,
@@ -158,7 +163,7 @@ const authHeaders = function () {
 const authStore = {
   namespaced: true,
   state: {
-    userWallet: '',
+    userWallet: null,
     myProfile: {
       username: null,
       loggedIn: false,
@@ -168,7 +173,7 @@ const authStore = {
     appLogo: '/img/logo/Risidio_logo_256x256.png',
     authHeaders: null,
     networkId: 'testnet',
-    provider: 'blockstack'
+    provider: 'risidio'
   },
   getters: {
     getMyProfile: state => {
@@ -308,6 +313,7 @@ const authStore = {
           const useApi = (state.provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
           axios.post(useApi + '/v2/deploy', formData, { headers: headers }).then(response => {
             commit('addResponse', response.data)
+            store.dispatch('fetchWalletBalances')
             resolve(response)
           }).catch((error) => {
             reject(error)
@@ -329,8 +335,9 @@ const authStore = {
             name: state.appName,
             icon: state.appLogo
           },
-          finished: data => {
-            console.log(data.txId);
+          finished: result => {
+            data.result = result
+            resolve(data)
           },
         })
       })
@@ -338,28 +345,48 @@ const authStore = {
     makeTransferRisidio ({ state, commit }, data) {
       return new Promise((resolve, reject) => {
         network.coreApiUrl = 'http://localhost:20443'
-        let amount = new BigNum(data.amount)
-        amount = amount.div(new BigNum(1000000))
+        let amount =  Math.round(data.amount * precision)
+        amount = parseInt(amount, 16)
+        amount = new BigNum(amount)
+
+        // amount = amount.div(new BigNum(1000000))
+        const profile = getProfile()
+        if (!data.senderKey) {
+          data.senderKey = profile.senderKey
+        }
         const txOptions = {
           recipient: data.recipient,
           amount: amount,
           senderKey: data.senderKey,
           network,
           memo: data.memo,
-          // nonce: new BigNum(0), // set a nonce manually if you don't want builder to fetch from a Stacks node
+          nonce: new BigNum(data.nonce), // set a nonce manually if you don't want builder to fetch from a Stacks node
           fee: new BigNum(200) // set a tx fee if you don't want the builder to estimate
+        }
+        if (!data.senderKey) {
+          reject('No sender key')
         }
         makeSTXTokenTransfer(txOptions).then((transaction) => {
           const txdata = new Uint8Array(transaction.serialize())
           const headers = {
             'Content-Type': 'application/octet-stream'
           }
-          axios.post(MESH_API + '/v2/broadcast', txdata, { headers: headers }).then(response => {
-            commit('addResponse', response.data)
-            resolve(response)
+          const useApi = (state.provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
+          axios.post(useApi + '/v2/broadcast', txdata, { headers: headers }).then(response => {
+            // commit('addResponse', response.data)
+            data.result = response.data
+            data.senderKey = null
+            resolve(data)
           }).catch((error) => {
-            commit('addResponse', error.response.data)
-            resolve(error.response.data)
+            if (error.response) {
+              if (error.response.data.message.indexOf('NotEnoughFunds')) {
+                reject('Not enough funds in the wallet to send this - try decreasing the amount?')
+              } else {
+                reject(error.response.data.message)
+              }
+            } else {
+              reject(error.message)
+            }
           })
         })
       })

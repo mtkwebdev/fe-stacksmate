@@ -11,6 +11,9 @@ export const APP_CONSTANTS = {
   KEY_EXCHANGE_RATES: 'getExchangeRates',
   KEY_PLAY_MODE: 'getPlayMode',
   COMMIT_TOGGLE_PLAY_MODE: 'setPlayMode',
+  KEY_SECTION_HEIGHT: 'getSectionHeight',
+  KEY_SECTION_WIDTH: 'getSectionWidth',
+  KEY_FEE_ESTIMATE: 'getFeeEstimate',
 
   KEY_PROVIDER: 'authStore/getProvider',
   COMMIT_PROVIDER: 'authStore/setProvider',
@@ -19,7 +22,7 @@ export const APP_CONSTANTS = {
   KEY_NETWORK_ID: 'authStore/getNetworkId',
   KEY_USER_WALLET: 'authStore/getUserWallet',
 
-  KEY_CONTRACT_CURRENT: 'contractStore/getCurrentContract',
-  KEY_CONTRACT_HISTORY: 'contractStore/getContractHistory',
-  COMMIT_CONTRACT_CURRENT: 'contractStore/setCurrentContract'
+  KEY_TX_CURRENT: 'rstackStore/getCurrentTransaction',
+  KEY_TX_HISTORY: 'rstackStore/getTransactionHistory',
+  COMMIT_TX_CURRENT: 'rstackStore/setCurrentTransaction'
 }

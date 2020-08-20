@@ -119,6 +119,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100%;
+  background-color: #000;
+  color: #ffffff;
 }
 
 ::-webkit-input-placeholder { /* Edge */
@@ -132,6 +134,11 @@ body {
 ::placeholder {
   color: #999 !important;
   font-weight: 200;
+}
+
+.dropdown-menu {
+  background-color: #000 !important;
+  border: 1pt solid #fff;
 }
 
 .footer{
@@ -201,7 +208,7 @@ p {
 }
 button {
   background: rgb(255, 255, 255, .2) 0% 0% no-repeat padding-box;
-  color: #5FBDC1;
+  color: $info;
   border: none;
   padding: 10px;
 }
@@ -219,7 +226,7 @@ a {
 }
 a:hover {
   text-decoration: none;
-  color: #5FBDC1;
+  color: $cyan;;
 }
 .nav-text > a {
   text-align: left;
@@ -231,7 +238,7 @@ a:hover {
   padding-top: 20px;
 }
 .nav-text > a:hover {
-  font-weight: 700;
+  color: $cyan;
 }
 .navbar-brand {
   width: auto;
@@ -240,7 +247,7 @@ a:hover {
 .more-text {
   font-size: 11px;
   font-weight: 700;
-  color: #5FBDC1;
+  color: $info;
 }
 .btn-services {
   background: #d1ebeb 0% 0% no-repeat padding-box;
@@ -250,7 +257,7 @@ a:hover {
   height: 43px;
 }
 .btn-services:hover {
-  background: #5FBDC1 0% 0% no-repeat padding-box;
+  background: $info 0% 0% no-repeat padding-box;
 }
 .btn-services:hover a {
   color: #d1ebeb !important;
@@ -311,4 +318,67 @@ a:hover {
 @media only screen and (max-width:320px) {
   .textOnMobile h2 { font-size: 22px; }
   .textOnMobile p { font-size: 10px; }
+}
+.wallet-play-mode {
+  border: 2pt solid $yellow;
+  border-radius: 15px;
+  padding: 10px 30px;
+}
+.wallet-user-mode {
+  border: 2pt solid $cyan;
+  border-radius: 15px;
+  padding: 10px 30px;
+}
+.wallet-label {
+  width: 70px;
+  display: inline-block;
+}
+.flasher {
+  color: $yellow;
+}
+.wallet-use {
+  text-decoration: underline;
+  font-size: 12px;
+  font-weight: 600;
+}
+.modal-content {
+  background-color: #000;
+  border: 1pt solid #fff;
+}
+.r-notifs {
+  // Style of the notification itself 
+  padding: 10px;
+  margin: 0 5px 5px;
+ 
+  font-size: 12px;
+ 
+  color: #ffffff;
+  background: #44A4FC;
+  border-left: 5px solid #187FE7;
+
+  .notification-title {
+    font-size: 16px;
+    font-weight: 700
+  }
+ 
+  .notification-content {
+    text-decoration: dashed;
+  }
+ 
+  &.warn {
+    background: $warning;
+    border-left-color: $danger;
+  }
+  &.error {
+    background: $danger;
+    border-left-color: $indigo;
+  }
+  &.info {
+    background-color: $info;
+    border-left-color: $danger;
+  }
+  &.success {
+    background-color: $success;
+    border-left-color: $danger;
+  }
 }

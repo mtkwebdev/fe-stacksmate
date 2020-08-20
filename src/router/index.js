@@ -1,13 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import ContractManagement from '@/views/ContractManagement.vue'
-import TransferManagement from '@/views/TransferManagement.vue'
 import Stackers from '@/views/Stackers.vue'
+import TransactionHistory from '@/views/TransactionHistory.vue'
 import Wallets from '@/components/Wallets.vue'
 import Converter from '@/components/Converter.vue'
 import Contracts from '@/views/Contracts.vue'
 import ApiFramework from '@/views/ApiFramework.vue'
-import CommunityHub from '@/views/CommunityHub.vue'
+import Homepage from '@/views/Homepage.vue'
 import Login from '@/views/Login.vue'
 import MainNavbar from '@/layout/MainNavbar.vue'
 import MainFooter from '@/layout/MainFooter.vue'
@@ -16,9 +16,19 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/',
-    name: 'home',
+    path: '/get-stacks',
+    name: 'get-stacks',
     components: { default: Stackers, wallets: Wallets, converter: Converter, header: MainNavbar, footer: MainFooter }
+  },
+  {
+    path: '/transfer-stacks',
+    name: 'transfer-stacks',
+    components: { default: Stackers, wallets: Wallets, header: MainNavbar, footer: MainFooter }
+  },
+  {
+    path: '/tx-history',
+    name: 'tx-history',
+    components: { default: TransactionHistory, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/contracts',
@@ -31,19 +41,14 @@ const routes = [
     components: { default: ApiFramework, wallets: Wallets, header: MainNavbar, footer: MainFooter }
   },
   {
-    path: '/staxhub',
-    name: 'staxhub',
-    components: { default: CommunityHub, header: MainNavbar, footer: MainFooter }
+    path: '/',
+    name: 'home',
+    components: { default: Homepage, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/contracts',
     name: 'contracts',
     components: { default: Contracts, wallets: Wallets, header: MainNavbar, footer: MainFooter }
-  },
-  {
-    path: '/transfers',
-    name: 'transfers',
-    components: { default: TransferManagement, wallets: Wallets, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/login',
@@ -68,7 +73,7 @@ const routes = [
   },
   {
     path: '*',
-    redirect: { name: 'not-found' }
+    redirect: { name: 'home' }
   }
 ]
 

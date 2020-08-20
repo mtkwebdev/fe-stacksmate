@@ -1,41 +1,61 @@
 <template>
-<div class="bg-black d-flex justify-content-between">
-  <b-navbar toggleable="lg" type="dark" style="width: 100%;">
-    <b-navbar-brand href="#"><router-link to="/" class="pl-5 navbar-brand"><img :src="logo"/></router-link></b-navbar-brand>
+<div>
+<div class="bg-black navbar">
+  <div class="container">
 
-    <b-navbar-toggle class="ml-auto" target="nav-collapse"></b-navbar-toggle>
-    <b-collapse class="mr-auto" id="nav-collapse" is-nav>
-      <b-navbar-nav class="mr-auto">
-        <b-nav-item :class="isActive('staxhub')" to='/staxhub'>Community</b-nav-item>
-        <b-nav-item :class="isActive('home')" to='/'>Stackers</b-nav-item>
-        <b-nav-item :class="isActive('transfers')" to='/transfers'>Transfers</b-nav-item>
-        <!--
-          <b-nav-item class="joinUsButton" to='/contracts'>Contracts</b-nav-item>
-         -->
-        <!-- <b-nav-item class="joinUsButton" to='/api-demo'>API Demo</b-nav-item> -->
-      </b-navbar-nav>
+  <b-navbar toggleable="md" type="dark" style="width: 100%; margin: 0; padding-right:0;padding-left:0;">
+    <b-navbar-brand href="#">
+      <router-link to="/" class="navbar-brand"><img width="40px" height="40px" :src="logo"/></router-link>
+      <router-link v-if="isHomePage" to="/get-stacks" class="navbar-brand"><img width="40px" height="40px" :src="nounStack"/></router-link>
+    </b-navbar-brand>
 
-      <b-navbar-nav class="ml-auto">
-        <b-nav-item-dropdown class="" right caret>
+    <b-navbar class="mr-auto" v-if="!isHomePage">
+      <!-- <b-nav-text class="mr-3">Get Stacks:</b-nav-text> -->
+      <b-nav-text><router-link :class="isActive('get-stacks')" to="/get-stacks">Get Stax</router-link></b-nav-text>
+      <b-nav-text><router-link class="ml-3" :class="isActive('transfer-stacks')" to="/transfer-stacks">Transfer Stax</router-link></b-nav-text>
+    </b-navbar>
+
+    <exchange-rates class="ml-auto nav-text d-block d-md-none" v-if="isHomePage"/>
+
+    <b-navbar-toggle class="" target="nav-collapse">
+      <template v-slot:default="{ expanded }">
+        <b-icon width="30px" height="30px" v-if="expanded" icon="chevron-contract"></b-icon>
+        <img width="30px" v-else :src="toggler"/>
+      </template>
+    </b-navbar-toggle>
+
+    <b-collapse id="nav-collapse" is-nav>
+        <b-navbar class="ml-auto">
+
+        <exchange-rates class="nav-text d-none d-md-block" v-if="isHomePage"/>
+        <b-nav-item-dropdown class="nav-text" right caret v-if="isHomePage">
+          <template v-slot:button-content>
+            <span class="header">Circ. STX: 808,734,706</span>
+          </template>
+          <b-dropdown-item><span style="display: inline-block; width: 150px;">Binance</span> 385,937,152</b-dropdown-item>
+          <b-dropdown-item><span style="display: inline-block; width: 150px;">CoinMarketCap</span> 574,811,341</b-dropdown-item>
+        </b-nav-item-dropdown>
+
+        <b-nav-item-dropdown class="nav-text" left caret>
           <template v-slot:button-content>
             <span class="header">{{networkId}}</span>
           </template>
           <b-dropdown-item class="bg-dark" disabled><span class="text-light">Network</span></b-dropdown-item>
-          <b-dropdown-item @click="changeNetworkId('testnet')"><span  class="text-success">Testnet</span></b-dropdown-item>
+          <b-dropdown-item @click="changeNetworkId('testnet')"><span class="text-success">Testnet</span></b-dropdown-item>
           <b-dropdown-item @click="changeNetworkId('mainnet')"><i class="fa fa-ban" aria-hidden="true"></i> <span  class="" style="text-transform: strikethrough;">Mainnet</span></b-dropdown-item>
         </b-nav-item-dropdown>
 
-        <b-nav-item-dropdown class="" right v-if="loggedIn" caret>
+        <b-nav-item-dropdown class="nav-text" right v-if="loggedIn" caret>
           <template v-slot:button-content>
             <span v-if="provider" class="header">{{provider}}</span>
           </template>
           <b-dropdown-item class="bg-dark" disabled><span class="text-light">Provider</span></b-dropdown-item>
-          <b-dropdown-item @click="changeProvider('blockstack')">Blockstack Connect</b-dropdown-item>
-          <b-dropdown-item @click="changeProvider('risidio')">Risidio Network</b-dropdown-item>
-          <b-dropdown-item @click="changeProvider('local-network')">Local Stax Blockchain</b-dropdown-item>
+          <b-dropdown-item @click="changeProvider('blockstack')">Blockstack PBC</b-dropdown-item>
+          <b-dropdown-item @click="changeProvider('risidio')">Risidio</b-dropdown-item>
+          <b-dropdown-item @click="changeProvider('local-network')">Local</b-dropdown-item>
         </b-nav-item-dropdown>
 
-        <b-nav-item-dropdown class="" right v-else caret>
+        <b-nav-item-dropdown class="nav-text" right v-else caret>
           <template v-slot:button-content>
             <span v-if="provider" class="header">{{provider}}</span>
           </template>
@@ -43,26 +63,46 @@
           <b-dropdown-item @click.prevent="login()">Login to use Blockstack Provider</b-dropdown-item>
         </b-nav-item-dropdown>
 
-        <exchange-rates style="display: block;"/>
-        <b-nav-text style="display: block;">
-          <b-form-checkbox v-model="localPlayMode" name="check-button" switch>
-            <span :class="(localPlayMode) ? 'text-success' : 'text-grey'">play mode</span>
-          </b-form-checkbox>
-        </b-nav-text>
-
-        <b-nav-item-dropdown class="v-text ml-3" right v-if="loggedIn" no-caret>
+        <b-nav-item-dropdown class="nav-text ml-3" right v-if="loggedIn" caret>
           <template v-slot:button-content>
-            <i class="fas fa-cog"></i>
+            Account
           </template>
           <b-dropdown-item>{{username}}</b-dropdown-item>
+          <b-dropdown-item to="/tx-history">
+            <span>Transaction History</span>
+          </b-dropdown-item>
           <b-dropdown-item>
             <span @click="logout()">Logout</span>
           </b-dropdown-item>
         </b-nav-item-dropdown>
-        <b-nav-item class="joinUsButton" v-else><span @click="login()">Login</span></b-nav-item>
-      </b-navbar-nav>
+        <b-nav-item class="nav-text" v-else><span @click="login()">Login</span></b-nav-item>
+        </b-navbar>
     </b-collapse>
   </b-navbar>
+  </div>
+</div>
+  <div class=" play-mode w-100" :class="(localPlayMode) ? 'bg-warning text-white' : ''" v-if="!isHomePage">
+    <div class="container">
+      <div class="d-flex justify-content-end">
+        <div class="py-2">
+          <b-form-checkbox v-model="localPlayMode" name="check-button" switch>
+            <span class="" :class="(localPlayMode) ? 'text-white' : 'text-grey'">play mode</span>
+          </b-form-checkbox>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container mb-3 d-flex justify-content-between w-100" v-if="!isHomePage">
+    <exchange-rates class="nav-text"/>
+    <b-nav-item-dropdown class="nav-text" right caret>
+      <template v-slot:button-content>
+        <span class="header">Circulating STX: 808,734,706</span>
+      </template>
+      <b-dropdown-item><span style="display: inline-block; width: 150px;">Binance</span> 385,937,152</b-dropdown-item>
+      <b-dropdown-item><span style="display: inline-block; width: 150px;">CoinMarketCap</span> 574,811,341</b-dropdown-item>
+    </b-nav-item-dropdown>
+  </div>
+
 </div>
 </template>
 
@@ -86,7 +126,9 @@ export default {
   },
   data () {
     return {
-      logo: require('@/assets/img/logo/risidio_white1.png'),
+      toggler: require('@/assets/img/navbar/Icon_ionic-md-options.svg'),
+      logo: require('@/assets/img/logo/Risidio_Logo.svg'),
+      nounStack: require('@/assets/img/logo/Risidio_Stacks.svg'),
       localPlayMode: false
     }
   },
@@ -104,15 +146,13 @@ export default {
       if (provider) {
         this.$store.commit(APP_CONSTANTS.COMMIT_PROVIDER, provider)
         this.$store.dispatch('authStore/fetchMyAccount').then(profile => {
-          this.$notify({ type: 'success', title: 'Wallets', text: 'Fetched wallet balance!' })
+          this.$store.dispatch('fetchWalletBalances')
+          this.$notify({ type: 'success', title: 'Provider', text: 'Network provider has been updated - the provider determines how transactions are broadcast to the blockchain!' })
         })
       }
     },
-    changePlayMode () {
-      // this.$store.commit(APP_CONSTANTS.COMMIT_TOGGLE_PLAY_MODE)
-    },
     isActive (route) {
-      return (this.$route.name === route) ? 'active' : ''
+      return (this.$route.name === route) ? 'active' : 'text-light'
     },
     changeNetworkId (networkId) {
       if (networkId && networkId === 'testnet') {
@@ -123,8 +163,8 @@ export default {
     }
   },
   computed: {
-    isLoginPage () {
-      return this.$route.name === 'login'
+    isHomePage () {
+      return this.$route.name === 'home'
     },
     stxRate () {
       const stxRate = this.$store.getters[APP_CONSTANTS.KEY_STX_RATE]
@@ -161,8 +201,39 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss">
+@import "@/assets/scss/custom.scss";
+.play-mode {
+  border-top: 1pt solid $yellow;
+  border-bottom: 1pt solid $yellow;
+}
+.dropdown-item:hover {
+  color: #000 !important;
+}
+.dropdown-item {
+  color: #fff !important;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 300;
+}
 .header {
   text-transform: capitalize;
+}
+.active {
+  color: #FFFFFF;
+}
+.nav-text {
+  position: relative;
+  top: -6px;
+  display: inline-block;
+}
+.nav-text > a {
+  text-align: left;
+  color: #FFFFFF;
+  font-size: 12px;
+}
+.navbar-text {
+  font-size: 12px;
+  font-weight: 300;
 }
 </style>

@@ -30,7 +30,7 @@ export default {
   methods: {
     changeContract (contractHash) {
       if (contractHash) {
-        this.$store.commit(APP_CONSTANTS.COMMIT_CONTRACT_CURRENT, contractHash)
+        this.$store.commit(APP_CONSTANTS.COMMIT_TX_CURRENT, contractHash)
       } else {
         this.$notify({ type: 'warning', title: 'Contracts', text: 'Contracts not available!' })
       }
@@ -38,11 +38,11 @@ export default {
   },
   computed: {
     currentContract () {
-      const currentContract = this.$store.getters[APP_CONSTANTS.KEY_CONTRACT_CURRENT]
+      const currentContract = this.$store.getters[APP_CONSTANTS.KEY_TX_CURRENT]
       return currentContract
     },
     contractHistory () {
-      const contracts = this.$store.getters[APP_CONSTANTS.KEY_CONTRACT_HISTORY]
+      const contracts = this.$store.getters[APP_CONSTANTS.KEY_TX_HISTORY]
       const history = []
       history.push({ text: 'select contract', value: 'zero' })
       if (contracts) {

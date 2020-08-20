@@ -30,15 +30,14 @@ const transactionStore = {
       return new Promise((resolve) => {
         const privateKey = makeRandomPrivKey()
         const publicKey = getAddressFromPrivateKey(privateKey.data.toString('hex'))
-        // const stacksPublicKey = createStacksPublicKey(privateKey.data.toString('hex'))
-        const account = {
-          value: publicKey,
-          text: null,
-          balance: 0,
-          sk: privateKey.data.toString('hex')
+        const wallet = {
+          keyInfo: {
+            address: publicKey,
+            privateKey: privateKey.data.toString('hex')
+          },
+          balance: 0
         }
-
-        resolve(account)
+        resolve(wallet)
       })
     }
   }

@@ -7,22 +7,23 @@
     <b-input
       class="mt-3"
       ref="accountText"
-      v-model="account.label"
+      v-model="wallet.label"
       placeholder="Account label"></b-input>
     <b-input
       class="mt-3"
       readonly
       ref="accountValue"
-      v-model="account.keyInfo.address"
+      v-model="wallet.keyInfo.address"
       placeholder="Address"></b-input>
     <b-input
       class="mt-3"
       ref="accountSk"
       readonly
-      v-model="account.keyInfo.privateKey"
+      v-model="wallet.keyInfo.privateKey"
       placeholder="Private key"></b-input>
+    <div class="text-danger">Note: this is for test purposes only - don't enter seeds / private keys in web sites unless you are clear about the reason.</div>
     <div class="mt-3">
-      <b-button class="mr-3 btn-sm bg-info" @click="createAccount()">Create Account</b-button>
+      <b-button @click="createAccount()" variant="warning" class="text-white button1" style="width: 49%;">Create Wallet</b-button>
     </div>
   </div>
 </b-form>
@@ -36,7 +37,7 @@ export default {
   data () {
     return {
       loading: true,
-      account: {
+      wallet: {
         label: null,
         keyInfo: {
           privateKey: null,
@@ -47,14 +48,14 @@ export default {
     }
   },
   mounted () {
-    this.$store.dispatch('transactionStore/makeKey').then((account) => {
-      if (account && account.keyInfo) this.account = account
+    this.$store.dispatch('transactionStore/makeKey').then((wallet) => {
+      if (wallet && wallet.keyInfo) this.wallet = wallet
       this.loading = false
     })
   },
   methods: {
     createAccount: function () {
-      this.$emit('createAccount', this.account)
+      this.$emit('createAccount', this.wallet)
     }
   },
   computed: {

@@ -1,17 +1,17 @@
 <template>
 <div id="app">
-  <div>
-    <router-view class="navbar" name="header"/>
-    <div class="container mt-5 main d-flex justify-content-start">
-      <router-view id="nav"  class="w-75"/>
-      <div class="w-25 container mt-5">
-        <router-view class="" name="wallets"/>
-        <router-view class="" name="converter"/>
-      </div>
-    </div>
-    <notifications position="top right" width="30%" style="margin: 20px; top: 100px;"/>
-    <router-view name="footer" />
+  <router-view name="header"/>
+  <div v-if="isHome">
+    <router-view id="nav"/>
   </div>
+  <div v-else>
+    <div class="container">
+      <router-view class="my-3" name="wallets"/>
+      <router-view id="nav"  class="w-100"/>
+    </div>
+    <notifications :duration="10000" classes="r-notifs" position="bottom right" width="30%" style="margin: 20px; top: 100px;"/>
+  </div>
+  <router-view name="footer" />
 </div>
 </template>
 
@@ -29,17 +29,25 @@ export default {
   },
   mounted () {
     this.$store.dispatch('fetchWalletBalances')
+    const myself = this
+    let resizeTimer
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(function () {
+        myself.$store.commit('setWinDims')
+        myself.componentKey += 1
+      }, 200)
+    })
   },
   beforeDestory () {
     this.$store.dispatch('stopWebsockets')
   },
   methods: {
-    meshEvent: function (data) {
-      this.$emit('meshEvent', data)
-      console.log('meshEvent', data)
-    }
   },
   computed: {
+    isHome: function (data) {
+      return this.$route.name === 'home'
+    }
   }
 }
 </script>

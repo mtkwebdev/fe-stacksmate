@@ -1,7 +1,7 @@
 <template>
 <b-nav-item-dropdown caret v-if="exchangeRate">
   <template v-slot:button-content>
-    STX: <span>{{amountTrunc}}</span> {{exchangeRate.fiatCurrency}}
+    STX: <span>{{amountTrunc}}</span> <span v-html="exchangeRate.fiatCurrency"></span>
   </template>
   <b-dropdown-item v-for="(rate, idx) in exchangeRates" :key="idx" @click.prevent="changeFiatCurrency(rate.fiatCurrency)">{{rate.fiatCurrency}}</b-dropdown-item>
 </b-nav-item-dropdown>
@@ -21,6 +21,18 @@ export default {
     }
   },
   methods: {
+    fiatSymbol () {
+      const exchangeRate = this.$store.getters[APP_CONSTANTS.KEY_EXCHANGE_RATE]
+      if (exchangeRate.fiatCurrency === 'EUR') {
+        return '&euro;'
+      } else if (exchangeRate.fiatCurrency === 'GBP') {
+        return '&pound;'
+      } else if (exchangeRate.fiatCurrency === 'JPY') {
+        return '&yen;'
+      } else {
+        return '&dollar;'
+      }
+    },
     changeFiatCurrency (fiatCurrency) {
       if (fiatCurrency) {
         this.$store.commit(APP_CONSTANTS.COMMIT_FIAT_CURRENCY, fiatCurrency)

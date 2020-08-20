@@ -11,8 +11,9 @@
       ref="accountSk"
       v-model="account.keyInfo.privateKey"
       placeholder="Private key"></b-input>
+    <div class="text-danger">Note: this is for test purposes only - don't enter seeds / private keys in web sites unless you are clear about the reason.</div>
     <div class="mt-3">
-      <b-button class="mr-3 btn-sm bg-info" @click="importAccount()">Import Account</b-button>
+      <b-button @click="importAccount()" variant="warning" class="text-white button1" style="width: 49%;">Import Wallet</b-button>
     </div>
   </div>
 </b-form>
