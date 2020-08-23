@@ -386,21 +386,32 @@ export default new Vuex.Store({
                 // now transfer x stx to users address..
                 // then update the payment challenge to set serviceStatus = 1 ie paid
                 // add the txid of the transfer for users records.
+                let amount = paymentChallenge.serviceData.numbCredits
+                if (!amount) {
+                  amount = paymentChallenge.xchange.numbCredits
+                }
+                if (!amount || amount === 0) {
+                  amount = 0.0075
+                }
                 const data = {
                   recipient: paymentChallenge.serviceData.stxAddress,
-                  amount: paymentChallenge.serviceData.numbCredits,
+                  amount: amount,
                   senderKey: state.shakerData.privateKey,
-                  memo: 'Payment for ' + paymentChallenge.serviceData.numbCredits + ' STX tokens.',
-                  nonce: 0 // get the nonce!
+                  memo: 'Payment for ' + amount + ' STX tokens.'
                 }
-                store.dispatch('authStore/makeTransferRisidio', data).then((result) => {
-                  if (result) {
-                    // store.dispatch('transferComplete', paymentChallenge.paymentId)
-                    paymentChallenge.serviceStatus = 1
-                    paymentChallenge.serviceData.transferTx = result
-                    updatePaymentChallenge(paymentChallenge)
-                    commit('addTransfer', paymentChallenge)
-                  }
+                store.dispatch('fetchWalletInfo', state.shakerData.address).then((response) => {
+                  data.nonce = response.data.nonce
+                  store.dispatch('authStore/makeTransferRisidio', data).then((result) => {
+                    if (result) {
+                      // store.dispatch('transferComplete', paymentChallenge.paymentId)
+                      paymentChallenge.serviceStatus = 1
+                      paymentChallenge.serviceData.transferTx = result
+                      updatePaymentChallenge(paymentChallenge)
+                      commit('addTransfer', paymentChallenge)
+                    }
+                  })
+                }).catch((err) => {
+                  console.log(err)
                 })
               }
             })

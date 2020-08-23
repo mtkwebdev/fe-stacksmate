@@ -93,7 +93,7 @@ export default {
     transferEvent: function (txData) {
       this.$notify({ type: 'info', title: 'Transfers', text: 'Transaction sent to Blockchain the transaction id=' + txData.result })
       this.txData = txData
-      this.$store.dispatch('rstackStore/saveTransfer', txData).then((result) => {
+      this.$store.dispatch('rstackStore/saveToGaia', txData).then((result) => {
         this.$bvModal.show('modal-2')
         this.$notify({ type: 'success', title: 'Transfers', text: 'Transaction saved to your Gaia storage bucket - id=' + txData.result })
       })

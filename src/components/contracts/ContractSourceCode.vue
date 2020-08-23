@@ -39,10 +39,17 @@
           </div>
         </div>
     </b-form>
-    <div class="container m-5">
-      {{result}}
-    </div>
   </div>
+  <b-modal scrollable id="modal-1" title="Contract Deployed">
+    <div class="row" v-if="txData">
+      <div class="col-12 my-1">
+        <div class="mb-3">Deployed {{txData.contractName}}</div>
+        <div class="mb-3">Tx: {{txData.result}}</div>
+      </div>
+    </div>
+    <template v-slot:modal-footer>
+    </template>
+  </b-modal>
 </div>
 </template>
 
@@ -61,7 +68,7 @@ export default {
   data () {
     return {
       feeAmount: 3000,
-      result: null,
+      txData: null,
       nonce: 0,
       loading: true,
       parentalError: null,
@@ -109,8 +116,10 @@ export default {
         this.$store.dispatch('authStore/deployContractBlockstack', data)
       } else {
         data.senderKey = sender.keyInfo.privateKey
-        this.$store.dispatch('authStore/deployContractRisidio', data).then((result) => {
-          this.result = result
+        data.address = sender.keyInfo.address
+        this.$store.dispatch('authStore/deployContractRisidio', data).then((txData) => {
+          this.txData = txData
+          this.$bvModal.show('modal-1')
         }).catch((error) => {
           this.$notify({ type: 'error', title: 'Contracts', text: 'Error during deployment. ', error })
         })

@@ -20,6 +20,7 @@ import {
 } from '@blockstack/stacks-transactions'
 import BigNum from 'bn.js'
 import axios from 'axios'
+import { APP_CONSTANTS } from '@/app-constants'
 
 const BLOCKSTACK_LOGIN = Number(process.env.VUE_APP_BLOCKSTACK_LOGIN)
 const network = new StacksTestnet()
@@ -299,38 +300,41 @@ const authStore = {
             icon: state.appLogo
           },
           finished: (trans) => {
-            console.log(trans.txId)
+            console.log(trans.txid)
             store.dispatch('contractStore/saveContract', data)
           }
         })
       })
     },
-    deployContractRisidio ({ state, commit }, data) {
+    deployContractRisidio ({ state, commit, dispatch }, data) {
       return new Promise((resolve, reject) => {
         network.coreApiUrl = 'http://localhost:20443'
-        const txOptions = {
+        const sender = store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
+        let txOptions = {
           contractName: data.contractName,
           codeBody: data.codeBody,
-          senderKey: data.senderKey,
-          // nonce: new BigNum(data.nonce), // watch for nonce increments if this works - may need to restart mocknet!
-          // fee: new BigNum(3000), // set a tx fee if you don't want the builder to estimate
+          senderKey: sender.keyInfo.privateKey,
+          nonce: new BigNum(sender.nonce++), // watch for nonce increments if this works - may need to restart mocknet!
+          fee: new BigNum(3000), // set a tx fee if you don't want the builder to estimate
           network
         }
         makeContractDeploy(txOptions).then((transaction) => {
           commit('addContract', data.contractName)
-          const array = new Uint8Array(transaction.serialize())
-          const blobby = new Blob([array])
-          const formData = new FormData()
-          formData.append('filename', 'broadcastRawTransaction')
-          formData.append('bar', blobby, 'filename')
+          const txdata = new Uint8Array(transaction.serialize())
           const headers = {
-            'Content-Type': 'multipart/form-data;'
+            'Content-Type': 'application/octet-stream'
           }
           const useApi = (state.provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
-          axios.post(useApi + '/v2/deploy', formData, { headers: headers }).then(response => {
-            commit('addResponse', response.data)
-            store.dispatch('fetchWalletBalances')
-            resolve(response)
+          axios.post(useApi + '/v2/broadcast', txdata, { headers: headers }).then(response => {
+            txOptions.senderKey = null
+            txOptions.fromAddress = data.address
+            txOptions.result = response.data
+            txOptions.provider = 'risidio'
+            txOptions.txtype = 'deployment'
+            store.dispatch('rstackStore/saveToGaia', txOptions).then(() => {
+              resolve(txOptions)
+              dispatch('fetchWalletBalances')
+            })
           }).catch((error) => {
             reject(error)
           })
@@ -393,7 +397,7 @@ const authStore = {
         })
       })
     },
-    makeTransferRisidio ({ state, commit }, data) {
+    makeTransferRisidio ({ state }, data) {
       return new Promise((resolve, reject) => {
         network.coreApiUrl = 'http://localhost:20443'
         let amount =  Math.round(data.amount * precision)
@@ -412,7 +416,7 @@ const authStore = {
           network,
           memo: data.memo,
           nonce: new BigNum(data.nonce), // set a nonce manually if you don't want builder to fetch from a Stacks node
-          fee: new BigNum(200) // set a tx fee if you don't want the builder to estimate
+          fee: new BigNum(2000) // set a tx fee if you don't want the builder to estimate
         }
         if (!data.senderKey) {
           reject('No sender key')
@@ -424,7 +428,6 @@ const authStore = {
           }
           const useApi = (state.provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
           axios.post(useApi + '/v2/broadcast', txdata, { headers: headers }).then(response => {
-            // commit('addResponse', response.data)
             data.result = response.data
             data.senderKey = null
             resolve(data)

@@ -43,11 +43,16 @@ const rstackStore = {
         })
       })
     },
-    saveTransfer ({ state, commit }, txData) {
+    saveToGaia ({ state, commit }, txData) {
       return new Promise((resolve) => {
+        const item = state.rootFile.transactions.find(item => item.txData.result === txData.result)
+        if (item) {
+          resolve(item)
+          return
+        }
         rstackService.saveTransaction(state.rootFile, txData).then((rootFile) => {
           commit('rootFile', rootFile)
-          resolve(rootFile)
+          resolve(rootFile.transactions[0])
         })
       })
     },
@@ -55,12 +60,12 @@ const rstackStore = {
       return new Promise((resolve) => {
         const item = state.rootFile.transactions.find(item => item.txData.preimage === txData.preimage)
         if (item) {
-          resolve(state.rootFile)
+          resolve(item)
           return
         }
         rstackService.saveTransaction(state.rootFile, txData).then((rootFile) => {
           commit('rootFile', rootFile)
-          resolve(rootFile)
+          resolve(rootFile.transactions[0])
         })
       })
     }

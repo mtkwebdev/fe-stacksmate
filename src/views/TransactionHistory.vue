@@ -9,18 +9,35 @@
         <div v-for="(item, index) in transactions" :key="index">
           <div class="row">
             <div class="col-12 my-1 border-bottom py-4">
-              <div>
+              <div v-if="item.txData.txtype === 'deployment'">
+                <div class="d-flex justify-content-between">
+                  <p class="label">Contract Deployed</p>
+                  <p>{{updated(item.updated)}}</p>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <p class="label">From</p>
+                  <p>{{truncMe(item.txData.fromAddress)}}</p>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <p class="label">Name</p>
+                  <p>{{truncMe(item.txData.contractName)}}</p>
+                </div>
+                <div class="mt-4 d-flex justify-content-center">
+                  <p><a class="text-info" style="text-decoration: underline;" target="_blank" :href="explorerUrl(item.txData.result)">explorer</a></p>
+                </div>
+              </div>
+              <div v-else>
                 <div class="d-flex justify-content-between">
                   <p class="label">{{txType(item.txData.txtype)}}</p>
                   <p>{{updated(item.updated)}}</p>
                 </div>
                 <p style="font-size: 18px;">{{item.txData.amount}} STX Tokens</p>
                 <div class="d-flex justify-content-between">
-                  <p class="label">Sender</p>
+                  <p class="label">From</p>
                   <p>{{truncMe(item.txData.recipient)}}</p>
                 </div>
                 <div class="d-flex justify-content-between">
-                  <p class="label">Dest.</p>
+                  <p class="label">To</p>
                   <p>{{truncMe(item.txData.fromAddress)}}</p>
                 </div>
                 <div class="d-flex justify-content-between" v-if="item.txData.txtype !== 'transfer'">
@@ -73,6 +90,8 @@ export default {
     txType (type) {
       if (type === 'rpay-swap') {
         return 'Lightning/STX Swap'
+      } else if (type === 'deployment') {
+        return 'Contract Deployment'
       } else {
         return 'Transfer'
       }
