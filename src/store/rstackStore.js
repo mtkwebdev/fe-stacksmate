@@ -53,7 +53,7 @@ const rstackStore = {
     },
     saveMacaroon ({ state, commit }, txData) {
       return new Promise((resolve) => {
-        const item = state.rootFile.transactions.find(item => item.preimage === txData.preimage)
+        const item = state.rootFile.transactions.find(item => item.txData.preimage === txData.preimage)
         if (item) {
           resolve(state.rootFile)
           return

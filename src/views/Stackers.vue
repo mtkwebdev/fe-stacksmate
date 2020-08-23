@@ -3,7 +3,7 @@
   <div class="row">
     <div class="col-md-6 col-sm-12">
       <div class="" v-if="isRPay">
-        <h4 class="mb-4">Use R-Pay to swap Lightning BTC for Stacks (STX) tokens</h4>
+        <h4 class="mb-4">Use rPay to swap Lightning BTC for Stacks (STX) tokens</h4>
       </div>
       <div class="" v-else>
         <h4 class="mb-4">Transfer Stacks (STX) tokens to your address</h4>
@@ -14,8 +14,11 @@
         <p>2. Deploy smart contracts</p>
         <p>3. Register digital assets</p>
       </div>
-      <div class="my-4" v-if="!isRPay">
-        Try it out first? Use <span class="text-warning">Play Mode</span>
+      <div class="my-4" v-if="isRPay">
+        We charge the equivalent of a small tip to <span class="text-warning">Try it Out</span>
+      </div>
+      <div class="my-4" v-else>
+        Try it out first? Use <span class="text-warning">Dev Mode</span>
       </div>
     </div>
     <div class="col-md-6 col-sm-12">
@@ -76,10 +79,15 @@ export default {
     rpayEvent: function (paymentData) {
       this.paymentData = paymentData
       if (this.paymentData.opcode === 'lsat-payment-confirmed') {
-        this.eventData += '<p><pre style="color: #fff;">' + JSON.stringify(this.paymentData) + '</pre></p>'
-        this.$notify({ type: 'success', title: 'Transfers', text: 'Payment recieved with thanks - your STX tokens are on their way' })
-        this.$bvModal.show('modal-1')
-        this.$store.dispatch('rstackStore/saveMacaroon', this.paymentData)
+        this.$store.dispatch('rstackStore/saveMacaroon', this.paymentData).then((item) => {
+          if (item && item.txData) {
+            this.$bvModal.show('modal-1')
+          } else {
+            this.$notify({ type: 'success', title: 'Transfers', text: 'Payment recieved with thanks - details stored to your Gaia hub.' })
+          }
+        }).catch(() => {
+          this.$notify({ type: 'error', title: 'Transfers', text: 'Payment recieved with thanks - unable to store details to your Gaia hub.' })
+        })
       }
     },
     transferEvent: function (txData) {
@@ -118,7 +126,4 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-button {
-  text-transform: uppercase;
-}
 </style>

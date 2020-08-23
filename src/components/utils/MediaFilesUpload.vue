@@ -1,11 +1,9 @@
 <template>
-<div class="m-0">
+<div class="">
   <div class="" v-if="!readonly">
-    <div >
-      <label class="btn btn-default btn-file text-white" :class="(checkQuantity) ? 'bg-info' : 'bg-warning'" style="cursor: pointer; width: 300px;">
+      <label style="cursor: pointer;">
         {{contentModel.title}} <input v-if="checkQuantity" type="file" style="display: none;" id="file-input" @change.prevent="loadMediaObjects"/>
       </label>
-    </div>
     <div class="invalid-feedback d-block" v-if="showError">
       {{contentModel.errorMessage}}
     </div>
@@ -17,11 +15,11 @@
     </div>
   </div>
   <p v-if="!readonly && contentModel.qualityMessage" v-html="contentModel.qualityMessage"></p>
-  <div class="row" v-if="showFiles">
-    <div class="col-md-3 mx-0 mb-3" sm="12" v-for="(file, index) in mediaObjects" :key="index" :file="file">
+  <div class="" v-if="showFiles">
+    <div v-for="(file, index) in mediaObjects" :key="index" :file="file">
       <div class="">
-        <div v-if="!readonly" class="d-flex pr-1 justify-content-between teal-text" style="height: auto;">
-          <a style="border-radius: 15px;" href="" @click.prevent="clearMediaObject(file.size)"><i class="fas fa-times text-danger" style="font-size: 1.2rem;"></i></a>
+        <div v-if="!readonly">
+          <a href="" @click.prevent="clearMediaObject(file.size)">cancel</a>
         </div>
         <div class="view view-cascade overlay" v-if="ispdf(file)">
           <img class="card-img-top" :src="missing" :alt="file.name" :title="file.name" height="100px">

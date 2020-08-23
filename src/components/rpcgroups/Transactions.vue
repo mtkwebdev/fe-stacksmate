@@ -107,7 +107,4 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-button {
-  text-transform: uppercase;
-}
 </style>

@@ -5,22 +5,29 @@
 
   <b-navbar toggleable="md" type="dark" style="width: 100%; margin: 0; padding-right:0;padding-left:0;">
     <b-navbar-brand href="#">
-      <router-link to="/" class="navbar-brand"><img width="40px" height="40px" :src="logo"/></router-link>
-      <router-link v-if="isHomePage" to="/get-stacks" class="navbar-brand"><img width="40px" height="40px" :src="nounStack"/></router-link>
+      <div class="d-block d-md-none">
+        <router-link to="/" class="navbar-brand"><img height="30px" :src="logo"/></router-link>
+      </div>
+      <div class="d-none d-md-block">
+        <router-link to="/" class="navbar-brand"><img height="50px" :src="logo"/></router-link>
+      </div>
+
+      <!-- <router-link v-if="isHomePage" to="/get-stacks" class="navbar-brand"><img width="40px" height="40px" :src="nounStack"/></router-link> -->
     </b-navbar-brand>
 
     <b-navbar class="mr-auto" v-if="!isHomePage">
       <!-- <b-nav-text class="mr-3">Get Stacks:</b-nav-text> -->
       <b-nav-text><router-link :class="isActive('get-stacks')" to="/get-stacks">Get Stax</router-link></b-nav-text>
       <b-nav-text><router-link class="ml-3" :class="isActive('transfer-stacks')" to="/transfer-stacks">Transfer Stax</router-link></b-nav-text>
+      <b-nav-text><router-link class="ml-3" :class="isActive('contracts')" to="/contracts">Contracts</router-link></b-nav-text>
     </b-navbar>
 
     <exchange-rates class="ml-auto nav-text d-block d-md-none" v-if="isHomePage"/>
 
     <b-navbar-toggle class="" target="nav-collapse">
       <template v-slot:default="{ expanded }">
-        <b-icon width="30px" height="30px" v-if="expanded" icon="chevron-contract"></b-icon>
-        <img width="30px" v-else :src="toggler"/>
+        <b-icon width="20px" height="30px" v-if="expanded" icon="chevron-contract"></b-icon>
+        <img width="20px" v-else :src="toggler"/>
       </template>
     </b-navbar-toggle>
 
@@ -86,7 +93,7 @@
       <div class="d-flex justify-content-end">
         <div class="py-2">
           <b-form-checkbox v-model="localPlayMode" name="check-button" switch>
-            <span class="" :class="(localPlayMode) ? 'text-white' : 'text-grey'">play mode</span>
+            <span class="" :class="(localPlayMode) ? 'text-white' : 'text-grey'">dev mode</span>
           </b-form-checkbox>
         </div>
       </div>
@@ -127,7 +134,7 @@ export default {
   data () {
     return {
       toggler: require('@/assets/img/navbar/Icon_ionic-md-options.svg'),
-      logo: require('@/assets/img/logo/Risidio_Logo.svg'),
+      logo: require('@/assets/img/logo/risidio_white.png'),
       nounStack: require('@/assets/img/logo/Risidio_Stacks.svg'),
       localPlayMode: false
     }
@@ -145,7 +152,7 @@ export default {
     changeProvider (provider) {
       if (provider) {
         this.$store.commit(APP_CONSTANTS.COMMIT_PROVIDER, provider)
-        this.$store.dispatch('authStore/fetchMyAccount').then(profile => {
+        this.$store.dispatch('initApplication').then(() => {
           this.$store.dispatch('fetchWalletBalances')
           this.$notify({ type: 'success', title: 'Provider', text: 'Network provider has been updated - the provider determines how transactions are broadcast to the blockchain!' })
         })

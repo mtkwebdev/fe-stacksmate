@@ -4,7 +4,7 @@ import axios from 'axios'
 import transactionStore from './transactionStore'
 import rstackStore from './rstackStore'
 import authStore from './authStore'
-import store from './index'
+import store from './staxStore'
 import rates from 'risidio-rates'
 import SockJS from 'sockjs-client'
 import Stomp from '@stomp/stompjs'
@@ -19,10 +19,10 @@ let socket = null
 let stompClient = null
 
 const mac = JSON.parse(process.env.VUE_APP_WALLET_MAC || '')
-const alice = JSON.parse(process.env.VUE_APP_WALLET_ALICE || '')
-const bob = JSON.parse(process.env.VUE_APP_WALLET_BOB || '')
-const charlie = JSON.parse(process.env.VUE_APP_WALLET_CHARLIE || '')
-const doreen = JSON.parse(process.env.VUE_APP_WALLET_DOREEN || '')
+const pat = JSON.parse(process.env.VUE_APP_WALLET_ALICE || '')
+const kip = JSON.parse(process.env.VUE_APP_WALLET_BOB || '')
+const mik = JSON.parse(process.env.VUE_APP_WALLET_CHARLIE || '')
+const rik = JSON.parse(process.env.VUE_APP_WALLET_DOREEN || '')
 
 const authHeaders = function (configuration) {
   var publicKey
@@ -33,6 +33,17 @@ const authHeaders = function (configuration) {
     Authorization: 'Bearer ' + token
   }
   return headers
+}
+const websockCheck = function (paymentChallenge) {
+  let allow = false
+  if (paymentChallenge.paymentId && paymentChallenge.paymentId !== 'null') {
+    if (paymentChallenge.serviceKey === 'stax-lightning-exchange' && paymentChallenge.serviceData) {
+      if (paymentChallenge.serviceStatus === -1 && paymentChallenge.status === 5) {
+        allow = true
+      }
+    }
+  }
+  return allow
 }
 const precision = 1000000
 const getAmountStx = function (amountMicroStx) {
@@ -79,13 +90,14 @@ export default new Vuex.Store({
     xgeRates: null,
     playMode: false,
     fiatCurrency: 'EUR',
+    shakerData: null,
     windims: { innerWidth: window.innerWidth, innerHeight: window.innerHeight },
     response: null,
     status: true,
     transfer: null,
     currentAccount: null,
     feeEstimate: null,
-    wallets: [mac, alice, bob, charlie, doreen],
+    wallets: [mac, pat, kip, mik, rik],
     endpoints: [
       {
         type: 'account',
@@ -192,6 +204,9 @@ export default new Vuex.Store({
     },
     getWallets: state => {
       return state.wallets
+    },
+    getShakerData: (state) => {
+      return state.shakerData
     }
   },
   mutations: {
@@ -234,6 +249,9 @@ export default new Vuex.Store({
         throw new Error('Wallet with this address already exists.')
       }
       state.wallets.push(wallet)
+    },
+    setShakerData (state, shakerData) {
+      state.shakerData = shakerData
     }
   },
   actions: {
@@ -243,6 +261,12 @@ export default new Vuex.Store({
         store.dispatch('fetchFeeEstimate')
         store.dispatch('authStore/fetchMyAccount').then((profile) => {
           store.dispatch('rstackStore/initApplication', profile.loggedIn)
+          store.dispatch('authStore/fetchShakerData').then((shakerData) => {
+            if (shakerData) {
+              commit('setShakerData', shakerData)
+              store.dispatch('startWebsockets', profile)
+            }
+          })
         })
       })
     },
@@ -331,44 +355,56 @@ export default new Vuex.Store({
         })
       })
     },
+    transferComplete ({ state }, paymentId) {
+      return new Promise((resolve, reject) => {
+        const authHeaders = store.getters['authStore/authHeaders']
+        const provider = store.getters['authStore/getProvider']
+        const useApi = (provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
+        axios.post(useApi + '/payment/stx-transfered/' + paymentId, null, { headers: authHeaders }).then(response => {
+          resolve(response.data)
+        }).catch((error) => {
+          reject(error)
+        })
+      })
+    },
     startWebsockets ({ state, commit }, profile) {
       return new Promise((resolve) => {
+        if (!profile.superAdmin) {
+          resolve()
+        }
         socket = new SockJS(API_PATH + '/lsat/ws1/transfers')
         stompClient = Stomp.over(socket)
         stompClient.connect({}, function () {
-          if (profile.superAdmin) {
-            stompClient.subscribe('/queue/transfers-mijocoidblockstack', function (response) {
-              const paymentChallenges = JSON.parse(response.body)
-              if (paymentChallenges && Array.isArray(paymentChallenges)) {
-                paymentChallenges.forEach(function (paymentChallenge) {
-                  if (paymentChallenge.paymentId && paymentChallenge.paymentId !== 'null') {
-                    if (paymentChallenge.serviceKey === 'stax-lightning-exchange' && paymentChallenge.serviceData) {
-                      if (paymentChallenge.serviceStatus === -1 && paymentChallenge.status === 5) {
-                        // match means users payment has been received
-                        // now transfer x stx to users address..
-                        // then update the payment challenge to set serviceStatus = 1 ie paid
-                        // add the txid of the transfer for users records.
-                        const data = {
-                          recipient: paymentChallenge.serviceData.stxAddress,
-                          amount: paymentChallenge.xchange.numbCredits,
-                          senderKey: profile.privateKey,
-                          memo: 'stx-lsat ' + paymentChallenge.xchange.numbCredits,
-                          nonce: 0 // get the nonce!
-                        }
-                        if (data.senderKey) {
-                          store.dispatch('authStore/makeTransferRisidio', data).then((result) => {
-                            paymentChallenge.serviceData.transferTx = result
-                            updatePaymentChallenge(paymentChallenge)
-                            commit('addTransfer', paymentChallenge)
-                          })
-                        }
-                      }
-                    }
+          stompClient.subscribe('/queue/transfers-' + state.shakerData.address, function (response) {
+            const paymentChallenges = JSON.parse(response.body)
+            if (!paymentChallenges || !Array.isArray(paymentChallenges)) {
+              return
+            }
+            paymentChallenges.forEach(function (paymentChallenge) {
+              if (websockCheck) {
+                // match means users payment has been received
+                // now transfer x stx to users address..
+                // then update the payment challenge to set serviceStatus = 1 ie paid
+                // add the txid of the transfer for users records.
+                const data = {
+                  recipient: paymentChallenge.serviceData.stxAddress,
+                  amount: paymentChallenge.serviceData.numbCredits,
+                  senderKey: state.shakerData.privateKey,
+                  memo: 'Payment for ' + paymentChallenge.serviceData.numbCredits + ' STX tokens.',
+                  nonce: 0 // get the nonce!
+                }
+                store.dispatch('authStore/makeTransferRisidio', data).then((result) => {
+                  if (result) {
+                    // store.dispatch('transferComplete', paymentChallenge.paymentId)
+                    paymentChallenge.serviceStatus = 1
+                    paymentChallenge.serviceData.transferTx = result
+                    updatePaymentChallenge(paymentChallenge)
+                    commit('addTransfer', paymentChallenge)
                   }
                 })
               }
             })
-          }
+          })
         },
         function (error) {
           console.log(error)

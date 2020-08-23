@@ -1,11 +1,12 @@
 <template>
-<div class="container">
+<div class="">
   <div>
-    <b-tabs content-class="mt-3">
-      <b-tab title="Deploy New Contract" active><contract-source-code @lookupEvent="lookupEvent"/></b-tab>
+    <b-tabs content-class="mt-3" v-if="showTabs">
+      <b-tab title="Deploy New Contract" active></b-tab>
       <b-tab title="Lookup Contract"><contract-lookup/></b-tab>
       <b-tab title="Contract History"><contract-history/></b-tab>
     </b-tabs>
+    <contract-source-code @lookup-event="lookupEvent"/>
   </div>
   <div class="row">
     <div class="col-12">
@@ -44,7 +45,8 @@ export default {
       operation: 0,
       loading: true,
       lookup: false,
-      response: null
+      response: null,
+      showTabs: false
     }
   },
   mounted () {
@@ -63,5 +65,12 @@ export default {
   }
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss">
+.create-contract {
+  background: #1D1D1D 0% 0% no-repeat padding-box;
+  text-transform: capitalize;
+  border-radius: 24px;
+  opacity: 1;
+  padding: 20px;
+}
 </style>

@@ -186,7 +186,7 @@ export default {
     useTestWallet: function (field) {
       const wallet = this.$store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
       if (!wallet || !wallet.keyInfo) {
-        this.$notify({ type: 'warn', title: 'Play Mode', text: 'No test wallet selected!' })
+        this.$notify({ type: 'warn', title: 'Dev Mode', text: 'No test wallet selected!' })
         return
       }
       if (field === 'sender') {
@@ -220,7 +220,4 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-button {
-  text-transform: uppercase;
-}
 </style>

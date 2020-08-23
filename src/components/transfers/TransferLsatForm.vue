@@ -29,13 +29,12 @@ export default {
   methods: {
     rpayEvent: function (event) {
       const paymentEvent = event.detail[0]
-      const wallets = this.$store.getters[APP_CONSTANTS.KEY_WALLETS]
-      const senderWallet = wallets[0]
+      if (paymentEvent.opcode !== 'lsat-payment-confirmed') {
+        return
+      }
       const provider = this.$store.getters[APP_CONSTANTS.KEY_PROVIDER]
       const recipientWallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
       paymentEvent.recipient = (recipientWallet) ? recipientWallet.keyInfo.address : null
-      paymentEvent.fromAddress = (senderWallet) ? senderWallet.keyInfo.address : null
-      paymentEvent.senderKey = (senderWallet) ? senderWallet.keyInfo.privateKey : null
       paymentEvent.amount = paymentEvent.numbCredits
       paymentEvent.provider = provider
       paymentEvent.txtype = 'rpay-swap'
@@ -98,7 +97,7 @@ export default {
         labels: {
           orderMsg: 'Send us a tip on lightning in exchange for some testnet \'STX Tokens\'.',
           successMsg: 'Your STX order for has been received with thanks.',
-          title: 'R-Pay',
+          title: 'rPay',
           subtitle: 'Stacks Lightning Exchange',
           card1Label: 'Select payment option',
           card2Label1: 'Number of tokens required?',
@@ -145,7 +144,7 @@ export default {
       if (!exchangeRate) {
         return
       }
-      const testnetRate = exchangeRate.amountStx / 10000
+      // const testnetRate = exchangeRate.amountStx / 10000
       const profile = this.$store.getters[APP_CONSTANTS.KEY_MY_PROFILE]
       const productOrder = {
         paymentId: null,
@@ -161,13 +160,14 @@ export default {
         paymentOption: 'lightning',
         creditAttributes: {
           amountFiatFixed: 0.10,
-          amountFiatPerCredit: testnetRate,
+          amountFiatPerCredit: 0,
+          precision: 1000,
           fiatCurrency: 'EUR',
-          useCredits: true,
-          start: 5,
-          step: 0.5,
-          min: 0.5,
-          max: 10
+          useCredits: false,
+          start: 0.05,
+          step: 0.01,
+          min: 0.01,
+          max: 1
         }
       }
       const po = JSON.stringify(productOrder)
@@ -178,7 +178,4 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-button {
-  text-transform: uppercase;
-}
 </style>

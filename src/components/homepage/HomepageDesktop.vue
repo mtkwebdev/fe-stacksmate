@@ -9,13 +9,13 @@
     <div class="ml-4 my-4 level1">
       Earn Bitcoin while contributing to the development of the user owned internet
     </div>
-    <div class="ml-4 my-4 mb-5 level2">
-      Swap Lightning btc for Stacks (STX) with R-Pay - we're lowering the barriers to get Stacking.
+    <div class="ml-4 my-4 mb-5">
+      Swap Lightning btc for Stacks (STX) with rPay - we're lowering the barriers to get Stacking.
     </div>
     <div class="mt-5">
       <div class=" ml-4 my-4 d-flex justify-content-around">
-        <b-button to="/get-stacks" variant="warning" class="text-white button1" style="width: 49%;">Start Stacking</b-button>
-        <b-button @click="scrollTo()" variant="outline-warning" class="text-white button2" style="width: 49%;">Learn more</b-button>
+        <b-button to="/get-stacks" variant="info" class="text-white button1" style="width: 40%;">Start Stacking</b-button>
+        <b-button v-scroll-to="{ element: '#nextSection', duration: 2500 }" variant="outline-info" class="text-info button2" style="width: 40%;">Learn more</b-button>
       </div>
     </div>
   </div>

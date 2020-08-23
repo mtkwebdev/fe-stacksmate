@@ -1,11 +1,12 @@
 /* eslint-disable */
 import {
   Person,
+  decodeToken,
   UserSession
 } from 'blockstack'
 import { openSTXTransfer, openContractDeploy, showBlockstackConnect, authenticate } from '@blockstack/connect'
 import router from '@/router'
-import store from '@/store'
+import store from '@/store/staxStore'
 import {
   addressToString,
   makeContractDeploy,
@@ -76,7 +77,6 @@ const getUserWallet = function () {
         label: userData.username
       }
       store.commit('authStore/userWallet', wallet)
-      store.dispatch('startWebsockets', getProfile())
     }).catch((err) => {
       console.log(err)
     })
@@ -146,9 +146,9 @@ const authHeaders = function () {
   if (userSession.isUserSignedIn()) {
     const account = userSession.loadUserData()
     if (account) {
-      // authResponseToken = account.authResponseToken
-      // decodedToken = decodeToken(authResponseToken)
-      // publicKey = decodedToken.payload.public_keys[0]
+      const authResponseToken = account.authResponseToken
+      const decodedToken = decodeToken(authResponseToken)
+      publicKey = decodedToken.payload.public_keys[0]
       token = 'v1:' + account.authResponseToken
     }
   }
@@ -271,6 +271,22 @@ const authStore = {
         }
       })
     },
+    fetchShakerData ({ state, commit }) {
+      return new Promise((resolve) => {
+        if (!state.myProfile.loggedIn || !state.myProfile.superAdmin) {
+          resolve()
+          return
+        }
+        const provider = store.getters['authStore/getProvider']
+        const useApi = (provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
+        axios.post(useApi + '/v1/shaker', null, { headers: authHeaders() }).then(response => {
+          const shakerData = response.data
+          resolve(shakerData)
+        }).catch(() => {
+          resolve()
+        })
+      })
+    },
     deployContractBlockstack ({ state }, data) {
       return new Promise(() => {
         const authOrigin = (state.provider === 'local-network') ? 'http://localhost:20443' : null
@@ -289,7 +305,7 @@ const authStore = {
         })
       })
     },
-    deployContractRisidio ({ commit }, data) {
+    deployContractRisidio ({ state, commit }, data) {
       return new Promise((resolve, reject) => {
         network.coreApiUrl = 'http://localhost:20443'
         const txOptions = {
@@ -320,6 +336,41 @@ const authStore = {
           })
         }).catch((error) => {
           reject(error)
+        })
+      })
+    },
+    callContractRisidio ({ commit }, data) {
+      return new Promise((resolve, reject) => {
+        makeContractCall({
+          contractAddress: keys['contract-base'].stacksAddress,
+          contractName,
+          functionName,
+          functionArgs,
+          fee,
+          senderKey: keys[sender].secretKey,
+          nonce,
+          network
+        }).then((transaction) => {
+          const txdata = new Uint8Array(transaction.serialize())
+          const headers = {
+            'Content-Type': 'application/octet-stream'
+          }
+          const useApi = (state.provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
+          axios.post(useApi + '/v2/broadcast', txdata, { headers: headers }).then(response => {
+            data.result = response.data
+            data.senderKey = null
+            resolve(data)
+          }).catch((error) => {
+            if (error.response) {
+              if (error.response.data.message.indexOf('NotEnoughFunds')) {
+                reject('Not enough funds in the wallet to send this - try decreasing the amount?')
+              } else {
+                reject(error.response.data.message)
+              }
+            } else {
+              reject(error.message)
+            }
+          })
         })
       })
     },

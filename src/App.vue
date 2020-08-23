@@ -9,7 +9,7 @@
       <router-view class="my-3" name="wallets"/>
       <router-view id="nav"  class="w-100"/>
     </div>
-    <notifications :duration="10000" classes="r-notifs" position="bottom right" width="30%" style="margin: 20px; top: 100px;"/>
+    <notifications :duration="10000" classes="r-notifs" position="bottom right" width="30%"/>
   </div>
   <router-view name="footer" />
 </div>

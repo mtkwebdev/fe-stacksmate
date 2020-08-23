@@ -1,6 +1,7 @@
 <template>
 <div class="wallet-user-mode">
   <div style="min-height: 60px;">
+    <h1>Your Wallet</h1>
     <div><span class="wallet-label mt-2 text-light" >Name</span><span>{{label}}</span></div>
     <div ref="lndQrcode"><span class="wallet-label text-light" >Address</span>
       <span class="">{{truncMe}}</span>

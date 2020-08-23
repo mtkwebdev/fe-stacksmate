@@ -1,45 +1,43 @@
 <template>
 <div>
-  <div class="container">
+  <div class="create-contract">
     <b-form >
-      <div class="mt-4">
         <div>
-          <p>Deploy a contract - your contract will be broadcast to the Stacks 2.0 blockchain
-          and uploaded to your Gaia storage.</p>
-          <media-files-upload @lookupEvent="$emit('lookupEvent')" class="mb-3" :readonly="false" :contentModel="contentModel1" popoverId="'popover-target-1'" :parentalError="parentalError" :showFiles="true" :mediaFiles="mediaFiles1" :limit="1" :sizeLimit="2000000" :mediaTypes="'plain'" @updateMedia="setByEventLogo1($event)"/>
+          <div v-if="!uploadable" class="text-info pt-5 create-container text-center">
+            <div>
+              <div style="font-size: 32px;">+</div>
+              <media-files-upload style="font-size: 16px; cursor: pointer;" class="" @lookupEvent="$emit('lookup-event')" :readonly="false" :contentModel="contentModel1" popoverId="'popover-target-1'" :parentalError="parentalError" :showFiles="true" :mediaFiles="mediaFiles1" :limit="1" :sizeLimit="2000000" :mediaTypes="'plain'" @updateMedia="setByEventLogo1($event)"/>
+            </div>
+          </div>
           <div v-if="uploadable">
-            <div class="mb-3">
-              <b-input
-                id="contractName"
-                ref="contractName"
-                v-model="fileName"
-                class=""
-                placeholder="Contract Name"
-              ></b-input>
-              <b-form-text>
-                The contract file name must have a .clar extension and forms part of the contract address on the network.
-              </b-form-text>
-            </div>
-
-            <div class="mb-3">
-              <b-textarea
-                ref="contractCode"
-                :value="decodedString"
-                class="mt-3"
-                rows="10"
-                placeholder="Contract Code"
-              ></b-textarea>
-              <b-form-text>
-                Your clarity contract to be deployed on the blockchain.
-              </b-form-text>
-            </div>
-            <div class="mt-3">
-              <b-button class="mr-3 btn-sm bg-info" @click="deployContract()">Deploy Contract</b-button>
+            <div>
+              <h1>Contract name</h1>
+              <div class="mb-3">
+                <b-input
+                  id="contractName"
+                  ref="contractName"
+                  v-model="fileName"
+                  class="my-input"
+                  placeholder="Contract Name"
+                ></b-input>
+              </div>
+              <div class="mb-3">
+                <b-textarea
+                  ref="contractCode"
+                  :value="decodedString"
+                  class=" text-info py-4 my-3 my-input"
+                  rows="10"
+                  placeholder="Contract Code"
+                ></b-textarea>
+              </div>
+              <div class="mt-3 d-flex justify-content-end">
+                <b-button variant="outline-info" class="text-white button2" @click="cancelUpload()">Cancel</b-button>
+                <b-button variant="info" class="ml-3 text-white button1" @click="deployContract()">Deploy</b-button>
+              </div>
             </div>
             <!-- <pre class="mt-3 mb-0">{{ plainFile }}</pre> -->
           </div>
         </div>
-      </div>
     </b-form>
     <div class="container m-5">
       {{result}}
@@ -68,7 +66,7 @@ export default {
       loading: true,
       parentalError: null,
       contentModel1: {
-        title: 'Load Contract Source',
+        title: 'Browse computer for contract to deploy',
         errorMessage: 'A file is required.',
         popoverBody: 'Your clarity  file.'
       },
@@ -90,6 +88,9 @@ export default {
       const octets = this.files[0].dataUrl.substring(sub.length)
       const decodedString = atob(octets)
       return decodedString
+    },
+    cancelUpload () {
+      this.files = []
     },
     deployContract: function () {
       const provider = this.$store.getters[APP_CONSTANTS.KEY_PROVIDER]
@@ -172,7 +173,14 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-button {
-  text-transform: uppercase;
+.create-container {
+  width: 200px;
+  height: 200px;
+  margin: auto auto;
+}
+.my-input {
+  background: #363636 0% 0% no-repeat padding-box;
+  border-radius: 24px;
+  border: none;
 }
 </style>
