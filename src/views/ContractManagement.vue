@@ -13,16 +13,6 @@
       <pre>{{getResponse}}</pre>
     </div>
   </div>
-  <b-modal scrollable id="modal-1" title="Result of Some Action">
-  <div class="row">
-    <div class="col-12 my-1">
-      <div>some message</div>
-    </div>
-  </div>
-  <template v-slot:modal-footer>
-  </template>
-</b-modal>
-
 </div>
 </template>
 

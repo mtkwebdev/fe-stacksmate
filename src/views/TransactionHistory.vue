@@ -22,6 +22,10 @@
                   <p class="label">Name</p>
                   <p>{{truncMe(item.txData.contractName)}}</p>
                 </div>
+                <div class="d-flex justify-content-between">
+                  <p class="label">Txid</p>
+                  <p>{{truncMe(item.txData.result)}}</p>
+                </div>
                 <div class="mt-4 d-flex justify-content-center">
                   <p><a class="text-info" style="text-decoration: underline;" target="_blank" :href="explorerUrl(item.txData.result)">explorer</a></p>
                 </div>

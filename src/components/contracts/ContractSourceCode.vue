@@ -46,9 +46,10 @@
         <div class="mb-3">Deployed {{txData.contractName}}</div>
         <div class="mb-3">Tx: {{txData.result}}</div>
       </div>
+      <div class="text-center col-12 my-1">
+        <div class="mb-3"><router-link to="/tx-history">Tx is stored via Gaia</router-link></div>
+      </div>
     </div>
-    <template v-slot:modal-footer>
-    </template>
   </b-modal>
 </div>
 </template>
