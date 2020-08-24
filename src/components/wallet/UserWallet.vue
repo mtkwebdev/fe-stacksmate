@@ -1,14 +1,24 @@
 <template>
 <div class="wallet-user-mode">
   <div style="min-height: 60px;">
-    <h1>Your Wallet</h1>
+    <h1>Your Stacking Information</h1>
     <div><span class="wallet-label mt-2 text-light" >Name</span><span>{{label}}</span></div>
     <div ref="lndQrcode"><span class="wallet-label text-light" >Address</span>
       <span class="">{{truncMe}}</span>
       <a href="#" @click.prevent="copyAddress" class="wallet-label ml-3" style="text-decoration: underline; font-size: 12px;">Copy <b-icon icon="files"></b-icon></a>
     </div>
-    <div><span class="wallet-label text-light">Balance</span><span>{{balance}}</span></div>
-    <div><span class="wallet-label text-light">Tx Count</span><span class="mr-3">{{nonce}}</span></div>
+    <div><span class="wallet-label text-light">Holdings</span><span>{{balance}}</span></div>
+    <div class="mt-3"><span class="text-light">BTC Reward Address</span>
+      <span>
+        <b-input inline
+          ref="btcAddress"
+          v-model="btcAddress"
+          class=""
+          style="width: 100%;"
+          ></b-input>
+      </span>
+    </div>
+    <div v-show="false"><span class="wallet-label text-light">Tx Count</span><span class="mr-3">{{nonce}}</span></div>
   </div>
 </div>
 </template>
@@ -22,7 +32,8 @@ export default {
   },
   data () {
     return {
-      wallet: null
+      wallet: null,
+      btcAddress: null
     }
   },
   mounted () {

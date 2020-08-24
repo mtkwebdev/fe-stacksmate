@@ -12,11 +12,12 @@
     <div class="mx-auto text-left mb-5" style="max-width: 450px;">
       <div class="level1 mb-5">How to get started with Stacking</div>
       <div class="text-center level2"><img :src="stxIcon"/></div>
-      <div class="level2">Contribute to securing the Stacks 2.0 network by locking up you're STX tokens.</div>
+      <div class="level2">Delegation means you can take part even if your below the 0.002% threshold.</div>
       <div class="text-center level2"><img :src="lckIcon"/></div>
-      <div class="level2">To become a Stacker, you will have to lock in an amount of STX tokens for a fixed period of time.</div>
+      <div class="level2">To get stacker register a bitcoin address and lock up some STX.</div>
       <div class="text-center level2"><img :src="btcIcon"/></div>
-      <div class="level2">You'll help secure the network and receive Bitcoin from miners.</div>
+      <div class="level2">We remove the barriers and provide transparency.</div>
+      <div class="level2">Don't trust - verify!</div>
       <div class="level2 border-top pt-4">For a full tutorial or any questions, watch our videos below, or reach out to us.</div>
     </div>
     <div class="d-flex justify-content-center mb-5">

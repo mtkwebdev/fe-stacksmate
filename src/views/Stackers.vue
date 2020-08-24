@@ -3,13 +3,13 @@
   <div class="row">
     <div class="col-md-6 col-sm-12">
       <div class="" v-if="isRPay">
-        <h4 class="mb-4">Use rPay to swap Lightning BTC for Stacks (STX) tokens</h4>
+        <h4 class="mb-4">Get STX - rPay lets you swap Lightning BTC for Stacks tokens.</h4>
       </div>
       <div class="" v-else>
-        <h4 class="mb-4">Transfer Stacks (STX) tokens to your address</h4>
+        <h4 class="mb-4">Get STX - Transfer Stacks (STX) tokens to your address.</h4>
       </div>
       <div class="border-bottom">
-        <p>Once you have some STX you can;</p>
+        <p>Use Stacks tokens to;</p>
         <p>1. Earn bitcoin by stacking</p>
         <p>2. Deploy smart contracts</p>
         <p>3. Register digital assets</p>

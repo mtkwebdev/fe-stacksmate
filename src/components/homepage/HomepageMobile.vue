@@ -9,7 +9,7 @@
       Earn Bitcoin while contributing to the development of the user owned internet
     </div>
     <div class="ml-4 my-4 mb-5 level2">
-      Swap Lightning btc for Stacks (STX) with rPay - we're lowering the barriers to get Stacking.
+      Get stacking with tools and services that help you take part and understand the process.
     </div>
   </div>
   <div class="mt-5">
