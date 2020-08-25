@@ -1,5 +1,5 @@
 <template>
-<div class="wallet-user-mode">
+<div class="wallet-user-mode py-4">
   <div style="min-height: 60px;">
     <h1>Your Stacking Information</h1>
     <div><span class="wallet-label mt-2 text-light" >Name</span><span>{{label}}</span></div>
@@ -15,6 +15,7 @@
           v-model="btcAddress"
           class=""
           style="width: 100%;"
+          @keyup.enter="saveBtcAddress"
           ></b-input>
       </span>
     </div>
@@ -36,8 +37,16 @@ export default {
       btcAddress: null
     }
   },
+  watch: {
+    'stackingFile' () {
+      const stackingFile = this.$store.getters[APP_CONSTANTS.KEY_STACKING_FILE]
+      this.btcAddress = (stackingFile) ? stackingFile.btcAddress : ''
+    }
+  },
   mounted () {
     this.loading = false
+    const stackingFile = this.$store.getters[APP_CONSTANTS.KEY_STACKING_FILE]
+    this.btcAddress = (stackingFile) ? stackingFile.btcAddress : ''
   },
   methods: {
     copyAddress () {
@@ -54,12 +63,23 @@ export default {
       setTimeout(function () {
         flasher.classList.remove('flasher')
       }, 1000)
+    },
+    saveBtcAddress () {
+      this.$store.dispatch('rstackStore/saveBtcAddress', this.btcAddress).then((result) => {
+        this.$notify({ type: 'success', title: 'Bitcoin Address', text: 'Bitcoin address updated for next reward cycle..' })
+      }).catch((error) => {
+        this.$notify({ type: 'error', title: 'Bitcoin Address Error', text: error })
+      })
     }
   },
   computed: {
     profile () {
       const profile = this.$store.getters[APP_CONSTANTS.KEY_MY_PROFILE]
       return profile.name
+    },
+    stackingFile () {
+      const stackingFile = this.$store.getters[APP_CONSTANTS.KEY_STACKING_FILE]
+      return stackingFile || {}
     },
     balance () {
       const wallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]

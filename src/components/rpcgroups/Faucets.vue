@@ -66,7 +66,7 @@ export default {
     },
     placeholder () {
       if (this.selected && this.selected.indexOf('stx') > -1) {
-        return 'Stax Address'
+        return 'Stacks Address'
       }
       return 'Bitcoin Address'
     }

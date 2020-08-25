@@ -39,7 +39,7 @@
     <template v-slot:modal-footer>
     </template>
   </b-modal>
-  <b-modal scrollable id="modal-2" title="Stax Transfer">
+  <b-modal scrollable id="modal-2" title="STX Transfer">
     <div class="row" v-if="txData">
       <div class="col-12 my-1">
         <p>Sent {{txData.amount}} STX Tokens from {{txData.fromAddress}} to {{txData.recipient}}

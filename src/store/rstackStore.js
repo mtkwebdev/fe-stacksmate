@@ -5,11 +5,15 @@ const rstackStore = {
   state: {
     initialised: false,
     rootFile: null,
-    transaction: null
+    transaction: null,
+    stackingFile: null
   },
   getters: {
     getRootFile: (state) => {
       return state.rootFile
+    },
+    getStackingFile: (state) => {
+      return state.stackingFile
     },
     getTransactionHistory: (state) => {
       return (state.rootFile) ? state.rootFile.transactions : []
@@ -30,16 +34,37 @@ const rstackStore = {
     },
     setCurrentTransaction (state, transaction) {
       state.transaction = transaction
+    },
+    setStackingFile (state, stackingFile) {
+      state.stackingFile = stackingFile
     }
   },
   actions: {
     initApplication ({ commit }, loggedIn) {
       return new Promise((resolve) => {
         rstackService.initSchema(loggedIn).then((rootFile) => {
+          rstackService.initStacking(loggedIn).then((stackingFile) => {
+            commit('setStackingFile', stackingFile)
+          })
           const transaction = rootFile.transactions[0]
           commit('rootFile', rootFile)
           commit('initialised')
           resolve(transaction)
+        })
+      })
+    },
+    saveBtcAddress ({ state, commit }, btcAddress) {
+      return new Promise((resolve, reject) => {
+        state.stackingFile.btcAddress = btcAddress
+        rstackService.checkBitcoinAddress(btcAddress).then((result) => {
+          if (!result) {
+            reject(new Error('Bitcoin address not valid'))
+          } else {
+            rstackService.saveStackingFile(state.stackingFile).then((stackingFile) => {
+              commit('stackingFile', stackingFile)
+              resolve(stackingFile)
+            })
+          }
         })
       })
     },

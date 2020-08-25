@@ -138,7 +138,7 @@ export default {
         this.$store.dispatch('authStore/makeTransferBlockstack', data).then((result) => {
           this.$emit('transferEvent', result)
         }).catch((error) => {
-          this.result = error
+          this.$notify({ type: 'error', title: 'Transfers', text: 'Error message: ' + error })
         })
       } else {
         this.$store.dispatch('authStore/makeTransferRisidio', data).then((result) => {

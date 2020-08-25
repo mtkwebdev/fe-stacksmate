@@ -17,8 +17,8 @@
 
     <b-navbar class="mr-auto" v-if="!isHomePage">
       <!-- <b-nav-text class="mr-3">Get Stacks:</b-nav-text> -->
-      <b-nav-text><router-link :class="isActive('get-stacks')" to="/get-stacks">Get Stax</router-link></b-nav-text>
-      <b-nav-text><router-link class="ml-3" :class="isActive('transfer-stacks')" to="/transfer-stacks">Transfer Stax</router-link></b-nav-text>
+      <b-nav-text><router-link :class="isActive('get-stacks')" to="/get-stacks">Get STX</router-link></b-nav-text>
+      <b-nav-text><router-link class="ml-3" :class="isActive('transfer-stacks')" to="/transfer-stacks">Transfer STX</router-link></b-nav-text>
       <b-nav-text><router-link class="ml-3" :class="isActive('contracts')" to="/contracts">Contracts</router-link></b-nav-text>
     </b-navbar>
 

@@ -22,6 +22,7 @@ export const APP_CONSTANTS = {
   KEY_NETWORK_ID: 'authStore/getNetworkId',
   KEY_USER_WALLET: 'authStore/getUserWallet',
 
+  KEY_STACKING_FILE: 'rstackStore/getStackingFile',
   KEY_TX_CURRENT: 'rstackStore/getCurrentTransaction',
   KEY_TX_HISTORY: 'rstackStore/getTransactionHistory',
   COMMIT_TX_CURRENT: 'rstackStore/setCurrentTransaction'
