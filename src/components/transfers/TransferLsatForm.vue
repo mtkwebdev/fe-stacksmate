@@ -125,7 +125,7 @@ export default {
         background: {
           padding: '0px 0 0 0',
           height: 'auto',
-          'max-width': '400px',
+          'max-width': '500px',
           position: 'relative',
           'border-radius': '15px',
           top: '0px',
