@@ -150,6 +150,7 @@ export default {
         paymentId: null,
         opcode: 'rpay-place-order',
         purchaseEndpoint: '/assets/buy-now',
+        authHeaders: this.$store.getters[APP_CONSTANTS.KEY_AUTH_HEADERS],
         serviceKey: 'stax-lightning-exchange',
         serviceData: {
           stxAddress: profile.stxAddress

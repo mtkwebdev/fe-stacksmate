@@ -374,8 +374,6 @@ export default new Vuex.Store({
                 let amount = 0
                 if (paymentChallenge.serviceData && paymentChallenge.serviceData.numbCredits) {
                   amount = paymentChallenge.serviceData.numbCredits
-                } else {
-                  amount = paymentChallenge.xchange.numbCredits
                 }
                 if (!paymentChallenge.serviceData || !amount) {
                   paymentChallenge.serviceStatus = -2
