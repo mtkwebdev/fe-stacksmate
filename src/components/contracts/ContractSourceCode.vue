@@ -30,15 +30,23 @@
                   placeholder="Contract Code"
                 ></b-textarea>
               </div>
+              <div class="mt-4 mb-2" style="height: 100px;">
+                <div class="mb-2">Fee STX</div>
+                <b-input
+                  id="feeAmount"
+                  ref="feeAmount"
+                  v-model="feeAmount"
+                  class="mt-3"></b-input>
+              </div>
               <div class="mt-3 d-flex justify-content-end">
                 <b-button variant="outline-info" class="text-white button2" @click="cancelUpload()">Cancel</b-button>
                 <b-button variant="info" class="ml-3 text-white button1" @click="deployContract()">Deploy</b-button>
               </div>
             </div>
-            <!-- <pre class="mt-3 mb-0">{{ plainFile }}</pre> -->
           </div>
         </div>
     </b-form>
+    <pre class="mt-3 mb-0">{{ result }}</pre>
   </div>
   <b-modal scrollable id="modal-1" title="Contract Deployed">
     <div class="row" v-if="txData">
@@ -73,6 +81,7 @@ export default {
       nonce: 0,
       loading: true,
       parentalError: null,
+      result: null,
       contentModel1: {
         title: 'Browse computer for contract to deploy',
         errorMessage: 'A file is required.',
@@ -113,6 +122,7 @@ export default {
         return
       }
 
+      data.fee = this.feeAmount
       if (provider === 'blockstack') {
         this.$store.dispatch('authStore/deployContractBlockstack', data)
       } else {
@@ -122,7 +132,8 @@ export default {
           this.txData = txData
           this.$bvModal.show('modal-1')
         }).catch((error) => {
-          this.$notify({ type: 'error', title: 'Contracts', text: 'Error during deployment. ', error })
+          this.result = error
+          this.$notify({ type: 'error', title: 'Contracts', text: 'Error during deployment. ' + error })
         })
       }
     },

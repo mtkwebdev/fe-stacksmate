@@ -301,7 +301,11 @@ const authStore = {
           },
           finished: (trans) => {
             console.log(trans.txid)
-            store.dispatch('contractStore/saveContract', data)
+            store.dispatch('rstackStore/saveToGaia', txOptions).then(() => {
+              data.result = trans
+              resolve(data)
+              dispatch('fetchWalletBalances')
+            })
           }
         })
       })
@@ -310,12 +314,15 @@ const authStore = {
       return new Promise((resolve, reject) => {
         network.coreApiUrl = 'http://localhost:20443'
         const sender = store.getters[APP_CONSTANTS.KEY_TEST_WALLET]
+        if (!data.fee) {
+          data.fee = 4000
+        }
         let txOptions = {
           contractName: data.contractName,
           codeBody: data.codeBody,
           senderKey: sender.keyInfo.privateKey,
           nonce: new BigNum(sender.nonce++), // watch for nonce increments if this works - may need to restart mocknet!
-          fee: new BigNum(3000), // set a tx fee if you don't want the builder to estimate
+          fee: new BigNum(data.fee), // set a tx fee if you don't want the builder to estimate
           network
         }
         makeContractDeploy(txOptions).then((transaction) => {
@@ -345,14 +352,21 @@ const authStore = {
     },
     callContractRisidio ({ commit }, data) {
       return new Promise((resolve, reject) => {
+        const profile = getProfile()
+        if (!data.senderKey) {
+          data.senderKey = profile.senderKey
+        }
+        if (!data.fee) {
+          data.fee = 4000
+        }
         makeContractCall({
           contractAddress: keys['contract-base'].stacksAddress,
-          contractName,
-          functionName,
-          functionArgs,
-          fee,
-          senderKey: keys[sender].secretKey,
-          nonce,
+          contractName: data.contractName,
+          functionName: data.functionName,
+          functionArgs: data.functionArgs,
+          fee: new BigNum(data.fee),
+          senderKey: data.senderKey,
+          nonce: new BigNum(data.nonce),
           network
         }).then((transaction) => {
           const txdata = new Uint8Array(transaction.serialize())
