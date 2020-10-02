@@ -8,7 +8,7 @@ import { openSTXTransfer, openContractDeploy, showBlockstackConnect, authenticat
 import router from '@/router'
 import store from '@/store/staxStore'
 import {
-  addressToString,
+  getAddressFromPrivateKey,
   makeContractDeploy,
   makeSTXTokenTransfer,
   StacksTestnet,
@@ -40,10 +40,12 @@ const getStacksAccount = function (appPrivateKey) {
     1,
     [publicKey]
   )
-  return { privateKey, address }
+  // return { privateKey, address }
+  return getAddressFromPrivateKey(privateKey.data.toString('hex'))
 }
 const authFinished = function() {
-  store.dispatch('initApplication').then(() => {
+  store.dispatch('initApplication').then((resp) => {
+    console.log(resp)
     if (window.location.pathname !== '/') {
       router.push('/')
     }
@@ -64,10 +66,9 @@ const authOptions = {
 const getUserWallet = function () {
   if (userSession.isUserSignedIn()) {
     const userData = userSession.loadUserData()
-    const appPrivateKey = userData.appPrivateKey
-    const id = getStacksAccount(appPrivateKey)
-    // const userData = userSession.loadUserData()
-    const userAddress = userData.profile.stxAddress // addressToString(id.address)
+    const publicKey = getStacksAccount(userData.appPrivateKey)
+    // const publicKey = getAddressFromPrivateKey(id.privateKey.data.toString('hex'))
+    const userAddress = publicKey // userData.profile.stxAddress // addressToString(id.address)
     store.dispatch('fetchWalletInfo', userAddress).then((response) => {
       const wallet = {
         keyInfo: {

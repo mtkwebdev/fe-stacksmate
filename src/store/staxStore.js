@@ -243,7 +243,7 @@ export default new Vuex.Store({
     initApplication ({ commit }) {
       return new Promise(resolve => {
         store.dispatch('fetchRates')
-        store.dispatch('fetchFeeEstimate')
+        // store.dispatch('fetchFeeEstimate')
         store.dispatch('authStore/fetchMyAccount').then((profile) => {
           store.dispatch('rstackStore/initApplication', profile.loggedIn)
           store.dispatch('authStore/fetchShakerData').then((shakerData) => {
