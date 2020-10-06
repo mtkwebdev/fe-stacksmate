@@ -65,18 +65,20 @@ const authOptions = {
 }
 const getUserWallet = function () {
   if (userSession.isUserSignedIn()) {
-    const userData = userSession.loadUserData()
-    const publicKey = getStacksAccount(userData.appPrivateKey)
+    const account = userSession.loadUserData()
+    const publicKey = getStacksAccount(account.appPrivateKey)
     // const publicKey = getAddressFromPrivateKey(id.privateKey.data.toString('hex'))
-    const userAddress = publicKey // userData.profile.stxAddress // addressToString(id.address)
+    const userAddress = (account.profile.stxAddress) ? account.profile.stxAddress : publicKey
+    // account.profile.stxAddress
+    // addressToString(id.address)
     store.dispatch('fetchWalletInfo', userAddress).then((response) => {
       const wallet = {
         keyInfo: {
-          address: response.data.address
+          address: (account.profile.stxAddress) ? account.profile.stxAddress : response.data.address
         },
         balance: response.data.balance, // parseInt(response.data.balance, 16),
         nonce: response.data.nonce,
-        label: userData.username
+        label: account.username
       }
       store.commit('authStore/userWallet', wallet)
     }).catch((err) => {

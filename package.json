@@ -12,7 +12,7 @@
   "dependencies": {
     "@blockstack/clarity": "^0.1.13",
     "@blockstack/clarity-native-bin": "^0.1.13",
-    "@blockstack/connect": "^2.10.5",
+    "@blockstack/connect": "^2.12.5",
     "@blockstack/stacks-transactions": "^0.6.0",
     "@stomp/stompjs": "^4.0.6",
     "axios": "^0.19.2",

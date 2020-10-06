@@ -103,15 +103,19 @@ export default {
       return (wallet) ? wallet.label : 'n/a'
     },
     truncMe: function () {
-      const wallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
-      if (!wallet) return
-      let addr = wallet.keyInfo.address
+      const profile = this.$store.getters[APP_CONSTANTS.KEY_MY_PROFILE]
+      let stxAddress = profile.stxAddress
+      if (!stxAddress) {
+        const wallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
+        if (!wallet) return
+        stxAddress = wallet.keyInfo.address
+      }
       const width = this.$store.getters[APP_CONSTANTS.KEY_SECTION_WIDTH]
       if (width > 800) {
-        return addr
+        return stxAddress
       }
-      addr = addr.substring(0, 5) + '...' + addr.substring(addr.length - 5, addr.length)
-      return addr
+      stxAddress = stxAddress.substring(0, 5) + '...' + stxAddress.substring(stxAddress.length - 5, stxAddress.length)
+      return stxAddress
     }
   }
 }
