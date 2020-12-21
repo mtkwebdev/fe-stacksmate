@@ -39,6 +39,9 @@
         <iframe :style="videoDimensions" src="https://www.youtube.com/embed/ymPB-P_7LE8" frameborder="1" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
     </div>
+    <div class="d-flex justify-content-center mb-5 bg-white">
+      <lineChartContainer></lineChartContainer>
+    </div>
   </div>
 </div>
 </template>
@@ -47,12 +50,14 @@
 import { APP_CONSTANTS } from '@/app-constants'
 import HomepageMobile from '@/components/homepage/HomepageMobile'
 import HomepageDesktop from '@/components/homepage/HomepageDesktop'
+import LineChartContainer from '@/components/charts/ChartContainer'
 
 export default {
   name: 'Homepage',
   components: {
     HomepageMobile,
-    HomepageDesktop
+    HomepageDesktop,
+    LineChartContainer
   },
   data () {
     return {
