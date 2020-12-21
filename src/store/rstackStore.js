@@ -1,5 +1,47 @@
 import rstackService from '@/services/rstackService'
 
+startListening (paymentId) {
+  if (!socket) return
+  socket = new SockJS(API_PATH + '/lsat/ws1/mynews')
+  stompClient = Stomp.over(socket)
+  stompClient.connect({}, function () {
+    stompClient.subscribe('/queue/mynews-' + paymentId, function (response) {
+      const paymentChallenge = JSON.parse(response.body)
+      store.commit('addPaymentChallenge', paymentChallenge)
+    })
+    stompClient.subscribe('/queue/rates', function (response) {
+      const rates = JSON.parse(response.body)
+      store.commit('addRates', rates)
+    })
+  },
+  function (error) {
+    console.log(error)
+  })
+}
+
+const stopListening = function () {
+  if (stompClient) stompClient.disconnect()
+}
+
+const startListening = function () {
+  if (!socket) return
+  socket = new SockJS(API_PATH + '/mesh/ws1/mynews')
+  stompClient = Stomp.over(socket)
+  stompClient.connect({}, function () {
+    stompClient.subscribe('/queue/mynews-' + paymentId, function (response) {
+      const paymentChallenge = JSON.parse(response.body)
+      store.commit('addPaymentChallenge', paymentChallenge)
+    })
+    stompClient.subscribe('/queue/rates', function (response) {
+      const rates = JSON.parse(response.body)
+      store.commit('addRates', rates)
+    })
+  },
+  function (error) {
+    console.log(error)
+  })
+}
+
 const rstackStore = {
   namespaced: true,
   state: {

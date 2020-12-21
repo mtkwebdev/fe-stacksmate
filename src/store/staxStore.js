@@ -27,7 +27,7 @@ const rik = JSON.parse(process.env.VUE_APP_WALLET_DOREEN || '')
 const websockCheck = function (paymentChallenge) {
   let allow = false
   if (paymentChallenge.paymentId && paymentChallenge.paymentId !== 'null') {
-    if (paymentChallenge.serviceKey === 'stax-lightning-exchange') {
+    if (paymentChallenge.serviceKey === 'stacks-lightning-exchange') {
       if (paymentChallenge.serviceStatus === -1 && paymentChallenge.status === 5) {
         allow = true
       }

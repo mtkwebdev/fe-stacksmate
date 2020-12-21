@@ -84,7 +84,7 @@ export default {
         result = false
       }
       if (!this.amountStax || this.amountStax < 0.00001) {
-        this.$notify({ type: 'error', title: 'Transfers', text: 'Amount of STX to send must be at least 0.00001 stax!' })
+        this.$notify({ type: 'error', title: 'Transfers', text: 'Amount of STX to send must be at least 0.00001 stx!' })
         result = false
       }
       if (provider === 'risidio' && !sender) {
@@ -92,7 +92,7 @@ export default {
         result = false
       }
       if (!sender.balance || sender.balance < this.amountStax) {
-        this.$notify({ type: 'error', title: 'Transfers', text: 'Sender does not have enough stax to make this transfer!' })
+        this.$notify({ type: 'error', title: 'Transfers', text: 'Sender does not have enough stx to make this transfer!' })
         // result = false
       }
       const userWallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
@@ -174,7 +174,7 @@ export default {
         return
       }
       if (!wallet || !wallet.keyInfo) {
-        this.$notify({ type: 'error', title: 'Network Error', text: 'No network detected - is stax 2.0 blockchain running?!' })
+        this.$notify({ type: 'error', title: 'Network Error', text: 'No network detected - is stx 2.0 blockchain running?!' })
         return
       }
       if (field === 'sender') {
