@@ -1,9 +1,11 @@
 import {
   makeRandomPrivKey,
-  StacksTestnet,
   broadcastRawTransaction,
   getAddressFromPrivateKey
-} from '@blockstack/stacks-transactions'
+} from '@stacks/transactions'
+import {
+  StacksTestnet
+} from '@stacks/network'
 const network = new StacksTestnet()
 const transactionStore = {
   namespaced: true,

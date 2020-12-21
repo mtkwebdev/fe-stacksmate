@@ -1,23 +1,21 @@
 /* eslint-disable */
-import {
-  Person,
-  decodeToken,
-  UserSession
-} from 'blockstack'
-import { openSTXTransfer, openContractDeploy, showBlockstackConnect, authenticate } from '@blockstack/connect'
+import { UserSession, AppConfig } from '@stacks/auth'
+import { openSTXTransfer, openContractDeploy, authenticate } from '@stacks/connect'
 import router from '@/router'
 import store from '@/store/staxStore'
 import {
   getAddressFromPrivateKey,
   makeContractDeploy,
   makeSTXTokenTransfer,
-  StacksTestnet,
   createStacksPrivateKey,
   getPublicKey,
   addressFromPublicKeys,
   AddressVersion,
   AddressHashMode
-} from '@blockstack/stacks-transactions'
+} from '@stacks/transactions'
+import {
+  StacksTestnet
+} from '@stacks/network'
 import BigNum from 'bn.js'
 import axios from 'axios'
 import { APP_CONSTANTS } from '@/app-constants'
@@ -95,8 +93,7 @@ const getProfile = function () {
     const account = userSession.loadUserData()
     if (account) {
       let uname = account.username
-      const person = new Person(account.profile)
-      let name = person.name()
+      let name = account.profile.name
       if (uname) {
         if (!name) {
           const indexOfDot = uname.indexOf('.')
@@ -118,7 +115,7 @@ const getProfile = function () {
         uname.indexOf('head') > -1 ||
         uname.indexOf('testuser0934583') > -1 ||
         uname.indexOf('feek') > -1
-      const avatarUrl = person.avatarUrl()
+      const avatarUrl = account.profile.avatarUrl
       // let privateKey = account.appPrivateKey + '01'
       // privateKey = hexStringToECPair(privateKey).toWIF()
       // const authResponseToken = account.authResponseToken
@@ -131,7 +128,7 @@ const getProfile = function () {
         showAdmin: showAdmin,
         superAdmin: uname === 'mijoco.id.blockstack',
         name: name,
-        description: person.description(),
+        description: account.profile.description,
         avatarUrl: avatarUrl,
         username: uname,
         hubUrl: account.hubUrl,
