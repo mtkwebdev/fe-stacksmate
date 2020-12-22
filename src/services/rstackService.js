@@ -147,15 +147,6 @@ const rstackService = {
       } else {
         resolve(isBTCAddress(btcAddress))
       }
-      /**
-      const url = _API + '/lsat/checkaddress'
-      axios.post(url, { address: btcAddress }).then(response => {
-        resolve(response.data.details.result)
-      })
-        .catch(e => {
-          reject(new Error({ error: 'Unable to get new address.' }))
-        })
-    **/
     })
   }
 }

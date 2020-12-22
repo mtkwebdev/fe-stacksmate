@@ -11,16 +11,7 @@
       <div class="d-none d-md-block">
         <router-link to="/" class="navbar-brand"><img height="50px" :src="logo"/></router-link>
       </div>
-
-      <!-- <router-link v-if="isHomePage" to="/get-stacks" class="navbar-brand"><img width="40px" height="40px" :src="nounStack"/></router-link> -->
     </b-navbar-brand>
-
-    <b-navbar class="mr-auto" v-if="!isHomePage">
-      <!-- <b-nav-text class="mr-3">Get Stacks:</b-nav-text> -->
-      <b-nav-text><router-link :class="isActive('get-stacks')" to="/get-stacks">Get STX</router-link></b-nav-text>
-      <b-nav-text><router-link class="ml-3" :class="isActive('transfer-stacks')" to="/transfer-stacks">Transfer STX</router-link></b-nav-text>
-      <b-nav-text><router-link class="ml-3" :class="isActive('contracts')" to="/contracts">Contracts</router-link></b-nav-text>
-    </b-navbar>
 
     <exchange-rates class="ml-auto nav-text d-block d-md-none" v-if="isHomePage"/>
 
@@ -42,42 +33,11 @@
           <b-dropdown-item><span style="display: inline-block; width: 150px;">Binance</span> 385,937,152</b-dropdown-item>
           <b-dropdown-item><span style="display: inline-block; width: 150px;">CoinMarketCap</span> 574,811,341</b-dropdown-item>
         </b-nav-item-dropdown>
-
-        <b-nav-item-dropdown class="nav-text" left caret>
-          <template v-slot:button-content>
-            <span class="header">{{networkId}}</span>
-          </template>
-          <b-dropdown-item class="bg-dark" disabled><span class="text-light">Network</span></b-dropdown-item>
-          <b-dropdown-item @click="changeNetworkId('testnet')"><span class="text-success">Testnet</span></b-dropdown-item>
-          <b-dropdown-item @click="changeNetworkId('mainnet')"><i class="fa fa-ban" aria-hidden="true"></i> <span  class="" style="text-transform: strikethrough;">Mainnet</span></b-dropdown-item>
-        </b-nav-item-dropdown>
-
-        <b-nav-item-dropdown class="nav-text" right v-if="loggedIn" caret>
-          <template v-slot:button-content>
-            <span v-if="provider" class="header">{{provider}}</span>
-          </template>
-          <b-dropdown-item class="bg-dark" disabled><span class="text-light">Provider</span></b-dropdown-item>
-          <b-dropdown-item @click="changeProvider('blockstack')">Blockstack PBC</b-dropdown-item>
-          <b-dropdown-item @click="changeProvider('risidio')">Risidio</b-dropdown-item>
-          <b-dropdown-item @click="changeProvider('local-network')">Local</b-dropdown-item>
-        </b-nav-item-dropdown>
-
-        <b-nav-item-dropdown class="nav-text" right v-else caret>
-          <template v-slot:button-content>
-            <span v-if="provider" class="header">{{provider}}</span>
-          </template>
-          <b-dropdown-item @click.prevent="changeAuthenticator('risidio')">Risidio Network</b-dropdown-item>
-          <b-dropdown-item @click.prevent="login()">Login to use Blockstack Provider</b-dropdown-item>
-        </b-nav-item-dropdown>
-
         <b-nav-item-dropdown class="nav-text ml-3" right v-if="loggedIn" caret>
           <template v-slot:button-content>
             Account
           </template>
           <b-dropdown-item>{{username}}</b-dropdown-item>
-          <b-dropdown-item to="/tx-history">
-            <span>Transaction History</span>
-          </b-dropdown-item>
           <b-dropdown-item>
             <span @click="logout()">Logout</span>
           </b-dropdown-item>

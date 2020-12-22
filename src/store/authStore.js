@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { UserSession, AppConfig } from '@stacks/auth'
-import { openSTXTransfer, openContractDeploy, authenticate } from '@stacks/connect'
+import { openSTXTransfer, openContractDeploy, showConnect, authenticate } from '@stacks/connect'
 import router from '@/router'
 import store from '@/store/staxStore'
 import {
@@ -248,7 +248,7 @@ const authStore = {
     startLogin({ }) {
       return new Promise(resolve => {
         if (BLOCKSTACK_LOGIN === 1) {
-          showBlockstackConnect(authOptions)
+          showConnect(authOptions)
         } else if (BLOCKSTACK_LOGIN === 2) {
           authenticate(authOptions)
         } else {
