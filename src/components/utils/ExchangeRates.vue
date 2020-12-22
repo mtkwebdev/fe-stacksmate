@@ -1,9 +1,9 @@
 <template>
 <b-nav-item-dropdown caret v-if="exchangeRate">
   <template v-slot:button-content>
-    STX: <span>{{amountTrunc}}</span> <span v-html="exchangeRate.fiatCurrency"></span>
+    STX: <span>{{amountTrunc}}</span> <span v-html="exchangeRate.currency"></span>
   </template>
-  <b-dropdown-item v-for="(rate, idx) in exchangeRates" :key="idx" @click.prevent="changeFiatCurrency(rate.fiatCurrency)">{{rate.fiatCurrency}}</b-dropdown-item>
+  <b-dropdown-item v-for="(rate, idx) in exchangeRates" :key="idx" @click.prevent="changeFiatCurrency(rate.currency)">{{rate.currency}}</b-dropdown-item>
 </b-nav-item-dropdown>
 </template>
 
@@ -45,7 +45,7 @@ export default {
     amountTrunc () {
       const exchangeRate = this.$store.getters[APP_CONSTANTS.KEY_EXCHANGE_RATE]
       // const tunced = Math.round(exchangeRate.amountStx * 10000)
-      return (1 / (exchangeRate.amountStx)).toFixed(4)
+      return (exchangeRate.stxPrice).toFixed(4)
     },
     exchangeRate () {
       const exchangeRate = this.$store.getters[APP_CONSTANTS.KEY_EXCHANGE_RATE]

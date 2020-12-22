@@ -159,7 +159,7 @@ export default new Vuex.Store({
       if (!state.xgeRates) {
         return null
       }
-      return state.xgeRates.find(item => item.fiatCurrency === state.fiatCurrency)
+      return state.xgeRates.find(item => item.currency === state.fiatCurrency)
     },
     getFiatCurrency: state => {
       return state.fiatCurrency
@@ -248,7 +248,7 @@ export default new Vuex.Store({
     fetchRates ({ commit }) {
       return new Promise((resolve) => {
         axios.get(MESH_API + '/v1/rates/ticker').then(response => {
-          commit('setFeeEstimate', response.data)
+          commit('setXgeRates', response.data)
         }).catch((error) => {
           console.log(error)
         })
