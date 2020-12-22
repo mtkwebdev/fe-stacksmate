@@ -12,7 +12,7 @@ import Stomp from '@stomp/stompjs'
 Vue.use(Vuex)
 
 const MESH_API = process.env.VUE_APP_API_RISIDIO + '/mesh'
-const MESH_API_RISIDIO = process.env.VUE_APP_API_RISIDIO_REMOTE + '/mesh'
+const STACKS_API = process.env.VUE_APP_API_STACKS
 const API_PATH = process.env.VUE_APP_API_RISIDIO
 
 let socket = null
@@ -241,38 +241,32 @@ export default new Vuex.Store({
   },
   actions: {
     initApplication ({ commit }) {
-      return new Promise(resolve => {
+      return new Promise(() => {
         store.dispatch('fetchRates')
-        // store.dispatch('fetchFeeEstimate')
-        store.dispatch('authStore/fetchMyAccount').then((profile) => {
-          store.dispatch('rstackStore/initApplication', profile.loggedIn)
-          store.dispatch('authStore/fetchShakerData').then((shakerData) => {
-            if (shakerData) {
-              commit('setShakerData', shakerData)
-              store.dispatch('startWebsockets', profile)
-            }
-          })
-        })
       })
     },
     fetchRates ({ commit }) {
-      return new Promise(() => {
+      return new Promise((resolve) => {
+        axios.get(MESH_API + '/v1/rates/ticker').then(response => {
+          commit('setFeeEstimate', response.data)
+        }).catch((error) => {
+          console.log(error)
+        })
         rates.fetchSTXRates().then((rates) => {
-          commit('setXgeRates', rates)
+          console.log(rates)
+          // commit('setXgeRates', rates)
         })
         setInterval(function () {
           rates.fetchSTXRates().then((rates) => {
-            commit('setXgeRates', rates)
+            // commit('setXgeRates', rates)
           })
         }, 3600000)
       })
     },
     fetchFeeEstimate ({ commit }, data) {
       return new Promise((resolve, reject) => {
-        const provider = store.getters['authStore/getProvider']
-        const useApi = (provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
         const data = { path: '/v2/fees/transfer', httpMethod: 'get', postData: null }
-        axios.post(useApi + '/v2/accounts', data).then(response => {
+        axios.post(STACKS_API + '/v2/accounts', data).then(response => {
           resolve(response.data)
           commit('setFeeEstimate', response.data)
         }).catch((error) => {
@@ -287,9 +281,7 @@ export default new Vuex.Store({
     },
     fireEvent ({ commit }, data) {
       return new Promise((resolve, reject) => {
-        const provider = store.getters['authStore/getProvider']
-        const useApi = (provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
-        axios.post(useApi + '/v2/accounts', data).then(response => {
+        axios.post(STACKS_API + '/v2/accounts', data).then(response => {
           resolve(response.data)
         }).catch((error) => {
           const msg = error.response.data.status + ' - ' + error.response.data.message
@@ -304,9 +296,7 @@ export default new Vuex.Store({
           httpMethod: 'get',
           postData: null
         }
-        const provider = store.getters['authStore/getProvider']
-        const useApi = (provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
-        axios.post(useApi + '/v2/accounts', data).then(response => {
+        axios.post(STACKS_API + '/v2/accounts', data).then(response => {
           const info = response.data
           info.address = address
           info.nonce = response.data.nonce
@@ -343,9 +333,7 @@ export default new Vuex.Store({
     transferComplete ({ state }, paymentId) {
       return new Promise((resolve, reject) => {
         const authHeaders = store.getters['authStore/getAuthHeaders']
-        const provider = store.getters['authStore/getProvider']
-        const useApi = (provider === 'risidio') ? MESH_API_RISIDIO : MESH_API
-        axios.post(useApi + '/payment/stx-transfered/' + paymentId, null, { headers: authHeaders }).then(response => {
+        axios.post(MESH_API + '/payment/stx-transfered/' + paymentId, null, { headers: authHeaders }).then(response => {
           resolve(response.data)
         }).catch((error) => {
           reject(error)
