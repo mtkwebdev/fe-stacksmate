@@ -73,7 +73,7 @@ export default {
       }, 1000)
     },
     saveBtcAddress () {
-      this.$store.dispatch('rstackStore/saveBtcAddress', this.btcAddress).then((result) => {
+      this.$store.dispatch('chartStore/saveBtcAddress', this.btcAddress).then((result) => {
         this.$notify({ type: 'success', title: 'Bitcoin Address', text: 'Bitcoin address updated for next reward cycle..' })
         this.btcDisplay = true
       }).catch((error) => {

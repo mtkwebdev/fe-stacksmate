@@ -2,10 +2,9 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
 import transactionStore from './transactionStore'
-import rstackStore from './rstackStore'
+import chartStore from './chartStore'
 import authStore from './authStore'
 import store from './staxStore'
-import rates from 'risidio-rates'
 import SockJS from 'sockjs-client'
 import Stomp from '@stomp/stompjs'
 
@@ -69,7 +68,7 @@ export default new Vuex.Store({
   modules: {
     transactionStore: transactionStore,
     authStore: authStore,
-    rstackStore: rstackStore
+    chartStore: chartStore
   },
   state: {
     xgeRates: null,
@@ -243,24 +242,16 @@ export default new Vuex.Store({
     initApplication ({ commit }) {
       return new Promise(() => {
         store.dispatch('fetchRates')
+        store.dispatch('chartStore/readApiData')
       })
     },
     fetchRates ({ commit }) {
-      return new Promise((resolve) => {
+      return new Promise(() => {
         axios.get(MESH_API + '/v1/rates/ticker').then(response => {
           commit('setXgeRates', response.data)
         }).catch((error) => {
           console.log(error)
         })
-        rates.fetchSTXRates().then((rates) => {
-          console.log(rates)
-          // commit('setXgeRates', rates)
-        })
-        setInterval(function () {
-          rates.fetchSTXRates().then((rates) => {
-            // commit('setXgeRates', rates)
-          })
-        }, 3600000)
       })
     },
     fetchFeeEstimate ({ commit }, data) {

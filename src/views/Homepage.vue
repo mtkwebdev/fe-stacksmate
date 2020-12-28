@@ -1,25 +1,37 @@
 <template>
 <div class="mb-5 mx-2" style="position: relative; top: 60px;">
-  <div class="">
-    <div>
-      <div class="mb-5 mx-5">
-        <div class="mt-0">
-          <div class="tagline">Risidio <span class="tagline1">Stacking</span></div>
-        </div>
-        <div class="level1">
-          Earn Bitcoin while contributing to the development of the user owned internet
-        </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="tagline">Risidio <span class="tagline1">Mining Insights</span></div>
+      </div>
+      <div class="col-12">
+        <div class="">Risidio <span class="tagline1">Mining Insights</span></div>
       </div>
     </div>
-    <div class="" style="min-height: 400px;">
-      <lineChartContainer></lineChartContainer>
+    <div class="mb-4" v-if="getFees">
+      <h4>Latest Block Stats</h4>
+      <b-table striped hover
+        :fields="fields()"
+        :items="values()"
+      >
+      </b-table>
+    </div>
+    <div class="mb-4" style="min-height: 400px;" v-if="findBlockWinners">
+      <chart-container :graphData="findMinerInfo" />
+    </div>
+    <div class="mb-4" style="min-height: 400px;" v-if="getBinanceRates">
+      <chart-container :graphData="getBinanceRates" />
+    </div>
+    <div class="mb-4" style="min-height: 400px;" v-if="getFeePredictions">
+      <bar-chart :graphData="getFeePredictions" />
     </div>
     <div>
       <div class="mb-5 mx-5">
         <div class="level2">
-          Get stacking with tools and services that help you take part and understand the process.
+          Get stacking with tools and services that help you get going.
         </div>
-        <div class="my-4 d-flex justify-content-between">
+        <div class="w-100 my-4 d-flex justify-content-between">
           <b-button to="/donate" variant="info" class="text-white button1" style="width: 49%;">Support Us</b-button>
           <b-button to="/information" variant="outline-info" class="text-info button2" style="width: 49%;">Learn more</b-button>
         </div>
@@ -30,27 +42,59 @@
 </template>
 
 <script>
-import LineChartContainer from '@/components/charts/ChartContainer'
+import ChartContainer from '@/components/charts/ChartContainer'
+import BarChart from '@/components/charts/BarChart'
+import { APP_CONSTANTS } from '@/app-constants'
 
 export default {
   name: 'Homepage',
   components: {
-    LineChartContainer
+    ChartContainer,
+    BarChart
   },
   data () {
     return {
-      blocks: require('@/assets/img/Block_Graphic.svg'),
-      btcIcon: require('@/assets/img/BTC_icon.svg'),
-      stxIcon: require('@/assets/img/STX_icon.svg'),
-      lckIcon: require('@/assets/img/Lock_icon.svg')
     }
   },
   mounted () {
     this.loading = false
   },
   methods: {
+    fields () {
+      return ['Block Height', 'Average Burn', 'Total Burned', 'Fastest BTC Tx Fee']
+    },
+    values () {
+      const chainInfo = this.$store.getters[APP_CONSTANTS.KEY_MINING_CHAIN_INFO]
+      const fees = this.$store.getters[APP_CONSTANTS.KEY_RATES_FEES]
+      if (!chainInfo || !fees) return []
+      const mapped = [{
+        'Block Height': chainInfo.currentBlockHeight,
+        'Average Burn': chainInfo.averageBurn,
+        'Total Burned': chainInfo.totalBurnFee,
+        'Fastest BTC Tx Fee': fees.fastestFee
+      }]
+      return mapped
+    }
   },
   computed: {
+    getBinanceRates () {
+      return this.$store.getters[APP_CONSTANTS.KEY_RATES_BINANCE]
+    },
+    getFeePredictions () {
+      return this.$store.getters[APP_CONSTANTS.KEY_RATES_FEE_PREDICTIONS]
+    },
+    getFees () {
+      return this.$store.getters[APP_CONSTANTS.KEY_RATES_FEES]
+    },
+    getChainInfo () {
+      return this.$store.getters[APP_CONSTANTS.KEY_MINING_CHAIN_INFO]
+    },
+    findBlockWinners () {
+      return this.$store.getters[APP_CONSTANTS.KEY_MINING_BLOCK_WINNERS]
+    },
+    findMinerInfo () {
+      return this.$store.getters[APP_CONSTANTS.KEY_MINING_MINER_INFO]
+    }
   }
 }
 </script>
