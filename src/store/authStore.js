@@ -211,14 +211,14 @@ const authStore = {
           const profile = getProfile()
           commit('myProfile', profile)
           commit('authHeaders', authHeaders())
-          getUserWallet(dispatch)
+          // getUserWallet(dispatch)
           resolve(profile)
         } else if (userSession.isSignInPending()) {
           userSession.handlePendingSignIn().then(() => {
             const profile = getProfile()
             commit('myProfile', profile)
             commit('authHeaders', authHeaders())
-            getUserWallet(dispatch)
+            // getUserWallet(dispatch)
             resolve(profile)
           })
         } else {

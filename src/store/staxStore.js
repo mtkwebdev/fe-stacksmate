@@ -282,6 +282,10 @@ export default new Vuex.Store({
     },
     fetchWalletInfo ({ commit }, address) {
       return new Promise((resolve, reject) => {
+        if (address) {
+          reject(new Error('Balanaces not available atm'))
+          return
+        }
         const data = {
           path: '/v2/accounts/' + address,
           httpMethod: 'get',

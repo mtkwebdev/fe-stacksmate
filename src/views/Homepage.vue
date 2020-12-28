@@ -3,10 +3,7 @@
   <div class="container">
     <div class="row">
       <div class="col-12">
-        <div class="tagline">Risidio <span class="tagline1">Mining Insights</span></div>
-      </div>
-      <div class="col-12">
-        <div class="">Risidio <span class="tagline1">Mining Insights</span></div>
+        <div class="tagline">Risidio <span class="tagline1">Stacks Stats</span></div>
       </div>
     </div>
     <div class="mb-4" v-if="getFees">

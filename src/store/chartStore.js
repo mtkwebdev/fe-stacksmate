@@ -129,7 +129,7 @@ const chartStore = {
     },
     findMinerInfo: (state) => {
       if (!state.miningNews || !state.miningNews.findMinerInfo) return
-      let filteredData = state.miningNews.findMinerInfo
+      let filteredData = state.miningNews.findMinerInfo.slice()
       filteredData = filteredData.sort(function compare (a, b) {
         if (a.actual_win > b.actual_win) {
           return 1
@@ -178,7 +178,7 @@ const chartStore = {
     },
     groupByBurnFee: (state) => {
       if (!state.miningNews || !state.miningNews.findMinerInfo) return
-      let filteredData = state.miningNews.findMinerInfo
+      let filteredData = state.miningNews.findMinerInfo.slice()
       filteredData = filteredData.sort(function compare (a, b) {
         const a1 = (a.total_mined > 0) ? a.miner_burned / a.total_mined : 0
         const b1 = (b.total_mined > 0) ? b.miner_burned / b.total_mined : 0
@@ -211,7 +211,7 @@ const chartStore = {
     },
     groupByActualWinPerBlock: (state) => {
       if (!state.miningNews || !state.miningNews.findMinerInfo) return
-      let filteredData = state.miningNews.findMinerInfo
+      let filteredData = state.miningNews.findMinerInfo.slice()
       filteredData = filteredData.sort(function compare (a, b) {
         const a1 = a.actual_win / a.total_mined
         const b1 = b.actual_win / b.total_mined
