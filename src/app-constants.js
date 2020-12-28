@@ -23,17 +23,15 @@ export const APP_CONSTANTS = {
   KEY_USER_WALLET: 'authStore/getUserWallet',
   KEY_AUTH_HEADERS: 'authStore/getAuthHeaders',
 
-  KEY_MINING_BLOCKS: 'chartStore/findBlockWinners',
-  KEY_MINING_MINERS: 'chartStore/findMinerInfo',
   KEY_MINING_GROUP_BURN_FEE: 'chartStore/groupByBurnFee',
-  KEY_MINING_GROUP_DISTRIBUTION: 'chartStore/groupByDistribution',
+  KEY_MINING_GROUP_ACTUAL_WINS: 'chartStore/groupByActualWinPerBlock',
   KEY_MINING_GROUP_WINNERS: 'chartStore/groupByWinners',
+  KEY_MINING_CHAIN_INFO: 'chartStore/getChainInfo',
+  KEY_MINING_BLOCK_WINNERS: 'chartStore/findBlockWinners',
+  KEY_MINING_MINER_INFO: 'chartStore/findMinerInfo',
 
   KEY_RATES_FEES: 'chartStore/getFees',
   KEY_RATES_FEE_PREDICTIONS: 'chartStore/getFeePredictions',
   KEY_RATES_BINANCE: 'chartStore/getBinanceRates',
-  KEY_RATES_TICKER: 'chartStore/getTickerRates',
-  KEY_MINING_CHAIN_INFO: 'chartStore/getChainInfo',
-  KEY_MINING_BLOCK_WINNERS: 'chartStore/findBlockWinners',
-  KEY_MINING_MINER_INFO: 'chartStore/findMinerInfo'
+  KEY_RATES_TICKER: 'chartStore/getTickerRates'
 }

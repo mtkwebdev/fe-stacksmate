@@ -67,7 +67,7 @@ const chartStore = {
       state.miningNews.findBlockWinners.forEach((item) => {
         totalBurnFee += item.burn_fee
       })
-      const averageBurn = totalBurnFee / state.miningNews.findBlockWinners.length
+      const averageBurn = Math.floor(totalBurnFee / state.miningNews.findBlockWinners.length)
       return {
         averageBurn: averageBurn,
         totalBurnFee: totalBurnFee,
@@ -128,7 +128,7 @@ const chartStore = {
       }
     },
     findMinerInfo: (state) => {
-      if (!state.ratesNews || !state.ratesNews.binanceRates) return
+      if (!state.miningNews || !state.miningNews.findMinerInfo) return
       let filteredData = state.miningNews.findMinerInfo
       filteredData = filteredData.sort(function compare (a, b) {
         if (a.actual_win > b.actual_win) {
@@ -176,14 +176,77 @@ const chartStore = {
         ]
       }
     },
+    groupByBurnFee: (state) => {
+      if (!state.miningNews || !state.miningNews.findMinerInfo) return
+      let filteredData = state.miningNews.findMinerInfo
+      filteredData = filteredData.sort(function compare (a, b) {
+        const a1 = a.miner_burned / a.total_mined
+        const b1 = b.miner_burned / b.total_mined
+        if (a1 > b1) {
+          return 1
+        }
+        if (a1 < b1) {
+          return -1
+        }
+        return 0
+      })
+      const stxADDL = filteredData[0].stx_address.length
+      let chartLabels = filteredData.map(filteredData => filteredData.stx_address)
+      chartLabels = filteredData.map(filteredData => filteredData.stx_address.substring(0, 5) + '...' + filteredData.stx_address.substring(stxADDL - 6, stxADDL - 1))
+      return {
+        title: 'STX Address / Actual Win',
+        chartLabels: chartLabels,
+        options: state.options,
+        datasets: [
+          {
+            label: 'Burned Per Block Mined',
+            borderColor: '#249EBF',
+            borderWidth: 3,
+            pointRadius: 1,
+            backgroundColor: '#249EBF',
+            data: filteredData.map(filteredData => Math.floor((filteredData.miner_burned / filteredData.total_mined)))
+          }
+        ]
+      }
+    },
+    groupByActualWinPerBlock: (state) => {
+      if (!state.miningNews || !state.miningNews.findMinerInfo) return
+      let filteredData = state.miningNews.findMinerInfo
+      filteredData = filteredData.sort(function compare (a, b) {
+        const a1 = a.actual_win / a.total_mined
+        const b1 = b.actual_win / b.total_mined
+        if (a1 > b1) {
+          return 1
+        }
+        if (a1 < b1) {
+          return -1
+        }
+        return 0
+      })
+      const stxADDL = filteredData[0].stx_address.length
+      let chartLabels = filteredData.map(filteredData => filteredData.stx_address)
+      chartLabels = filteredData.map(filteredData => filteredData.stx_address.substring(0, 5) + '...' + filteredData.stx_address.substring(stxADDL - 6, stxADDL - 1))
+      return {
+        title: 'Average Actual Wins Per Block',
+        chartLabels: chartLabels,
+        options: state.options,
+        datasets: [
+          {
+            label: 'Actual Win Per Block Mined',
+            borderColor: '#FDA800',
+            borderWidth: 0,
+            pointRadius: 0,
+            backgroundColor: '#FDA800',
+            data: filteredData.map(filteredData => (filteredData.actual_win / filteredData.total_mined))
+          }
+        ]
+      }
+    },
     getTickerRates: (state) => {
       return state.ratesNews.tickerRates
     },
     findBlockWinners: (state) => {
       return state.miningNews.findBlockWinners
-    },
-    groupByBurnFee: (state) => {
-      return state.miningNews.groupByBurnFee
     },
     groupByDistribution: (state) => {
       return state.miningNews.groupByDistribution

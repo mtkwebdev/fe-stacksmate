@@ -17,7 +17,13 @@
       >
       </b-table>
     </div>
-    <div class="mb-4" style="min-height: 400px;" v-if="findBlockWinners">
+    <div class="mb-4" style="min-height: 400px;" v-if="groupByActualWinPerBlock">
+      <chart-container :graphData="groupByActualWinPerBlock" />
+    </div>
+    <div class="mb-4" style="min-height: 400px;" v-if="grroupByBurnFee">
+      <chart-container :graphData="grroupByBurnFee" />
+    </div>
+    <div class="mb-4" style="min-height: 400px;" v-if="findMinerInfo">
       <chart-container :graphData="findMinerInfo" />
     </div>
     <div class="mb-4" style="min-height: 400px;" v-if="getBinanceRates">
@@ -61,7 +67,7 @@ export default {
   },
   methods: {
     fields () {
-      return ['Block Height', 'Average Burn', 'Total Burned', 'Fastest BTC Tx Fee']
+      return ['Block Height', 'Total Burned', 'Average Burn', 'Fastest BTC Tx Fee']
     },
     values () {
       const chainInfo = this.$store.getters[APP_CONSTANTS.KEY_MINING_CHAIN_INFO]
@@ -69,8 +75,8 @@ export default {
       if (!chainInfo || !fees) return []
       const mapped = [{
         'Block Height': chainInfo.currentBlockHeight,
-        'Average Burn': chainInfo.averageBurn,
         'Total Burned': chainInfo.totalBurnFee,
+        'Average Burn': chainInfo.averageBurn,
         'Fastest BTC Tx Fee': fees.fastestFee
       }]
       return mapped
@@ -89,8 +95,11 @@ export default {
     getChainInfo () {
       return this.$store.getters[APP_CONSTANTS.KEY_MINING_CHAIN_INFO]
     },
-    findBlockWinners () {
-      return this.$store.getters[APP_CONSTANTS.KEY_MINING_BLOCK_WINNERS]
+    grroupByBurnFee () {
+      return this.$store.getters[APP_CONSTANTS.KEY_MINING_GROUP_BURN_FEE]
+    },
+    groupByActualWinPerBlock () {
+      return this.$store.getters[APP_CONSTANTS.KEY_MINING_GROUP_ACTUAL_WINS]
     },
     findMinerInfo () {
       return this.$store.getters[APP_CONSTANTS.KEY_MINING_MINER_INFO]
