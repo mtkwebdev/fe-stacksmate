@@ -180,15 +180,15 @@ const chartStore = {
       if (!state.miningNews || !state.miningNews.findMinerInfo) return
       let filteredData = state.miningNews.findMinerInfo
       filteredData = filteredData.sort(function compare (a, b) {
-        const a1 = a.miner_burned / a.total_mined
-        const b1 = b.miner_burned / b.total_mined
+        const a1 = (a.total_mined > 0) ? a.miner_burned / a.total_mined : 0
+        const b1 = (b.total_mined > 0) ? b.miner_burned / b.total_mined : 0
         if (a1 > b1) {
           return 1
-        }
-        if (a1 < b1) {
+        } else if (a1 < b1) {
           return -1
+        } else {
+          return 0
         }
-        return 0
       })
       const stxADDL = filteredData[0].stx_address.length
       let chartLabels = filteredData.map(filteredData => filteredData.stx_address)
@@ -201,7 +201,7 @@ const chartStore = {
           {
             label: 'Burned Per Block Mined',
             borderColor: '#249EBF',
-            borderWidth: 3,
+            borderWidth: 0,
             pointRadius: 1,
             backgroundColor: '#249EBF',
             data: filteredData.map(filteredData => Math.floor((filteredData.miner_burned / filteredData.total_mined)))
@@ -217,11 +217,11 @@ const chartStore = {
         const b1 = b.actual_win / b.total_mined
         if (a1 > b1) {
           return 1
-        }
-        if (a1 < b1) {
+        } else if (a1 < b1) {
           return -1
+        } else {
+          return 0
         }
-        return 0
       })
       const stxADDL = filteredData[0].stx_address.length
       let chartLabels = filteredData.map(filteredData => filteredData.stx_address)

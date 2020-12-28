@@ -20,8 +20,8 @@
     <div class="mb-4" style="min-height: 400px;" v-if="groupByActualWinPerBlock">
       <chart-container :graphData="groupByActualWinPerBlock" />
     </div>
-    <div class="mb-4" style="min-height: 400px;" v-if="grroupByBurnFee">
-      <chart-container :graphData="grroupByBurnFee" />
+    <div class="mb-4" style="min-height: 400px;" v-if="groupByBurnFee">
+      <chart-container :graphData="groupByBurnFee" />
     </div>
     <div class="mb-4" style="min-height: 400px;" v-if="findMinerInfo">
       <chart-container :graphData="findMinerInfo" />
@@ -95,7 +95,7 @@ export default {
     getChainInfo () {
       return this.$store.getters[APP_CONSTANTS.KEY_MINING_CHAIN_INFO]
     },
-    grroupByBurnFee () {
+    groupByBurnFee () {
       return this.$store.getters[APP_CONSTANTS.KEY_MINING_GROUP_BURN_FEE]
     },
     groupByActualWinPerBlock () {
