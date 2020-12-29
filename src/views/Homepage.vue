@@ -1,21 +1,18 @@
 <template>
-<div class="mb-5 mx-2" style="position: relative; top: 60px;">
-  <div class="container">
-    <div class="row">
-      <div class="col-12">
-        <div class="tagline">Risidio <span class="tagline1">Stacks Stats</span></div>
-      </div>
-    </div>
+<div class="">
+  <div class="mb-5 mt-0">
+    <div class="tagline"><img width="30px" :src="stxIcon"/> Stacks <span class="tagline1">Mining Stats</span></div>
+  </div>
+  <div class="">
     <div class="mb-4" v-if="getFees">
-      <h4>Latest Block Stats</h4>
       <b-table striped hover
         :fields="fields()"
         :items="values()"
       >
       </b-table>
     </div>
-    <div class="mb-4" style="min-height: 400px;" v-if="groupByActualWinPerBlock">
-      <chart-container :graphData="groupByActualWinPerBlock" />
+    <div class="mb-4" style="min-height: 400px;" v-if="groupByDistribution">
+      <chart-container :graphData="groupByDistribution" />
     </div>
     <div class="mb-4" style="min-height: 400px;" v-if="groupByBurnFee">
       <chart-container :graphData="groupByBurnFee" />
@@ -29,6 +26,7 @@
     <div class="mb-4" style="min-height: 400px;" v-if="getFeePredictions">
       <bar-chart :graphData="getFeePredictions" />
     </div>
+    <!--
     <div>
       <div class="mb-5 mx-5">
         <div class="level2">
@@ -36,10 +34,11 @@
         </div>
         <div class="w-100 my-4 d-flex justify-content-between">
           <b-button to="/donate" variant="info" class="text-white button1" style="width: 49%;">Support Us</b-button>
-          <b-button to="/information" variant="outline-info" class="text-info button2" style="width: 49%;">Learn more</b-button>
+          <b-button to="/services" variant="outline-info" class="text-info button2" style="width: 49%;">Learn more</b-button>
         </div>
       </div>
     </div>
+    -->
   </div>
 </div>
 </template>
@@ -57,6 +56,8 @@ export default {
   },
   data () {
     return {
+      showNewComponent: false,
+      stxIcon: require('@/assets/img/stacks-icon-white.svg')
     }
   },
   mounted () {
@@ -64,16 +65,18 @@ export default {
   },
   methods: {
     fields () {
-      return ['Block Height', 'Total Burned', 'Average Burn', 'Fastest BTC Tx Fee']
+      return ['Chain', 'Block Height', 'Total Burned', 'Avg Burn Per Block', 'Numb Miners', 'Fastest BTC Tx Fee']
     },
     values () {
       const chainInfo = this.$store.getters[APP_CONSTANTS.KEY_MINING_CHAIN_INFO]
       const fees = this.$store.getters[APP_CONSTANTS.KEY_RATES_FEES]
       if (!chainInfo || !fees) return []
       const mapped = [{
+        Chain: 'Krypton',
         'Block Height': chainInfo.currentBlockHeight,
         'Total Burned': chainInfo.totalBurnFee,
-        'Average Burn': chainInfo.averageBurn,
+        'Avg Burn Per Block': chainInfo.averageBurn,
+        'Numb Miners': chainInfo.numbMiners,
         'Fastest BTC Tx Fee': fees.fastestFee
       }]
       return mapped
@@ -95,7 +98,7 @@ export default {
     groupByBurnFee () {
       return this.$store.getters[APP_CONSTANTS.KEY_MINING_GROUP_BURN_FEE]
     },
-    groupByActualWinPerBlock () {
+    groupByDistribution () {
       return this.$store.getters[APP_CONSTANTS.KEY_MINING_GROUP_ACTUAL_WINS]
     },
     findMinerInfo () {

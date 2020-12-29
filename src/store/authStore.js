@@ -1,19 +1,12 @@
 /* eslint-disable */
-import { UserSession, AppConfig } from '@stacks/auth'
+import { UserSession } from '@stacks/auth'
 import { showConnect, authenticate } from '@stacks/connect'
 import router from '@/router'
 import store from '@/store/staxStore'
 import {
   getAddressFromPrivateKey,
-  createStacksPrivateKey,
-  getPublicKey,
-  addressFromPublicKeys,
-  AddressVersion,
-  AddressHashMode
+  createStacksPrivateKey
 } from '@stacks/transactions'
-import {
-  StacksTestnet
-} from '@stacks/network'
 import axios from 'axios'
 
 const BLOCKSTACK_LOGIN = Number(process.env.VUE_APP_BLOCKSTACK_LOGIN)
@@ -132,9 +125,6 @@ const authHeaders = function () {
   if (userSession.isUserSignedIn()) {
     const account = userSession.loadUserData()
     if (account) {
-      const authResponseToken = account.authResponseToken
-      const decodedToken = decodeToken(authResponseToken)
-      publicKey = decodedToken.payload.public_keys[0]
       token = 'v1:' + account.authResponseToken
     }
   }

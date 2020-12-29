@@ -241,6 +241,7 @@ export default new Vuex.Store({
   actions: {
     initApplication ({ commit }) {
       return new Promise(() => {
+        store.dispatch('authStore/fetchMyAccount')
         store.dispatch('fetchRates')
         store.dispatch('chartStore/readApiData')
       })

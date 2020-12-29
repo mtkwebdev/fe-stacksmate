@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Homepage from '@/views/Homepage.vue'
-import Information from '@/views/Information.vue'
+import Services from '@/views/Services.vue'
 import Donate from '@/views/Donate.vue'
 import Login from '@/views/Login.vue'
 import MainNavbar from '@/layout/MainNavbar.vue'
@@ -16,9 +16,9 @@ const routes = [
     components: { default: Homepage, header: MainNavbar, footer: MainFooter }
   },
   {
-    path: '/information',
-    name: 'information',
-    components: { default: Information, header: MainNavbar, footer: MainFooter }
+    path: '/services',
+    name: 'services',
+    components: { default: Services, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/donate',

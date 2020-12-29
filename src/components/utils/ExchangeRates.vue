@@ -1,15 +1,14 @@
 <template>
-<b-nav-item-dropdown caret v-if="exchangeRate">
-  <template v-slot:button-content>
-    STX: <span>{{amountTrunc}}</span> <span v-html="exchangeRate.currency"></span>
+<b-nav-item-dropdown class="" caret v-if="exchangeRate">
+  <template v-slot:button-content class="xg-dd">
+    <span style="margin-left: -10px;">STX: <span>{{amountTrunc}}</span> <span v-html="exchangeRate.currency"></span></span>
   </template>
-  <b-dropdown-item v-for="(rate, idx) in exchangeRates" :key="idx" @click.prevent="changeFiatCurrency(rate.currency)">{{rate.currency}}</b-dropdown-item>
+  <b-dropdown-item class="pl-0 m-0" v-for="(rate, idx) in exchangeRates" :key="idx" @click.prevent="changeFiatCurrency(rate.currency)">{{rate.currency}}</b-dropdown-item>
 </b-nav-item-dropdown>
 </template>
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-
 export default {
   name: 'ExchangeRates',
   props: {
@@ -59,5 +58,5 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 </style>

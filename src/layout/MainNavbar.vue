@@ -1,6 +1,6 @@
 <template>
 <div>
-<div class="bg-black navbar">
+<div class="bg-black navbar play-mode">
   <div class="container">
 
   <b-navbar toggleable="md" type="dark" style="width: 100%; margin: 0; padding-right:0;padding-left:0;">
@@ -23,17 +23,19 @@
     </b-navbar-toggle>
 
     <b-collapse id="nav-collapse" is-nav>
-        <b-navbar class="ml-auto">
-
-        <exchange-rates class="nav-text d-none d-md-block" v-if="isHomePage"/>
-        <b-nav-item-dropdown class="nav-text" right caret v-if="isHomePage">
-          <template v-slot:button-content>
-            <span class="header">Circ. STX: 808,734,706</span>
-          </template>
-          <b-dropdown-item><span style="display: inline-block; width: 150px;">Binance</span> 385,937,152</b-dropdown-item>
-          <b-dropdown-item><span style="display: inline-block; width: 150px;">CoinMarketCap</span> 574,811,341</b-dropdown-item>
-        </b-nav-item-dropdown>
-        <b-nav-item-dropdown class="nav-text ml-3" right v-if="loggedIn" caret>
+      <b-navbar class="ml-auto">
+        <!--
+        <b-nav-item class="nav-text" to="/services"><span>Services</span></b-nav-item>
+        <b-nav-item class="nav-text" to="/donate"><b-button style="border-radius: 40px;" variant="info">Contribute</b-button></b-nav-item>
+        -->
+          <exchange-rates class="pl-0 nav-text"/>
+          <b-nav-item-dropdown class="nav-text" right caret>
+            <template v-slot:button-content>
+              <span class="header">Circulating: 711,834,032</span>
+            </template>
+            <b-dropdown-item><span style="display: inline-block; width: 150px;">Total Supply</span> 945,757,398</b-dropdown-item>
+          </b-nav-item-dropdown>
+        <b-nav-item-dropdown class="nav-text" right v-if="loggedIn" caret>
           <template v-slot:button-content>
             Account
           </template>
@@ -43,33 +45,26 @@
           </b-dropdown-item>
         </b-nav-item-dropdown>
         <b-nav-item class="nav-text" v-else><span @click="login()">Login</span></b-nav-item>
-        </b-navbar>
+      </b-navbar>
     </b-collapse>
   </b-navbar>
   </div>
 </div>
-  <div class=" play-mode w-100" :class="(localPlayMode) ? 'bg-warning text-white' : ''" v-if="!isHomePage">
+<!--
+  <div class=" play-mode w-100" :class="(localPlayMode) ? 'bg-warning text-white' : ''">
     <div class="container">
-      <div class="d-flex justify-content-end">
-        <div class="py-2">
-          <b-form-checkbox v-model="localPlayMode" name="check-button" switch>
-            <span class="" :class="(localPlayMode) ? 'text-white' : 'text-grey'">dev mode</span>
-          </b-form-checkbox>
-        </div>
+      <div class="d-flex justify-content-between">
+          <exchange-rates class="pl-0 nav-text"/>
+          <b-nav-item-dropdown class="nav-text" right caret>
+            <template v-slot:button-content>
+              <span class="header">Circulating STX: 711,834,032</span>
+            </template>
+            <b-dropdown-item><span style="display: inline-block; width: 150px;">Total Supply</span> 945,757,398</b-dropdown-item>
+          </b-nav-item-dropdown>
       </div>
     </div>
   </div>
-  <div class="container mb-3 d-flex justify-content-between w-100" v-if="!isHomePage">
-    <exchange-rates class="nav-text"/>
-    <b-nav-item-dropdown class="nav-text" right caret>
-      <template v-slot:button-content>
-        <span class="header">Circulating STX: 808,734,706</span>
-      </template>
-      <b-dropdown-item><span style="display: inline-block; width: 150px;">Binance</span> 385,937,152</b-dropdown-item>
-      <b-dropdown-item><span style="display: inline-block; width: 150px;">CoinMarketCap</span> 574,811,341</b-dropdown-item>
-    </b-nav-item-dropdown>
-  </div>
-
+  -->
 </div>
 </template>
 
@@ -171,7 +166,7 @@ export default {
 <style lang="scss">
 @import "@/assets/scss/custom.scss";
 .play-mode {
-  border-top: 1pt solid $yellow;
+  border-top: 0pt solid $yellow;
   border-bottom: 1pt solid $yellow;
 }
 .dropdown-item:hover {

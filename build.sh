@@ -2,7 +2,7 @@
 
 export SERVICE=$1
 
-PATH_DEPLOY=../radsoc/volumes/www/development/meshnet
+PATH_DEPLOY=../radsoc/volumes/www/development/stacksmate
 mkdir -p $PATH_DEPLOY
 
 printf "\n-----------------------------------------------------------------------------------------------------\n";

@@ -1,13 +1,10 @@
 <template>
 <div id="app">
   <router-view name="header"/>
-  <div v-if="isHome">
-    <router-view id="nav"/>
-  </div>
-  <div v-else>
+  <div>
     <div class="container">
       <router-view class="my-3" name="wallets"/>
-      <router-view id="nav"  class="w-100"/>
+      <router-view id="nav"  class="w-100" style="position: relative; top: 60px;"/>
     </div>
     <notifications :duration="10000" classes="r-notifs" position="bottom right" width="30%"/>
   </div>
@@ -44,9 +41,6 @@ export default {
   methods: {
   },
   computed: {
-    isHome: function (data) {
-      return this.$route.name === 'home'
-    }
   }
 }
 </script>
