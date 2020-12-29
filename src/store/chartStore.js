@@ -242,6 +242,12 @@ const chartStore = {
     getTickerRates: (state) => {
       return state.ratesNews.tickerRates
     },
+    getMinerInfo: (state) => {
+      return state.miningNews.findMinerInfo
+    },
+    getMinerInfoAggregated: (state) => {
+      return state.miningNews.findMinerInfo
+    },
     findBlockWinners: (state) => {
       return state.miningNews.findBlockWinners
     },

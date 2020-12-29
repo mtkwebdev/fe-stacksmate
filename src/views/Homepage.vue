@@ -6,8 +6,18 @@
   <div class="">
     <div class="mb-4" v-if="getFees">
       <b-table striped hover
-        :fields="fields()"
-        :items="values()"
+        :fields="t1Fields()"
+        :items="t1Values()"
+      >
+      </b-table>
+    </div>
+    <p><a href="#" @click.prevent="showT2 = !showT2">Toggle miner table</a> (<a href="#" @click.prevent="showBTC = !showBTC">show btc addresses</a>)
+    </p>
+    <div class="mb-4" v-if="showT2" :key="componentKey">
+      <b-table striped hover
+        :fields="t2Fields()"
+        :items="t2Values()"
+        :sort-by.sync="sortBy"
       >
       </b-table>
     </div>
@@ -56,18 +66,26 @@ export default {
   },
   data () {
     return {
-      showNewComponent: false,
-      stxIcon: require('@/assets/img/stacks-icon-white.svg')
+      componentKey: 0,
+      showT2: false,
+      showBTC: false,
+      stxIcon: require('@/assets/img/stacks-icon-white.svg'),
+      sortBy: 'Actual Wins'
+    }
+  },
+  watch: {
+    showBTC () {
+      this.componentKey += 1
     }
   },
   mounted () {
     this.loading = false
   },
   methods: {
-    fields () {
+    t1Fields () {
       return ['Chain', 'Block Height', 'Total Burned', 'Avg Burn Per Block', 'Numb Miners', 'Fastest BTC Tx Fee']
     },
-    values () {
+    t1Values () {
       const chainInfo = this.$store.getters[APP_CONSTANTS.KEY_MINING_CHAIN_INFO]
       const fees = this.$store.getters[APP_CONSTANTS.KEY_RATES_FEES]
       if (!chainInfo || !fees) return []
@@ -80,6 +98,41 @@ export default {
         'Fastest BTC Tx Fee': fees.fastestFee
       }]
       return mapped
+    },
+    t2Fields () {
+      if (this.showBTC) {
+        return ['STX Address', 'BTC Address', 'Actual Wins', 'Total Wins', 'Number Mined', 'Total Burned', 'Total Burned Per Block']
+      } else {
+        return ['STX Address', 'Actual Wins', 'Total Wins', 'Number Mined', 'Total Burned', 'Total Burned Per Block']
+      }
+    },
+    t2Values () {
+      const minerInfo = this.$store.getters[APP_CONSTANTS.KEY_MINING_GET_MINER_INFO]
+      if (!minerInfo) return []
+      if (this.showBTC) {
+        return minerInfo.map(function (a) {
+          return {
+            'STX Address': a.stx_address,
+            'BTC Address': a.btc_address,
+            'Actual Wins': a.actual_win,
+            'Total Wins': a.total_win,
+            'Number Mined': a.total_mined,
+            'Total Burned': a.miner_burned,
+            'Total Burned Per Block': a.miner_burned / a.total_mined
+          }
+        })
+      } else {
+        return minerInfo.map(function (a) {
+          return {
+            'STX Address': a.stx_address,
+            'Actual Wins': a.actual_win,
+            'Total Wins': a.total_win,
+            'Number Mined': a.total_mined,
+            'Total Burned': a.miner_burned,
+            'Total Burned Per Block': a.miner_burned / a.total_mined
+          }
+        })
+      }
     }
   },
   computed: {
@@ -103,6 +156,9 @@ export default {
     },
     findMinerInfo () {
       return this.$store.getters[APP_CONSTANTS.KEY_MINING_MINER_INFO]
+    },
+    getMinerInfo () {
+      return this.$store.getters[APP_CONSTANTS.KEY_MINING_GET_MINER_INFO]
     }
   }
 }
