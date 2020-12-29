@@ -208,13 +208,13 @@ const chartStore = {
         ]
       }
     },
-    groupByDistribution: (state) => {
-      if (!state.miningNews || !state.miningNews.groupByDistribution) return
-      let filteredData = state.miningNews.groupByDistribution.slice()
+    groupByActualWins: (state) => {
+      if (!state.miningNews || !state.miningNews.groupByActualWins) return
+      let filteredData = state.miningNews.groupByActualWins.slice()
       filteredData = filteredData.sort(function compare (a, b) {
-        if (a.count > b.count) {
+        if (a._id > b._id) {
           return 1
-        } else if (a.count < b.count) {
+        } else if (a._id < b._id) {
           return -1
         } else {
           return 0
@@ -224,17 +224,50 @@ const chartStore = {
       const chartLabels = filteredData.map(filteredData => filteredData._id)
       // chartLabels = filteredData.map(filteredData => filteredData._id.substring(0, 5) + '...' + filteredData.stx_address.substring(stxADDL - 6, stxADDL - 1))
       return {
-        title: 'Average Actual Wins Per Block',
+        title: 'Wins vs Burn Rate',
+        description: 'Grouped by actual_win counting the total btc burned (normalised by mining participation) across all miners with this number of wins',
         chartLabels: chartLabels,
         options: state.options,
         datasets: [
           {
-            label: 'Actual Win Per Block Mined',
+            label: 'Wins vs Amount Burned (per block)',
             borderColor: '#FDA800',
             borderWidth: 0,
             pointRadius: 0,
-            backgroundColor: '#FDA800',
-            data: filteredData.map(filteredData => (filteredData.totalBurnFee))
+            backgroundColor: 'transparent',
+            data: filteredData.map(filteredData => (filteredData.totalBurned / filteredData.totalBlocksMined))
+          }
+        ]
+      }
+    },
+    groupByActualWins1: (state) => {
+      if (!state.miningNews || !state.miningNews.groupByActualWins) return
+      let filteredData = state.miningNews.groupByActualWins.slice()
+      filteredData = filteredData.sort(function compare (a, b) {
+        if (a._id > b._id) {
+          return 1
+        } else if (a._id < b._id) {
+          return -1
+        } else {
+          return 0
+        }
+      })
+      // const stxADDL = filteredData[0].stx_address.length
+      const chartLabels = filteredData.map(filteredData => filteredData._id)
+      // chartLabels = filteredData.map(filteredData => filteredData._id.substring(0, 5) + '...' + filteredData.stx_address.substring(stxADDL - 6, stxADDL - 1))
+      return {
+        title: 'Number of Miners vs Wins',
+        description: 'Grouped by actual_win counting the number of miners with this number of wins',
+        chartLabels: chartLabels,
+        options: state.options,
+        datasets: [
+          {
+            label: 'Number of Miners vs Wins',
+            borderColor: '#FDA800',
+            borderWidth: 0,
+            pointRadius: 0,
+            backgroundColor: 'transparent',
+            data: filteredData.map(filteredData => (filteredData.count))
           }
         ]
       }

@@ -24,7 +24,8 @@ export const APP_CONSTANTS = {
   KEY_AUTH_HEADERS: 'authStore/getAuthHeaders',
 
   KEY_MINING_GROUP_BURN_FEE: 'chartStore/groupByBurnFee',
-  KEY_MINING_GROUP_ACTUAL_WINS: 'chartStore/groupByDistribution',
+  KEY_MINING_GROUP_ACTUAL_WINS: 'chartStore/groupByActualWins',
+  KEY_MINING_GROUP_ACTUAL_WINS1: 'chartStore/groupByActualWins1',
   KEY_MINING_GROUP_WINNERS: 'chartStore/groupByWinners',
   KEY_MINING_CHAIN_INFO: 'chartStore/getChainInfo',
   KEY_MINING_BLOCK_WINNERS: 'chartStore/findBlockWinners',

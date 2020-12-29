@@ -9,9 +9,12 @@
         :fields="t1Fields()"
         :items="t1Values()"
       >
+        <template #cell(Chain)="data">
+          <span v-html="data.value"></span>
+        </template>
       </b-table>
     </div>
-    <p><a href="#" @click.prevent="showT2 = !showT2">Toggle miner table</a> (<a href="#" @click.prevent="showBTC = !showBTC">show btc addresses</a>)
+    <p><a href="#" @click.prevent="showT2 = !showT2">Toggle miner table</a> <a v-if="showT2" href="#" @click.prevent="showBTC = !showBTC">- show btc addresses</a>
     </p>
     <div class="mb-4" v-if="showT2" :key="componentKey">
       <b-table striped hover
@@ -21,8 +24,11 @@
       >
       </b-table>
     </div>
-    <div class="mb-4" style="min-height: 400px;" v-if="groupByDistribution">
-      <chart-container :graphData="groupByDistribution" />
+    <div class="mb-4" style="min-height: 400px;" v-if="groupByActualWins">
+      <chart-container :graphData="groupByActualWins" />
+    </div>
+    <div class="mb-4" style="min-height: 400px;" v-if="groupByActualWins1">
+      <chart-container :graphData="groupByActualWins1" />
     </div>
     <div class="mb-4" style="min-height: 400px;" v-if="groupByBurnFee">
       <chart-container :graphData="groupByBurnFee" />
@@ -90,7 +96,7 @@ export default {
       const fees = this.$store.getters[APP_CONSTANTS.KEY_RATES_FEES]
       if (!chainInfo || !fees) return []
       const mapped = [{
-        Chain: 'Krypton',
+        Chain: '<span class="text-danger">Krypton</span>',
         'Block Height': chainInfo.currentBlockHeight,
         'Total Burned': chainInfo.totalBurnFee,
         'Avg Burn Per Block': chainInfo.averageBurn,
@@ -101,9 +107,9 @@ export default {
     },
     t2Fields () {
       if (this.showBTC) {
-        return ['STX Address', 'BTC Address', 'Actual Wins', 'Total Wins', 'Number Mined', 'Total Burned', 'Total Burned Per Block']
+        return ['STX Address', 'BTC Address', 'Actual Wins', 'Total Wins', 'Number Mined', 'Total Burned', 'Average Burned Per Block']
       } else {
-        return ['STX Address', 'Actual Wins', 'Total Wins', 'Number Mined', 'Total Burned', 'Total Burned Per Block']
+        return ['STX Address', 'Actual Wins', 'Total Wins', 'Number Mined', 'Total Burned', 'Average Burned Per Block']
       }
     },
     t2Values () {
@@ -118,7 +124,7 @@ export default {
             'Total Wins': a.total_win,
             'Number Mined': a.total_mined,
             'Total Burned': a.miner_burned,
-            'Total Burned Per Block': a.miner_burned / a.total_mined
+            'Average Burned Per Block': a.miner_burned / a.total_mined
           }
         })
       } else {
@@ -129,7 +135,7 @@ export default {
             'Total Wins': a.total_win,
             'Number Mined': a.total_mined,
             'Total Burned': a.miner_burned,
-            'Total Burned Per Block': a.miner_burned / a.total_mined
+            'Average Burned Per Block': a.miner_burned / a.total_mined
           }
         })
       }
@@ -151,8 +157,11 @@ export default {
     groupByBurnFee () {
       return this.$store.getters[APP_CONSTANTS.KEY_MINING_GROUP_BURN_FEE]
     },
-    groupByDistribution () {
+    groupByActualWins () {
       return this.$store.getters[APP_CONSTANTS.KEY_MINING_GROUP_ACTUAL_WINS]
+    },
+    groupByActualWins1 () {
+      return this.$store.getters[APP_CONSTANTS.KEY_MINING_GROUP_ACTUAL_WINS1]
     },
     findMinerInfo () {
       return this.$store.getters[APP_CONSTANTS.KEY_MINING_MINER_INFO]
