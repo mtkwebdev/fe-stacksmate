@@ -3,6 +3,13 @@
   <div class="mb-5 mt-0">
     <div class="tagline"><img width="30px" :src="stxIcon"/> Stacks <span class="tagline1">Mining Stats</span></div>
   </div>
+  <div class="mb-4">
+    <a @click="showMinersInfo = !showMinersInfo"><button class="mb-3">Show Miners' Info</button></a>
+    <div v-if="!showMinersInfo" class="mb-5">
+      <MinersInfo  />
+      <!-- <displayMinersInfo /> -->
+    </div>
+  </div>
   <div class="">
     <div class="mb-4" v-if="getFees">
       <b-table striped hover
@@ -47,16 +54,20 @@
 import ChartContainer from '@/components/charts/ChartContainer'
 import BarChart from '@/components/charts/BarChart'
 import { APP_CONSTANTS } from '@/app-constants'
+import MinersInfo from '@/components/minersInfo/MinersInfo'
+// import displayMinersInfo from '@/components/minersInfo/displayMinersInfo'
 
 export default {
   name: 'Homepage',
   components: {
     ChartContainer,
-    BarChart
+    BarChart,
+    MinersInfo
+    // displayMinersInfo
   },
   data () {
     return {
-      showNewComponent: false,
+      showMinersInfo: true,
       stxIcon: require('@/assets/img/stacks-icon-white.svg')
     }
   },
