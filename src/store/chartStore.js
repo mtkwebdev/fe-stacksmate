@@ -61,6 +61,13 @@ const chartStore = {
     }
   },
   getters: {
+    getMiner: (state) => (stxOrBtcAddress) => {
+      let miner = state.miningNews.findMinerInfo.find((o) => o.stx_address === stxOrBtcAddress)
+      if (!miner) {
+        miner = state.miningNews.findMinerInfo.find((o) => o.btc_address === stxOrBtcAddress)
+      }
+      return miner
+    },
     getChainInfo: (state) => {
       if (!state.miningNews || !state.miningNews.findBlockWinners) return
       let totalBurnFee = 0

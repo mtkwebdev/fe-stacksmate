@@ -4,26 +4,25 @@
 </div>
 <b-form v-else>
   <div class="mb-2">
-    <h3>Please input a miner's STX address</h3>
+    <h3>Please input a miner's STX/BTC address</h3>
     <b-input
       class="mt-3"
       ref="Miner's Address"
-      v-model="minersaddress"
-      placeholder="STX address"></b-input>
+      v-model="minersAddress"
+      placeholder="STX or BTC address"></b-input>
     <div class="mt-3">
-      <b-button @click="getAddress()" variant="warning" class="text-white button1" style="width: 49%;">Check Miner's Info</b-button>
+      <b-button @click="getMiner()" variant="warning" class="text-white button1" style="width: 49%;">Check Miner's Info</b-button>
     </div>
   </div>
-  {{minersaddress}}
-  {{filteredMiner}}
-    <div v-for="miner in filteredMiner" v-bind:key="miner.id">
-      <p>{{miner.btc_address}}</p>
-    </div>
+  {{minersAddress}}
+  <div v-if="miner">
+    <div>BTC Address: </div><div>{{miner.btc_address}}</div>
+  </div>
 </b-form>
 </template>
 
 <script>
-import axios from 'axios'
+import { APP_CONSTANTS } from '@/app-constants'
 
 export default {
   name: 'MinersInfo',
@@ -32,35 +31,25 @@ export default {
   data () {
     return {
       loading: true,
-      minersaddress: null,
+      miner: null,
+      minersAddress: null,
       miners: null
     }
-  },
-  created: function () {
-    axios
-      .get('http://monitor.stxmining.xyz/mining_info')
-      .then(res => {
-        this.miners = res.data
-      })
-      .catch(error => alert(error))
   },
   mounted () {
     this.loading = false
   },
   methods: {
-    getAddress: function () {
-      this.$emit('getAddress', this.minersaddress)
+    getMiner: function () {
+      let miner = this.$store.getters[APP_CONSTANTS.KEY_GET_MINER](this.minersAddress)
+      if (!miner) {
+        miner = this.$store.getters[APP_CONSTANTS.KEY_GET_MINER_BY_BTC_ADDRESS](this.minersAddress)
+        this.$notify({ type: 'warning', title: 'Miner Not Found', text: 'No miner found for address - ' + this.minersAddress })
+      }
+      this.miner = miner
     }
   },
   computed: {
-    // filteredMiners () {
-    //   return this.miners.filter(miner => miner.stx_address === this.minersaddress)
-    // }
-    filteredMiners () {
-      return this.miners.filter(miner => {
-        return miner.stx_address.indexOf(this.minersaddress) > -1
-      })
-    }
   }
 }
 </script>

@@ -30,6 +30,7 @@ export const APP_CONSTANTS = {
   KEY_MINING_BLOCK_WINNERS: 'chartStore/findBlockWinners',
   KEY_MINING_MINER_INFO: 'chartStore/findMinerInfo',
 
+  KEY_GET_MINER: 'chartStore/getMiner',
   KEY_RATES_FEES: 'chartStore/getFees',
   KEY_RATES_FEE_PREDICTIONS: 'chartStore/getFeePredictions',
   KEY_RATES_BINANCE: 'chartStore/getBinanceRates',
