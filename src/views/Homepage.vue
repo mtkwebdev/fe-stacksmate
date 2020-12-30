@@ -7,7 +7,6 @@
     <a @click="showMinersInfo = !showMinersInfo"><button class="mb-3">Show Miners' Info</button></a>
     <div v-if="!showMinersInfo" class="mb-5">
       <MinersInfo  />
-      <!-- <displayMinersInfo /> -->
     </div>
   </div>
   <div class="">
@@ -55,7 +54,6 @@ import ChartContainer from '@/components/charts/ChartContainer'
 import BarChart from '@/components/charts/BarChart'
 import { APP_CONSTANTS } from '@/app-constants'
 import MinersInfo from '@/components/minersInfo/MinersInfo'
-// import displayMinersInfo from '@/components/minersInfo/displayMinersInfo'
 
 export default {
   name: 'Homepage',
@@ -63,7 +61,7 @@ export default {
     ChartContainer,
     BarChart,
     MinersInfo
-    // displayMinersInfo
+    // DisplayMinersInfo
   },
   data () {
     return {

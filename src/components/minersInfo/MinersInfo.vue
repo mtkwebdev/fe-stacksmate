@@ -14,9 +14,11 @@
       <b-button @click="getMiner()" variant="warning" class="text-white button1" style="width: 49%;">Check Miner's Info</b-button>
     </div>
   </div>
-  {{minersAddress}}
+  <!-- {{minersAddress}}
+  {{miner}} -->
   <div v-if="miner">
-    <div>BTC Address: </div><div>{{miner.btc_address}}</div>
+    <!-- <div>BTC Address: </div><div>{{miner.btc_address}}</div> -->
+    <b-table striped hover :items="getMiner()" :fields="fields()" ></b-table>
   </div>
 </b-form>
 </template>
@@ -47,6 +49,18 @@ export default {
         this.$notify({ type: 'warning', title: 'Miner Not Found', text: 'No miner found for address - ' + this.minersAddress })
       }
       this.miner = miner
+      const mappedMiner = [{
+        'STX Address': miner.stx_address,
+        'BTC Address': miner.btc_address,
+        'Actual Blocks Won': miner.actual_win,
+        'Total Blocks Won': miner.total_win,
+        'Total Blocks Mined': miner.total_mined,
+        'Total Miner BTC Burned': miner.miner_burned
+      }]
+      return mappedMiner
+    },
+    fields () {
+      return ['STX Address', 'BTC Address', 'Actual Blocks Won', 'Total Blocks Won', 'Total Blocks Mined', 'Total Miner BTC Burned']
     }
   },
   computed: {
