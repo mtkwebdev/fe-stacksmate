@@ -89,15 +89,16 @@ export default {
   },
   methods: {
     t1Fields () {
-      return ['Chain', 'Block Height', 'Total Burned', 'Avg Burn Per Block', 'Numb Miners', 'Fastest BTC Tx Fee']
+      return ['Chain', 'Block Height (Min)', 'Block Height (Max)', 'Total Burned', 'Avg Burn Per Block', 'Numb Miners', 'Fastest BTC Tx Fee']
     },
     t1Values () {
       const chainInfo = this.$store.getters[APP_CONSTANTS.KEY_MINING_CHAIN_INFO]
       const fees = this.$store.getters[APP_CONSTANTS.KEY_RATES_FEES]
       if (!chainInfo || !fees) return []
       const mapped = [{
-        Chain: '<span class="text-danger">Krypton</span>',
-        'Block Height': chainInfo.currentBlockHeight,
+        Chain: '<span class="text-danger">Xenon</span>',
+        'Block Height (Max)': chainInfo.currentBlockHeightMax,
+        'Block Height (Min)': chainInfo.currentBlockHeightMin,
         'Total Burned': chainInfo.totalBurnFee,
         'Avg Burn Per Block': chainInfo.averageBurn,
         'Numb Miners': chainInfo.numbMiners,

@@ -68,11 +68,14 @@ const chartStore = {
         totalBurnFee += item.burn_fee
       })
       const averageBurn = Math.floor(totalBurnFee / state.miningNews.findBlockWinners.length)
+      const maxSTH = Math.max.apply(Math, state.miningNews.findBlockWinners.map(function (o) { return o.stacks_block_height }))
+      const minSTH = Math.min.apply(Math, state.miningNews.findBlockWinners.map(function (o) { return o.stacks_block_height }))
       return {
         averageBurn: averageBurn,
         totalBurnFee: totalBurnFee,
         numbMiners: state.miningNews.findMinerInfo.length,
-        currentBlockHeight: state.miningNews.findBlockWinners[0].stacks_block_height
+        currentBlockHeightMin: minSTH,
+        currentBlockHeightMax: maxSTH
       }
     },
     getFees: (state) => {
@@ -90,7 +93,7 @@ const chartStore = {
         options: state.options,
         datasets: [
           {
-            label: 'Confirmed tx at fee / last 24 hours',
+            label: 'Confirmed tx fees per last 24 hours',
             borderColor: '#249EBF',
             backgroundColor: '#249EBF',
             data: filteredData.map(filteredData => filteredData.dayCount)
@@ -255,9 +258,13 @@ const chartStore = {
       // const stxADDL = filteredData[0].stx_address.length
       const chartLabels = filteredData.map(filteredData => filteredData._id)
       // chartLabels = filteredData.map(filteredData => filteredData._id.substring(0, 5) + '...' + filteredData.stx_address.substring(stxADDL - 6, stxADDL - 1))
+      let totalBlocksMined = 0
+      filteredData.forEach((item) => {
+        totalBlocksMined += item.totalBlocksMined
+      })
       return {
         title: 'Number of Miners vs Wins',
-        description: 'Grouped by actual_win counting the number of miners with this number of wins',
+        description: 'Grouped by actual win - the number of miners with this many wins (weighted by the % of blocks mined) against number of wins',
         chartLabels: chartLabels,
         options: state.options,
         datasets: [
@@ -267,7 +274,7 @@ const chartStore = {
             borderWidth: 0,
             pointRadius: 0,
             backgroundColor: 'transparent',
-            data: filteredData.map(filteredData => (filteredData.count))
+            data: filteredData.map(filteredData => (filteredData.count * (filteredData.totalBlocksMined / totalBlocksMined) * 100))
           }
         ]
       }
