@@ -45,6 +45,7 @@
           </b-dropdown-item>
         </b-nav-item-dropdown>
         <b-nav-item class="nav-text" v-else><span @click="login()">Login</span></b-nav-item>
+        <b-nav-item to="/donate" class="nav-text"><span><b-icon icon="gift"/></span></b-nav-item>
       </b-navbar>
     </b-collapse>
   </b-navbar>
