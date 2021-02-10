@@ -24,10 +24,6 @@
 
     <b-collapse id="nav-collapse" is-nav>
       <b-navbar class="ml-auto">
-        <!--
-        <b-nav-item class="nav-text" to="/services"><span>Services</span></b-nav-item>
-        <b-nav-item class="nav-text" to="/donate"><b-button style="border-radius: 40px;" variant="info">Contribute</b-button></b-nav-item>
-        -->
           <exchange-rates class="pl-0 nav-text"/>
           <b-nav-item-dropdown class="nav-text" right caret>
             <template v-slot:button-content>
@@ -46,6 +42,8 @@
         </b-nav-item-dropdown>
         <b-nav-item class="nav-text" v-else><span @click="login()">Login</span></b-nav-item>
         <b-nav-item to="/donate" class="nav-text"><span><b-icon icon="gift"/></span></b-nav-item>
+        <b-nav-item to="/scene-vue" class="nav-text"><span><b-icon icon="gift"/></span></b-nav-item>
+        <b-nav-item to="/scene-plain" class="nav-text"><span><b-icon icon="gift"/></span></b-nav-item>
       </b-navbar>
     </b-collapse>
   </b-navbar>

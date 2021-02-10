@@ -1,8 +1,10 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Homepage from '@/views/Homepage.vue'
+// import Homepage from '@/views/Homepage.vue'
 import Services from '@/views/Services.vue'
 import Donate from '@/views/Donate.vue'
+import VueScene from '@/views/VueScene.vue'
+// import PlainScene from '@/views/PlainScene.vue'
 import Login from '@/views/Login.vue'
 import MainNavbar from '@/layout/MainNavbar.vue'
 import MainFooter from '@/layout/MainFooter.vue'
@@ -13,7 +15,7 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    components: { default: Homepage, header: MainNavbar, footer: MainFooter }
+    components: { default: VueScene, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/services',
@@ -24,6 +26,11 @@ const routes = [
     path: '/donate',
     name: 'donate',
     components: { default: Donate, header: MainNavbar, footer: MainFooter }
+  },
+  {
+    path: '/scene-vue',
+    name: 'scene-vue',
+    components: { default: VueScene, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/login',

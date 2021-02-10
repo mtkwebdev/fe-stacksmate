@@ -1,23 +1,32 @@
 <template>
-<div class="mx-2">
-  <div class="mb-5 mt-0">
-    <div class="mb-3 tagline">Risidio <span class="tagline1">Crowdfund</span></div>
-    <div class="mb-2">Everything we do at Risidio is about promoting Stacks, Bitcoin and Lightning networks.
-      we believe in a decentralised future and even our crowdfunding module
-      is designed with these goals in mind.</div>
-    <div class="mb-2">This crowdfunding module is available as open source web component you can plug
-      into your own website - <a href="https://github.com/radicleart/fe-mesh" target="_blank">fork the project</a> - and get in touch for more info.</div>
-  </div>
   <Scene>
-    <Box :position="[0, 0, 5]"></Box>
+    <Property name="clearColor" color="#ccc"></Property>
+    <Camera type="universal" ></Camera>
+    <HemisphericLight>
+    </HemisphericLight>
+    <Box :position="[0, 0, 0]">
+      <Material diffuse="#41B883" specular="#41B883"></Material>
+      <Animation property="rotation.x" :duration="200" :end="Math.PI * 4"></Animation>
+      <Animation property="rotation.y" :duration="200" :end="Math.PI * 4"></Animation>
+    </Box>
+    <Asset src="https://www.babylonjs-playground.com/scenes/skull.babylon" :scaling="[0.02, 0.02, 0.02]" :position="[4, 0.5, 0]"></Asset>
+    <Asset src="https://www.babylonjs-playground.com/scenes/StanfordBunny.obj" :scaling="[7.5, 7.5, 7.5]" :position="[-4, -0.25, -0.5]" :rotation="[0, Math.PI, 0]"></Asset>
+    <Asset src="https://rawgit.com/saswata26/misc/master/base.stl" :scaling="[0.02, 0.02, 0.02]" :position="[-2, 0, -0.5]"></Asset>
+    <Entity :position="[0, 0, 5]">
+      <Animation property="rotation.x" :duration="100">
+        <Key frame="0%" :value="0"></Key>
+        <Key frame="100%" :value="Math.PI * 2"></Key>
+      </Animation>
+      <Animation property="rotation.y" :duration="50" :end="Math.PI * 2"></Animation>
+      <Animation property="rotation.z" :duration="50" :end="Math.PI * 2"></Animation>
+      <PointLight diffuse="#FF0000"></PointLight>
+      <template v-for="x in [0, 4, -4]">
+        <template v-for="y in [0, 4, -4]">
+          <Box v-for="z in [0, 4, -4]" :position="[x, y, z]" :key="`${x},${y},${z}`"></Box>
+        </template>
+      </template>
+    </Entity>
   </Scene>
-
-  <div class="">
-    <div class="level1">
-      <rpay-entry :paymentConfig="configuration" @paymentEvent="rpayEvent"/>
-    </div>
-  </div>
-</div>
 </template>
 
 <script>

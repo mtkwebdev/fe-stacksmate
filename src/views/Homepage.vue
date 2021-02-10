@@ -42,19 +42,6 @@
     <div class="mb-4" style="min-height: 400px;" v-if="getFeePredictions">
       <bar-chart :graphData="getFeePredictions" />
     </div>
-    <!--
-    <div>
-      <div class="mb-5 mx-5">
-        <div class="level2">
-          Get stacking with tools and services that help you get going.
-        </div>
-        <div class="w-100 my-4 d-flex justify-content-between">
-          <b-button to="/donate" variant="info" class="text-white button1" style="width: 49%;">Support Us</b-button>
-          <b-button to="/services" variant="outline-info" class="text-info button2" style="width: 49%;">Learn more</b-button>
-        </div>
-      </div>
-    </div>
-    -->
   </div>
 </div>
 </template>
