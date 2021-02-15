@@ -44,13 +44,13 @@ const getUserWallet = function (dispatch) {
     const account = userSession.loadUserData()
     const publicKey = getStacksAccount(account.appPrivateKey)
     // const publicKey = getAddressFromPrivateKey(id.privateKey.data.toString('hex'))
-    const userAddress = (account.profile.stxAddress) ? account.profile.stxAddress : publicKey
+    const userAddress = (NETWORK === 'mainnet') ? account.profile.stxAddress.mainnet : account.profile.stxAddress.testnet
     // account.profile.stxAddress
     // addressToString(id.address)
     dispatch('fetchWalletInfo', userAddress).then((response) => {
       const wallet = {
         keyInfo: {
-          address: (account.profile.stxAddress) ? account.profile.stxAddress : response.data.address
+          address: (NETWORK === 'mainnet') ? account.profile.stxAddress.mainnet : account.profile.stxAddress.testnet
         },
         balance: response.data.balance, // parseInt(response.data.balance, 16),
         nonce: response.data.nonce,

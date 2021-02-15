@@ -34,6 +34,8 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 
+const NETWORK = process.env.VUE_APP_NETWORK
+
 export default {
   name: 'UserWallet',
   components: {
@@ -104,7 +106,7 @@ export default {
     },
     truncMe: function () {
       const profile = this.$store.getters[APP_CONSTANTS.KEY_MY_PROFILE]
-      let stxAddress = profile.stxAddress
+      let stxAddress = (NETWORK === 'mainnet') ? account.profile.stxAddress.mainnet : account.profile.stxAddress.testnet
       if (!stxAddress) {
         const wallet = this.$store.getters[APP_CONSTANTS.KEY_USER_WALLET]
         if (!wallet) return
