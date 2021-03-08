@@ -68,9 +68,6 @@
       "plugin:vue/essential",
       "@vue/standard"
     ],
-    "parserOptions": {
-      "ecmaVersion": 2020
-    },
     "rules": {}
   },
   "browserslist": [
