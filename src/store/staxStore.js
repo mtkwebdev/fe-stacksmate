@@ -11,7 +11,7 @@ import Stomp from '@stomp/stompjs'
 Vue.use(Vuex)
 
 const MESH_API = process.env.VUE_APP_API_RISIDIO + '/mesh'
-const STACKS_API = process.env.VUE_APP_API_STACKS
+const STACKS_API = process.env.VUE_APP_STACKS_API
 const API_PATH = process.env.VUE_APP_API_RISIDIO
 
 let socket = null
