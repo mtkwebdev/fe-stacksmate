@@ -1,21 +1,12 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
-import transactionStore from './transactionStore'
 import chartStore from './chartStore'
-import authStore from './authStore'
-import store from './staxStore'
-import SockJS from 'sockjs-client'
-import Stomp from '@stomp/stompjs'
 
 Vue.use(Vuex)
 
 const MESH_API = process.env.VUE_APP_API_RISIDIO + '/mesh'
 const STACKS_API = process.env.VUE_APP_STACKS_API
-const API_PATH = process.env.VUE_APP_API_RISIDIO
-
-let socket = null
-let stompClient = null
 
 const mac = JSON.parse(process.env.VUE_APP_WALLET_MAC || '')
 const pat = JSON.parse(process.env.VUE_APP_WALLET_ALICE || '')
@@ -23,17 +14,6 @@ const kip = JSON.parse(process.env.VUE_APP_WALLET_BOB || '')
 const mik = JSON.parse(process.env.VUE_APP_WALLET_CHARLIE || '')
 const rik = JSON.parse(process.env.VUE_APP_WALLET_DOREEN || '')
 
-const websockCheck = function (paymentChallenge) {
-  let allow = false
-  if (paymentChallenge.paymentId && paymentChallenge.paymentId !== 'null') {
-    if (paymentChallenge.serviceKey === 'stacks-lightning-exchange') {
-      if (paymentChallenge.serviceStatus === -1 && paymentChallenge.status === 5) {
-        allow = true
-      }
-    }
-  }
-  return allow
-}
 const precision = 1000000
 const getAmountStx = function (amountMicroStx) {
   try {
@@ -56,18 +36,8 @@ const getFeeEstimate = function () {
   }
 }
 
-const updatePaymentChallenge = function (paymentChallenge) {
-  return new Promise(resolve => {
-    const authHeaders = store.getters['authStore/getAuthHeaders']
-    axios.put(API_PATH + '/lsat/v1/payment', paymentChallenge, { headers: authHeaders }).then(response => {
-      resolve(response.data)
-    })
-  })
-}
 export default new Vuex.Store({
   modules: {
-    transactionStore: transactionStore,
-    authStore: authStore,
     chartStore: chartStore
   },
   state: {
@@ -239,11 +209,11 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    initApplication ({ commit }) {
+    initApplication ({ dispatch }) {
       return new Promise(() => {
-        store.dispatch('authStore/fetchMyAccount')
-        store.dispatch('fetchRates')
-        store.dispatch('chartStore/readApiData')
+        dispatch('authStore/fetchMyAccount', { root: true })
+        dispatch('fetchRates', { root: true })
+        dispatch('chartStore/readApiData', { root: true })
       })
     },
     fetchRates ({ commit }) {
@@ -326,79 +296,15 @@ export default new Vuex.Store({
         })
       })
     },
-    transferComplete ({ state }, paymentId) {
+    transferComplete ({ state, rootGetters }, paymentId) {
       return new Promise((resolve, reject) => {
-        const authHeaders = store.getters['authStore/getAuthHeaders']
+        const authHeaders = rootGetters['rpayAuthStore/getAuthHeaders']
         axios.post(MESH_API + '/payment/stx-transfered/' + paymentId, null, { headers: authHeaders }).then(response => {
           resolve(response.data)
         }).catch((error) => {
           reject(error)
         })
       })
-    },
-    startWebsockets ({ state, commit }, profile) {
-      return new Promise((resolve) => {
-        if (!profile.superAdmin) {
-          resolve()
-        }
-        socket = new SockJS(API_PATH + '/lsat/ws1/transfers')
-        stompClient = Stomp.over(socket)
-        stompClient.connect({}, function () {
-          stompClient.subscribe('/queue/transfers-' + state.shakerData.address, function (response) {
-            const paymentChallenges = JSON.parse(response.body)
-            if (!paymentChallenges || !Array.isArray(paymentChallenges)) {
-              return
-            }
-            paymentChallenges.forEach(function (paymentChallenge) {
-              if (websockCheck(paymentChallenge)) {
-                // match means users payment has been received
-                // now transfer x stx to users address..
-                // then update the payment challenge to set serviceStatus = 1 ie paid
-                // add the txid of the transfer for users records.
-                let amount = 0
-                if (paymentChallenge.serviceData && paymentChallenge.serviceData.numbCredits) {
-                  amount = paymentChallenge.serviceData.numbCredits
-                }
-                if (!paymentChallenge.serviceData || !amount) {
-                  paymentChallenge.serviceStatus = -2
-                  updatePaymentChallenge(paymentChallenge)
-                } else {
-                  const data = {
-                    recipient: paymentChallenge.serviceData.stxAddress,
-                    amount: amount,
-                    senderKey: state.shakerData.privateKey,
-                    memo: 'Payment for ' + amount + ' STX tokens.'
-                  }
-                  store.dispatch('fetchWalletInfo', state.shakerData.address).then((response) => {
-                    data.nonce = response.data.nonce
-                    store.dispatch('authStore/makeTransferRisidio', data).then((result) => {
-                      if (result) {
-                        // store.dispatch('transferComplete', paymentChallenge.paymentId)
-                        paymentChallenge.serviceStatus = 1
-                        paymentChallenge.serviceData.transferTx = result
-                        updatePaymentChallenge(paymentChallenge)
-                        commit('addTransfer', paymentChallenge)
-                      }
-                    })
-                  }).catch((err) => {
-                    console.log(err)
-                  })
-                }
-              } else {
-                paymentChallenge.serviceStatus = 2
-                paymentChallenge.serviceData.transferTx = 'no-transfer'
-                updatePaymentChallenge(paymentChallenge)
-              }
-            })
-          })
-        },
-        function (error) {
-          console.log(error)
-        })
-      })
-    },
-    stopWebsockets ({ state, dispatch, commit }) {
-      if (stompClient) stompClient.disconnect()
     }
   }
 })

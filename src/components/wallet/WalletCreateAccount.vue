@@ -48,11 +48,6 @@ export default {
     }
   },
   mounted () {
-    this.$store.dispatch('transactionStore/makeKey').then((wallet) => {
-      if (wallet && wallet.keyInfo) this.wallet = wallet
-      this.loading = false
-    })
-  },
   methods: {
     createAccount: function () {
       this.$emit('createAccount', this.wallet)
