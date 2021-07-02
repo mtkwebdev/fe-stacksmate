@@ -5,12 +5,15 @@
 
   <b-navbar toggleable="md" type="dark" style="width: 100%; margin: 0; padding-right:0;padding-left:0;">
     <b-navbar-brand href="#">
+      <div class="tagline"><img width="30px" :src="stxIcon"/> Stacks<span class="tagline1">Mate</span></div>
+      <!--
       <div class="d-block d-md-none">
         <router-link to="/" class="navbar-brand"><img height="30px" :src="logo"/></router-link>
       </div>
       <div class="d-none d-md-block">
         <router-link to="/" class="navbar-brand"><img height="50px" :src="logo"/></router-link>
       </div>
+      -->
     </b-navbar-brand>
 
     <exchange-rates class="ml-auto nav-text d-block d-md-none" v-if="isHomePage"/>
@@ -24,26 +27,25 @@
 
     <b-collapse id="nav-collapse" is-nav>
       <b-navbar class="ml-auto">
-          <exchange-rates class="pl-0 nav-text"/>
-          <b-nav-item-dropdown class="nav-text" right caret>
-            <template v-slot:button-content>
-              <span class="header">Circulating: 711,834,032</span>
-            </template>
-            <b-dropdown-item><span style="display: inline-block; width: 150px;">Total Supply</span> 945,757,398</b-dropdown-item>
-          </b-nav-item-dropdown>
-        <b-nav-item-dropdown class="nav-text" right v-if="loggedIn" caret>
+        <exchange-rates class="pl-0 nav-text"/>
+        <b-nav-item-dropdown class="nav-text" right v-if="profile.loggedIn" caret>
           <template v-slot:button-content>
             Account
           </template>
           <b-dropdown-item>{{username}}</b-dropdown-item>
+          <b-dropdown-divider />
           <b-dropdown-item>
-            <span @click="logout()">Logout</span>
+            <span>{{profile.stxAddress}}</span>
+          </b-dropdown-item>
+          <b-dropdown-item v-if="profile.accountInfo">
+            <span>Balance: {{profile.accountInfo.balance}} STX</span>
+          </b-dropdown-item>
+          <b-dropdown-divider />
+          <b-dropdown-item>
+            <span @click="startLogout()">Logout</span>
           </b-dropdown-item>
         </b-nav-item-dropdown>
-        <b-nav-item class="nav-text" v-else><span @click="login()">Login</span></b-nav-item>
-        <b-nav-item to="/donate" class="nav-text"><span><b-icon icon="gift"/></span></b-nav-item>
-        <b-nav-item to="/scene-vue" class="nav-text"><span><b-icon icon="gift"/></span></b-nav-item>
-        <b-nav-item to="/scene-plain" class="nav-text"><span><b-icon icon="gift"/></span></b-nav-item>
+        <b-nav-item class="nav-text" v-else><span @click="startLogin()">Login</span></b-nav-item>
       </b-navbar>
     </b-collapse>
   </b-navbar>
@@ -81,12 +83,10 @@ export default {
     ExchangeRates
   },
   watch: {
-    'localPlayMode' () {
-      this.$store.commit(APP_CONSTANTS.COMMIT_TOGGLE_PLAY_MODE)
-    }
   },
   data () {
     return {
+      stxIcon: require('@/assets/img/stacks-icon-white.svg'),
       toggler: require('@/assets/img/navbar/Icon_ionic-md-options.svg'),
       logo: require('@/assets/img/logo/risidio_white.png'),
       nounStack: require('@/assets/img/logo/Risidio_Stacks.svg'),
@@ -94,14 +94,40 @@ export default {
     }
   },
   methods: {
-    login () {
-      this.$store.dispatch('authStore/startLogin')
+    balance () {
+      const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
+      return (profile && profile.wallet) ? profile.wallet.balance : 0
     },
-    logout () {
-      this.$store.dispatch('authStore/startLogout').then(() => {
-        localStorage.clear()
-        sessionStorage.clear()
+    stxAddress () {
+      const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
+      if (profile.wallet && profile.wallet.keyInfo.address) {
+        return profile.wallet.keyInfo.address.substring(0, 5) + '...' + profile.wallet.keyInfo.address.substring(profile.wallet.keyInfo.address.length - 5)
+      }
+      return 'n/a'
+    },
+    startLogout () {
+      // this.$emit('updateEventCode', { eventCode: 'connect-logout' })
+      this.$store.dispatch('rpayAuthStore/startLogout').then(() => {
+        if (this.$route.name !== 'home') {
+          this.$router.push('/')
+        }
+        // sessionStorage.clear()
+      }).catch((err) => {
+        console.log(err)
+        this.$store.commit(APP_CONSTANTS.SET_WEB_WALLET_NEEDED)
       })
+    },
+    startLogin () {
+      // this.$emit('updateEventCode', { eventCode: 'connect-login' })
+      const myProfile = this.$store.getters['rpayAuthStore/getMyProfile']
+      if (myProfile.loggedIn) {
+        this.$emit('connect-login', myProfile)
+      } else {
+        this.$store.dispatch('rpayAuthStore/startLogin').catch(() => {
+          // https://www.hiro.so/wallet/install-web
+          this.$store.commit(APP_CONSTANTS.SET_WEB_WALLET_NEEDED)
+        })
+      }
     },
     changeProvider (provider) {
       if (provider) {
@@ -147,16 +173,13 @@ export default {
       const networkId = this.$store.getters[APP_CONSTANTS.KEY_NETWORK_ID]
       return networkId
     },
-    loggedIn () {
-      const profile = this.$store.getters[APP_CONSTANTS.KEY_MY_PROFILE]
-      return profile.loggedIn
-    },
     username () {
-      const profile = this.$store.getters[APP_CONSTANTS.KEY_MY_PROFILE]
+      const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
       return profile.name
     },
-    showLogin () {
-      return this.$route.name !== 'login'
+    profile () {
+      const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
+      return profile
     }
   }
 }

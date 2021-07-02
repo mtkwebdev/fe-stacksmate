@@ -61,7 +61,7 @@ export default {
     }
   },
   mounted () {
-    const profile = this.$store.getters[APP_CONSTANTS.KEY_MY_PROFILE]
+    const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
     if (profile.loggedIn) {
       this.loading = false
       const query = this.$route.query
@@ -72,10 +72,10 @@ export default {
       }
     } else {
       if (BLOCKSTACK_LOGIN < 3) {
-        this.$store.dispatch('authStore/startLogin')
+        this.$store.dispatch('rpayAuthStore/startLogin')
       } else {
         this.loading = false
-        this.$store.dispatch('authStore/fetchMyAccount').then(profile => {
+        this.$store.dispatch('rpayAuthStore/fetchMyAccount').then(profile => {
           if (profile.loggedIn) {
             this.$router.push({ path: '/' })
           }
@@ -88,7 +88,7 @@ export default {
       this.showModal = false
     },
     loginBanter: function () {
-      this.$store.dispatch('authStore/startLogin')
+      this.$store.dispatch('rpayAuthStore/startLogin')
     }
   }
 }

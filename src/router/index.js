@@ -2,7 +2,6 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Homepage from '@/views/Homepage.vue'
 import Services from '@/views/Services.vue'
-import Donate from '@/views/Donate.vue'
 import Login from '@/views/Login.vue'
 import MainNavbar from '@/layout/MainNavbar.vue'
 import MainFooter from '@/layout/MainFooter.vue'
@@ -12,18 +11,18 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'home',
+    name: 'swaps',
+    components: { default: Homepage, header: MainNavbar, footer: MainFooter }
+  },
+  {
+    path: '/swaps',
+    name: 'swaps',
     components: { default: Homepage, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/services',
     name: 'services',
     components: { default: Services, header: MainNavbar, footer: MainFooter }
-  },
-  {
-    path: '/donate',
-    name: 'donate',
-    components: { default: Donate, header: MainNavbar, footer: MainFooter }
   },
   {
     path: '/login',

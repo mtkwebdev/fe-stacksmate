@@ -123,7 +123,7 @@ export default {
       return wallets
     },
     loggedIn () {
-      const profile = this.$store.getters[APP_CONSTANTS.KEY_MY_PROFILE]
+      const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
       return profile.loggedIn
     },
     playMode () {
