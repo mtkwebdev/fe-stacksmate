@@ -7,23 +7,28 @@
     <router-view name="header"/>
     <div>
       <div class="container">
-        <router-view class="my-3" name="wallets"/>
-        <router-view id="nav"  class="w-100" style="position: relative; top: 60px;"/>
+        <router-view id="nav"/>
       </div>
-      <notifications :duration="10000" classes="r-notifs" position="bottom right" width="30%"/>
     </div>
     <router-view name="footer" />
   </div>
+  <notifications :duration="5000" classes="r-notifs" position="bottom left" width="50%"/>
+  <waiting-modal/>
+  <success-modal />
 </div>
 </template>
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import RisidioPay from 'risidio-pay'
+import SuccessModal from '@/components/utils/SuccessModal'
+import WaitingModal from '@/components/utils/WaitingModal'
 // const RisidioPay = () => import('risidio-pay')
 
 export default {
   name: 'App',
   components: {
+    SuccessModal,
+    WaitingModal,
     RisidioPay
   },
   data () {
@@ -34,9 +39,6 @@ export default {
     }
   },
   watch: {
-  },
-  mounted () {
-    this.setupEventListener()
   },
   beforeCreate () {
     this.$store.commit(APP_CONSTANTS.SET_RPAY_FLOW, { flow: 'config-flow', asset: this.gaiaAsset })
@@ -51,27 +53,6 @@ export default {
     })
   },
   methods: {
-    setupEventListener () {
-      const $self = this
-      this.loading = false
-      if (window.eventBus && window.eventBus.$on) {
-        window.eventBus.$on('rpayEvent', function (data) {
-          if (data.opcode === 'stx-transaction-finished') {
-            const txResult = $self.$store.getters[APP_CONSTANTS.KEY_TRANSACTION_DIALOG_MESSAGE]({ dKey: data.opcode, txId: data.txId })
-            $self.$store.commit('setModalMessage', txResult)
-          } else if (data.opcode === 'stx-transaction-sent') {
-            const txResult = $self.$store.getters[APP_CONSTANTS.KEY_TRANSACTION_DIALOG_MESSAGE]({ dKey: data.opcode, txId: data.txId })
-            $self.$store.commit('setModalMessage', txResult)
-          } else if (data.opcode === 'stx-transaction-error') {
-            const txResult = $self.$store.getters[APP_CONSTANTS.KEY_TRANSACTION_DIALOG_MESSAGE]({ dKey: data.opcode, txId: data.txId })
-            $self.$store.commit('setModalMessage', txResult)
-          } else if (data.opcode === 'configured-logged-in') {
-            $self.$store.commit('rpayAuthStore/setAuthResponse', data.session)
-            $self.$store.dispatch('rpayAuthStore/fetchMyAccount')
-          }
-        })
-      }
-    }
   },
   computed: {
     configuration () {

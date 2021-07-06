@@ -1,0 +1,414 @@
+#rpay-modal .modal-content {
+  border: none !important;
+  background-color: transparent !important;
+}
+#rpay-modal .modal-content {
+  border-radius: 0px;
+  min-height: 200px;
+  color: #000;
+  border: none;
+}
+#rpay-modal .modal-header {
+  display: none;
+  border-bottom: 0px solid #dee2e6;
+  border-radius: 0px;
+}
+#rpay-modal .modal-footer {
+  display: none;
+  border-top: 0px solid #dee2e6;
+  border-radius: 0px;
+}
+#rpay-modal .card-text {
+  text-align: center;
+}
+#rpay-modal .footer-container {
+  background: transparent !important;
+}
+#rpay-pay-card .footer-container {
+  height: 80px;
+}
+#rpay-pay-card .card-text {
+  padding: 0.25rem;
+}
+#rpay-pay-card .text-one {
+  color: #000;
+}
+#rpay-pay-card .text-two {
+  color: #ad1457;
+}
+#rpay-pay-card .text-three {
+  color: #ffd54f;
+}
+#rpay-pay-card .btn {
+  text-transform: capitalize;
+  font-size: 1.5rem;
+  font-weight: 7500;
+  border: none;
+}
+#rpay-pay-card label {
+  text-align: left;
+}
+#rpay-pay-card .btn-danger {
+  background-color: #000;
+  border: 1pt solid #000 !important;
+  color: #fff;
+}
+#rpay-pay-card .no-option-on {
+  color: #ffffff;
+  padding: 5px 15px;
+  margin: 8px;
+  text-transform: capitalize;
+  font-size: 1.2rem;
+  font-weight: 700;
+  min-width: 70%;
+  border-radius: 18px;
+}
+#rpay-pay-card .round-btn {
+  border-radius: 0px;
+  width: 50% !important;
+  white-space: 'nowrap';
+}
+#rpay-pay-card .no-option-off {
+  color: #000000;
+  border: #cccccc;
+  background-color: #cccccc;
+  padding: 5px 15px;
+  margin: 8px;
+  text-transform: capitalize;
+  font-size: 1.2rem;
+  font-weight: 700;
+  min-width: 70%;
+  border-radius: 18px;
+}
+#rpay-pay-card .oi-card-text {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  margin-top: 0;
+  padding: 0;
+  background-color: #F7F7F7;
+}
+#rpay-pay-card .rpay-card {
+  max-width: 450px;
+  min-width: 450px;
+  min-height: 60vh;
+  padding: '0';
+  margin: '0';
+  background-repeat: 'no-repeat';
+  -webkit-background-size: 'cover';
+  -moz-background-size: 'cover';
+  -o-background-size: 'cover';
+  background-size: 'cover';
+  /** opacity: 0.9;
+  background-image: url('https://risidio-journal.cdn.prismic.io/risidio-journal/59455bcb-a954-4713-9afd-cfe6130f0b26_Group+994.svg');
+  **/
+}
+#rpay-pay-card .btn:focus {
+  box-shadow: none !important;
+}
+#rpay-pay-card .text-small {
+  font-size: 1rem;
+}
+#rpay-pay-card a {
+  font-size: 1.4rem;
+  font-weight: normal;
+  color: #000000;
+}
+#rpay-pay-card .picker-input {
+  width: 54px;
+  height: 54px;
+  text-align: center;
+  background: #FFFFFF 0% 0% no-repeat padding-box;
+  border-radius: 5px;
+  border: none;
+  opacity: 1;
+  box-shadow: 0px 3px 6px #0000003B;
+}
+#rpay-pay-card h1 {
+  font-weight: 300;
+  font-size: 1.5rem;
+}
+#rpay-pay-card .text-bold {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+#rpay-pay-card .text-300 {
+  font-weight: 300;
+}
+#rpay-pay-card .cp-stepper {
+  position: relative;
+  margin-top: 15px;
+  font-weight: 700;
+  width: 28px;
+  height: 28px;
+  border: 1pt solid #ad1457;
+  border-radius: 50%;
+  color: #ad1457;
+  padding: 5px;
+  cursor: pointer;
+}
+#rpay-pay-card .cp-totals-outer {
+  margin: 30px auto;
+  width: 70%;
+}
+#rpay-pay-card .cp-totals {
+  background: #F0EFEF 0% 0% no-repeat padding-box;
+  border-radius: 16px;
+  opacity: 1;
+  padding: 20px;
+}
+#rpay-pay-card a {
+  font-weight: 200;
+}
+#rpay-pay-card .rpay-text-secondary {
+  font-size: 1.2rem;
+}
+#rpay-pay-card .text-h2 {
+  font-size: 2.4rem;
+  font-weight: 300;
+}
+#rpay-pay-card .rpay-sq-logo {
+  padding: 20px;
+  max-width: 250px;
+  background-color: #fff;
+  border-radius: 5px;
+}
+#rpay-pay-card .rpay-countdown {
+  position: relative;
+  top: 0px;
+  text-align: left;
+  font-size: 1.2rem;
+  font-weight: 200;
+  letter-spacing: 0px;
+  opacity: 1;
+}
+#rpay-pay-card .footer-container {
+  max-height: 60px !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+}
+
+/* ///////////////////////// NEW DESIGN //////////////////////////// */
+#rpay-pay-card .card.rpay-card {
+  color: #000;
+  border-radius: 0px;
+  min-width: 352px;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+#rpay-pay-card .card.rpay-card .card-body {
+  min-width: 352px;//*
+  min-height: 496px;//*
+  box-shadow: 0px 3px 6px #00000029;
+  border-radius: 20px;
+  background-color: #ffffff;
+  padding: 0 0 30px 0;
+}
+#rpay-pay-card .card-body p:first-child img:first-child {
+  width: 100%;
+}
+#rpay-pay-card .card-body .co-option-off, #rpay-pay-card .card-body .co-option-on {
+  background-color: #fff;
+  margin: 8px;
+  border-radius: 28px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.72px;
+  color: #000000;
+  text-transform: uppercase;
+  padding: 15px 25px;
+  min-width: 110px;
+}
+#rpay-pay-card .card-body .co-option-off:hover {
+  border: 1px solid #DC1720 !important;
+}
+#rpay-pay-card .card-body .co-option-off {
+  border: 1px solid #EBEBEB !important;
+}
+#rpay-pay-card .card-body .co-option-on {
+  border: 1px solid #DC1720 !important;
+  background-color: #ffffff;
+}
+#rpay-pay-card .card-body .cp-btn-order {
+  width: 100%;
+  color: white;
+  height: 46px;
+  background: #F8A900;
+  border: none !important;
+  border-radius: 28px;
+  padding-left: 20px;
+  padding-right: 20px;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+#rpay-pay-card .card-body .rpay-sq-payment-box {
+  border-radius: 5px;
+  padding: 10px;
+  //*min-width: 300px;
+  //*max-width: 300px;
+}
+#rpay-pay-card .sq-btn-order {
+  position: relative;
+  top: 40px;
+  width: 100%;
+  color: white;
+  height: 46px;
+  background: #F8A900;
+  border: none !important;
+  border-radius: 28px;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+#rpay-pay-card .sq-btn-order:hover {
+  background: #DC1720;
+}
+#rpay-pay-card .card.rpay-card footer {
+  background-color: transparent;
+  color: #ffffff;
+}
+#rpay-pay-card .card.rpay-card footer .click-effect {
+  pointer-events: none;//*
+}
+
+/* PROGRESS BAR STYLE */
+$slider-width-number: 250;
+$slider-width: #{$slider-width-number}px;
+$slider-height: 1px;
+$background-slider: #ffffff;
+$background-filled-slider: #F8A900;
+$thumb-width: 9px;
+$thumb-height: 9px !important;
+$thumb-radius: 50%;
+$thumb-background: #F8A900;
+$thumb-border: none;
+$track-border: none;
+$shadow-size: -4.45px;
+$fit-thumb-in-slider: -4.6px;
+
+@function makelongshadow($color, $size) {
+  $val: 5px 0 0 $size $color;
+
+  @for $i from 6 through $slider-width-number {
+    $val: #{$val}, #{$i}px 0 0 $size #{$color};
+  }
+
+  @return $val;
+}
+
+#rpay-pay-card .card.rpay-card .footer-container input[type=range] {
+  display: flex;
+  align-items: center;
+  appearance: none;
+  background: none;
+  height: 25px;
+  min-height: 25px;
+  overflow: hidden;
+  width: $slider-width;
+  margin: 0 auto;
+  /*
+  &::before {
+    position: absolute;
+    content: '';
+    width: $thumb-width;
+    height: $thumb-height;
+    background: $thumb-background;
+    border-radius: $thumb-radius;
+    border: $thumb-border;
+  }
+
+  &::after {
+    position: absolute;
+    content: '';
+    width: $thumb-width;
+    height: $thumb-height;
+    background: $thumb-background;
+    border-radius: $thumb-radius;
+    border: $thumb-border;
+  }
+  */
+  &:focus {
+    box-shadow: none;
+    outline: none;
+  }
+
+  &::-webkit-slider-runnable-track {
+    background: $background-filled-slider;
+    content: '';
+    height: $slider-height;
+    pointer-events: none;
+    -webkit-appearance: none;
+    border: $track-border;
+  }
+
+  &::-webkit-slider-thumb {
+    width: $thumb-width;
+    height: $thumb-height;
+    appearance: none;
+    background: $thumb-background;
+    border-radius: $thumb-radius;
+    box-shadow: makelongshadow($background-slider, $shadow-size);
+    margin-top: $fit-thumb-in-slider;
+    border: $thumb-border;
+  }
+
+  &::-moz-range-track {
+    width: $slider-width;
+    height: $slider-height;
+    border: $track-border;
+  }
+
+  &::-moz-range-thumb {
+    width: $thumb-width;
+    height: $thumb-height;
+    background: $thumb-background;
+    border-radius: $thumb-radius;
+    border: $thumb-border;
+    position: relative;
+  }
+
+  &::-moz-range-progress {
+    height: $slider-height;
+    background: $background-filled-slider;
+    border: 0;
+    margin-top: 0;
+  }
+
+  &::-ms-track {
+    background: transparent;
+    border: 0;
+    border-color: transparent;
+    border-radius: 0;
+    border-width: 0;
+    color: transparent;
+    height: $slider-height;
+    margin-top: 10px;
+    width: $slider-width;
+    border: $track-border;
+  }
+
+  &::-ms-thumb {
+    width: $thumb-width;
+    height: $thumb-height;
+    background: $thumb-background;
+    border-radius: $thumb-radius;
+    border: $thumb-border;
+  }
+
+  &::-ms-fill-lower {
+    background: $background-filled-slider;
+    border-radius: 0;
+  }
+
+  &::-ms-fill-upper {
+    background: $background-slider;
+    border-radius: 0;
+  }
+
+  &::-ms-tooltip {
+    display: none;
+  }
+}

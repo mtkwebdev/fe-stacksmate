@@ -1,5 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import axios from 'axios'
+import paymentStore from './paymentStore'
 
 Vue.use(Vuex)
 
@@ -7,8 +9,6 @@ const RISIDIO_API_PATH = process.env.VUE_APP_RISIDIO_API
 const APPLICATION_ID = process.env.VUE_APP_SQUARE_APPLICATION_ID
 const LOCATION_ID = process.env.VUE_APP_SQUARE_LOCATION_ID
 const SQUARE_URL = process.env.VUE_APP_VUE_APP_SQUARE_URL
-const ETH_PAYMENT_ADDRESS = process.env.VUE_APP_ETH_PAYMENT_ADDRESS
-const STX_PAYMENT_ADDRESS = process.env.VUE_APP_STACKS_PAYMENT_ADDRESS
 const STX_CONTRACT_ADDRESS = process.env.VUE_APP_STACKS_CONTRACT_ADDRESS
 const STX_CONTRACT_NAME = process.env.VUE_APP_STACKS_CONTRACT_NAME
 const STX_MINT_FUNCTION = process.env.VUE_APP_STACKS_MINT_FUNCTION
@@ -17,48 +17,51 @@ const RISIDIO_WALLET_MAC = process.env.VUE_APP_WALLET_MAC
 const RISIDIO_WALLET_SKY = process.env.VUE_APP_WALLET_SKY
 const RISIDIO_STACKS_API = process.env.VUE_APP_STACKS_API
 
-const selling = {
-}
-const marketConfig = {
-  oneLayout: true,
-  searchMenu: false,
-  sideMenu: false
-}
-const beneficiariesDefault = [
-  {
-    username: 'donation.id',
-    role: 'Charitable Donation',
-    email: 'donation@thisisnumberone.com',
-    royalty: 10,
-    chainAddress: 'STFJEDEQB1Y1CQ7F04CS62DCS5MXZVSNXXN413ZG'
-  },
-  {
-    username: 'environment.id',
-    role: 'Environment/Sustainabilty',
-    email: 'environment@thisisnumberone.com',
-    royalty: 5,
-    chainAddress: 'STMYA5EANW6C0HNS1S57VX52M0B795HHFDBW2XBE'
+const precision = 100000000
+const getAmounts = function (currency, amountFiat, tickerRates) {
+  try {
+    const rate = tickerRates.find((o) => o.currency === currency)
+    const amountBtc = amountFiat / rate.last
+    var formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency
+    })
+    const amounts = {
+      currency: currency,
+      amountFiat: formatter.format(amountFiat),
+      amountBtc: Math.round(amountBtc * precision) / precision,
+      amountSat: Math.round(amountBtc * precision),
+      amountEth: Math.round((amountFiat / rate.ethPrice) * precision) / precision,
+      amountStx: Math.round((amountFiat / rate.stxPrice) * precision) / precision
+    }
+    return amounts
+  } catch {
+    return {}
   }
-]
+}
+
 const payment = {
   forceNew: false,
-  amountFiat: 0.5,
+  amountFiat: 5,
+  amountEth: 5,
+  amountBtc: 5,
+  amountStx: 5,
   currency: 'GBP',
   paymentCode: 'po-12324',
-  allowMultiples: true,
-  stxPaymentAddress: STX_PAYMENT_ADDRESS,
-  ethPaymentAddress: ETH_PAYMENT_ADDRESS,
-  paymentOption: 'ethereum',
+  allowMultiples: false,
+  stxPaymentAddress: process.env.VUE_APP_STACKS_PAYMENT_ADDRESS,
+  ethPaymentAddress: process.env.VUE_APP_ETH_PAYMENT_ADDRESS,
+  paymentOption: 'unchosen',
   paymentOptions: [
     { allowFiat: true },
     { allowBitcoin: true },
     { allowLightning: true },
-    { allowStacks: true },
+    { allowStacks: false },
     { allowLSAT: false },
     { allowEthereum: true }
   ],
   creditAttributes: {
-    start: 4,
+    start: 1,
     step: 2,
     min: 2,
     max: 20
@@ -73,13 +76,6 @@ const minter = {
   preferredNetwork: 'stacks risidio',
   networks: [
     {
-      network: 'stacks risidio',
-      functionName: STX_MINT_FUNCTION,
-      enabled: true,
-      contractAddress: STX_CONTRACT_ADDRESS,
-      contractName: STX_CONTRACT_NAME
-    },
-    {
       network: 'stacks connect',
       enabled: true,
       functionName: STX_MINT_FUNCTION,
@@ -93,8 +89,8 @@ const minter = {
       contractAddress: ETH_CONTRACT_ADDRESS
     }
   ],
-  enableRoyalties: true,
-  beneficiaries: beneficiariesDefault
+  enableRoyalties: false,
+  beneficiaries: []
 }
 
 const lookAndFeel = {
@@ -109,12 +105,7 @@ const lookAndFeel = {
   }
 }
 
-const gaiaAsset = {
-  saleData: {}
-}
-
 const setup = function (data) {
-  if (!data.asset) data.asset = {}
   let risidioCardMode = 'payment-flow'
   if (data.flow) {
     risidioCardMode = data.flow
@@ -124,11 +115,11 @@ const setup = function (data) {
   const risidioBaseApi = RISIDIO_API_PATH
   const configuration = {
     lookAndFeel: lookAndFeel,
-    gaiaAppDomains: ['localhost:8080', 'localhost:8081', 'localhost:8082'],
-    gaiaAsset: (data.asset) ? data.asset : gaiaAsset,
+    gaiaAppDomains: null,
+    gaiaAsset: {},
     payment: payment,
-    marketConfig: marketConfig,
-    selling: selling,
+    marketConfig: null,
+    selling: null,
     minter: minter,
     network: NETWORK,
     risidioProjectId: STX_CONTRACT_ADDRESS + '.' + STX_CONTRACT_NAME,
@@ -144,79 +135,17 @@ const setup = function (data) {
 
 export default new Vuex.Store({
   modules: {
+    paymentStore
   },
   state: {
     chromeLink: 'https://chrome.google.com/webstore/detail/stacks-wallet/ldinpeekobnhjjdofggfgjlcehhmanlj',
     firefoxLink: 'https://addons.mozilla.org/en-US/firefox/addon/stacks-wallet/',
     webWalletNeeded: false,
-    xgeRates: null,
-    playMode: false,
-    fiatCurrency: 'EUR',
-    shakerData: null,
-    windims: { innerWidth: window.innerWidth, innerHeight: window.innerHeight },
-    response: null,
-    status: true,
-    transfer: null,
-    currentAccount: null,
-    feeEstimate: null,
-    endpoints: [
-      {
-        type: 'account',
-        values: [
-          { value: 'Choose Enpoint', text: 'Choose Option' },
-          { value: '/sidecar/v1/address/{address}/balances', text: 'Get account balances' },
-          { value: '/sidecar/v1/address/{address}/transactions', text: 'Get account transactions' },
-          { value: '/sidecar/v1/address/{address}/assets', text: 'Get account assets' },
-          { value: '/v2/accounts/{address}', text: 'Get account info' },
-          { value: '/v2/info', text: 'Get Core API info' },
-          { value: '/sidecar/v1/status', text: 'Get Blockchain API status' },
-          { value: '/v2/fees/transfer', text: 'Get fee estimation / byte' }
-        ]
-      },
-      {
-        type: 'contract',
-        values: [
-          { value: 'Choose Enpoint', text: 'Choose Option' },
-          { value: '/sidecar/v1/contract/{contract_id}', text: 'Get contract info' },
-          { value: '/sidecar/v1/contract/{contract_id}/events', text: 'Get contract events' },
-          { value: '/v2/contracts/interface/{stacks_address}/{contract_name}', text: 'Get contract interface' },
-          { value: '/v2/map_entry/{stacks_address}/{contract_name}/{map_name}', text: 'Get contract data map' },
-          { value: '/v2/contracts/source/{stacks_address}/{contract_name}', text: 'Get contract source' },
-          { value: '/v2/contracts/call-read/{stacks_address}/{contract_name}/{function_name}', text: 'Call read-only function' }
-        ]
-      },
-      {
-        type: 'faucet',
-        values: [
-          { value: null, text: 'Choose Faucet Endpoint' },
-          { value: '/sidecar/v1/faucets/stx/{address}', method: 'post', text: 'Get testnet STX tokens' },
-          { value: '/sidecar/v1/faucets/btc/{address}', method: 'post', text: 'Get testnet BTC tokens' }
-        ]
-      },
-      {
-        type: 'deployment',
-        values: [
-          { value: '/v2/transactions', method: 'post', text: 'Broadcast raw transaction' }
-        ]
-      },
-      {
-        type: 'transaction',
-        values: [
-          { value: null, text: 'Choose Transaction Endpoint' },
-          { value: '/sidecar/v1/tx', text: 'Get most recent (<= 200) transactions' },
-          { value: '/sidecar/v1/tx/stream?protocol={protocol}', text: 'Stream transaction events' },
-          { value: '/sidecar/v1/tx/{txid}', text: 'Get transaction' }
-        ]
-      },
-      {
-        type: 'block',
-        values: [
-          { value: null, text: 'Choose Blocks Endpoint' },
-          { value: '/sidecar/v1/block/{blockhash}', method: 'get', text: 'Get block' },
-          { value: '/sidecar/v1/block', text: 'Get recent blocks' }
-        ]
-      }
-    ]
+    proof: '?proof=0',
+    fiatCurrency: 'USD',
+    baseCurrency: 'GBP',
+    baseAmount: 5,
+    windims: { innerWidth: window.innerWidth, innerHeight: window.innerHeight }
   },
   getters: {
     getWebWalletLinkChrome: state => {
@@ -226,42 +155,35 @@ export default new Vuex.Store({
       return state.firefoxLink
     },
     getRpayConfiguration: state => {
+      state.configuration.payment = payment
+      state.configuration.payment.amountFiat = state.baseAmount
+      state.configuration.payment.currency = state.baseCurrency
       return state.configuration
     },
     getWebWalletNeeded: state => {
       return state.webWalletNeeded
     },
-    getInnerWidth: state => {
-      return (state.windims.innerWidth)
-    },
     getModalMessage: state => {
       return state.modalMessage
     },
-    getExchangeRates: state => {
-      return state.xgeRates
-    },
-    getSectionHeight: state => {
-      return (state.windims.innerHeight)
-    },
-    getSectionWidth: state => {
-      return (state.windims.innerWidth)
-    },
-    getFeeEstimate: state => {
-      return state.feeEstimate
-    },
-    getExchangeRate: state => {
-      if (!state.xgeRates) {
-        return null
-      }
-      return state.xgeRates.find(item => item.currency === state.fiatCurrency)
-    },
     getFiatCurrency: state => {
       return state.fiatCurrency
+    },
+    getAmounts: state => tickerRates => {
+      const baseRate = tickerRates.find((o) => o.currency === state.baseCurrency)
+      const fiatRate = tickerRates.find((o) => o.currency === state.fiatCurrency)
+      const fiatAmount = (fiatRate.last / baseRate.last) * 5
+      const amounts = {
+        baseAmounts: getAmounts(state.baseCurrency, state.baseAmount, tickerRates),
+        fiatAmounts: getAmounts(state.fiatCurrency, fiatAmount, tickerRates)
+      }
+      return amounts
     }
   },
   mutations: {
     setRpayFlow (state, data) {
-      state.configuration = setup(data)
+      const config = setup(data)
+      state.configuration = config
     },
     setWebWalletNeeded (state) {
       state.webWalletNeeded = true
@@ -274,17 +196,22 @@ export default new Vuex.Store({
         innerWidth: window.innerWidth, innerHeight: window.innerHeight
       }
     },
-    setStatus (state, status) {
-      state.status = status
-    },
-    setCurrentAccount (state, currentAccount) {
-      state.currentAccount = currentAccount
-    },
     setFiatCurrency (state, fiatCurrency) {
       state.fiatCurrency = fiatCurrency
     }
   },
   actions: {
+    fetchAddressInfo ({ state }, stxAddress) {
+      return new Promise((resolve, reject) => {
+        let stacksNode = process.env.VUE_APP_STACKS_API
+        stacksNode += '/v2/accounts/' + stxAddress + state.proof
+        axios.get(stacksNode).then((result) => {
+          resolve(result)
+        }).catch(() => {
+          reject(new Error('Address not registered on: ' + process.env.VUE_APP_NETWORK))
+        })
+      })
+    },
     initApplication ({ dispatch }) {
       return new Promise((resolve) => {
         dispatch('rpayAuthStore/fetchMyAccount', { root: true }).then((profile) => {

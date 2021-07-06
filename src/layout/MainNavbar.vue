@@ -16,7 +16,7 @@
       -->
     </b-navbar-brand>
 
-    <exchange-rates class="ml-auto nav-text d-block d-md-none" v-if="isHomePage"/>
+    <ExchangeRates class="ml-auto nav-text d-block d-md-none" v-if="isHomePage"/>
 
     <b-navbar-toggle class="" target="nav-collapse">
       <template v-slot:default="{ expanded }">
@@ -71,7 +71,7 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import ExchangeRates from '@/components/utils/ExchangeRates'
+import ExchangeRates from '@/components/tokens/ExchangeRates'
 
 export default {
   name: 'MainNavbar',
@@ -108,7 +108,7 @@ export default {
     startLogout () {
       // this.$emit('updateEventCode', { eventCode: 'connect-logout' })
       this.$store.dispatch('rpayAuthStore/startLogout').then(() => {
-        if (this.$route.name !== 'home') {
+        if (this.$route.name !== 'swaps') {
           this.$router.push('/')
         }
         // sessionStorage.clear()
