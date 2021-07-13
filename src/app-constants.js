@@ -10,7 +10,6 @@ export const APP_CONSTANTS = {
   KEY_WEB_WALLET_LINK_FIREFOX: 'getWebWalletLinkFirefox',
 
   KEY_PROFILE: 'rpayAuthStore/getMyProfile',
-  KEY_ACCOUNT_INFO: 'rpayAuthStore/getAccountInfo',
   KEY_TICKER_RATES: 'rpayStore/getTickerRates',
   KEY_TICKER_RATES_UNFILTERED: 'rpayStore/getUnfilteredTickerRates'
 }
