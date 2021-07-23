@@ -17,7 +17,7 @@
     "moment": "^2.29.1",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
-    "risidio-pay": "^0.4.38",
+    "risidio-pay": "^0.4.44",
     "risidio-rates": "^1.0.9",
     "vue": "^2.6.11",
     "vue-browser-detect-plugin": "^0.1.13",
