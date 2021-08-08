@@ -2,10 +2,10 @@
 <section class="" id="section-upload">
   <b-container class="mt-5 pt-5">
     <b-row style="min-height: 10vh" v-if="profile.loggedIn">
-      <b-col cols="12" v-if="getBalance > 0">
+      <b-col cols="12" v-if="getBalance < 0">
         <p>You have {{getBalance}} STX tokens in this account - more than enough to pay the
           mint fees!</p>
-        <p><b-link to="/create">Start Minting NFTs</b-link></p>
+        <p><a target="_blank" href="https://thisisnumberone.com/nft-gallery">Mint NFTs and display them here</a></p>
         <ExchangeRates :displayMode="'homepage'"/>
       </b-col>
       <b-col md="8" offset-md="2" sm="10" offset-sm="1" v-else>

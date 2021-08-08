@@ -12,7 +12,6 @@ export default {
   },
   data () {
     return {
-      logo: require('@/assets/img/logo/logoWhite.svg'),
       year: new Date().getFullYear()
     }
   },
