@@ -1,16 +1,16 @@
 <template>
 <div id="app">
   <div v-if="!configured">
-    <risidio-pay :configuration="configuration"/>
+    <RisidioPay :configuration="appConfig"/>
   </div>
   <div :key="componentKey" v-else>
-    <router-view name="header"/>
+    <RouterView name="header"/>
     <div>
       <div class="container">
-        <router-view id="nav"/>
+        <RouterView id="nav"/>
       </div>
     </div>
-    <router-view name="footer" />
+    <RouterView name="footer" />
   </div>
   <notifications :duration="5000" classes="r-notifs" position="bottom left" width="50%"/>
   <waiting-modal/>
@@ -54,9 +54,9 @@ export default {
   methods: {
   },
   computed: {
-    configuration () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_RPAY_CONFIGURATION]
-      return configuration
+    appConfig () {
+      const appConfig = this.$store.getters[APP_CONSTANTS.KEY_APP_CONFIGURATION]
+      return appConfig
     }
   }
 }

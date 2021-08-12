@@ -1,6 +1,6 @@
 <template>
     <div class="mt-5">
-      <h1 class="d-flex justify-content-center">{{$globalLookAndFeel.labels.numberUnits}}</h1>
+      <h1 class="d-flex justify-content-center">Quantity needed?</h1>
       <div class="mt-5 d-flex justify-content-center" style="margin-top: 20px; text-align: center; width: 100%;">
         <span @click.prevent="countDown">
           <b-icon v-if="fadeMin" class="cp-stepper" icon="caret-down"/>
@@ -32,19 +32,18 @@
         </div>
       </div>
       <div class="text-center mx-auto border-radius w-75">
-        <b-button class="cp-btn-order" style="width: 100%;" :variant="$globalLookAndFeel.variant0" @click.prevent="continueToPayment()">Place Your Order</b-button>
+        <b-button class="cp-btn-order" style="width: 100%;" variant="warning" @click.prevent="continueToPayment()">Place Your Order</b-button>
       </div>
     </div>
 </template>
 
 <script>
-import { APP_CONSTANTS } from '@/app-constants'
 
 export default {
   name: 'CryptoStepper',
   components: {
   },
-  props: ['paymentOption'],
+  props: ['paymentOption', 'configuration'],
   data () {
     return {
       localCredits: 0,
@@ -52,21 +51,21 @@ export default {
     }
   },
   mounted () {
-    const config = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+    const config = this.configuration
     this.localCredits = config.payment.creditAttributes.start
   },
   methods: {
     continueToPayment () {
-      const config = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const config = this.configuration
       this.$store.dispatch('rpayStore/initialisePaymentFlow', config).then(() => {
         this.$store.commit('rpayStore/setDisplayCard', 102)
       })
     },
     rpayCancel () {
-      window.eventBus.$emit('rpayEvent', { opcode: 'payment-canceled' })
+      this.$emit('rpayEvent', { opcode: 'payment-canceled' })
     },
     countDown () {
-      const config = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const config = this.configuration
       if (this.localCredits <= config.payment.creditAttributes.min) {
         return
       }
@@ -78,7 +77,7 @@ export default {
       this.updateCredits()
     },
     countUp () {
-      const config = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const config = this.configuration
       if (this.localCredits >= config.payment.creditAttributes.max) {
         return
       }
@@ -86,7 +85,7 @@ export default {
       this.updateCredits()
     },
     updateCredits (evt) {
-      const config = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const config = this.configuration
       let numbC = 0
       try {
         if (this.localCredits.length === 0) {
@@ -111,22 +110,18 @@ export default {
   },
   computed: {
     quantityLabel () {
-      let ql = 'Spins'
-      if (this.$globalLookAndFeel.labels && this.$globalLookAndFeel.labels.quantityLabel) {
-        ql = this.$globalLookAndFeel.labels.quantityLabel
-      }
-      return ql
+      return 'Spins'
     },
     config () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       return configuration
     },
     fadeMin () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       return this.localCredits === configuration.payment.creditAttributes.min
     },
     fadeMax () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       return this.localCredits === configuration.payment.creditAttributes.max
     },
     currentSymbol () {
@@ -139,7 +134,7 @@ export default {
       }
     },
     formattedFiat () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       const amount = configuration.payment.amountFiat * configuration.payment.creditAttributes.start
       const formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -149,7 +144,7 @@ export default {
       return ffiat[1].value + '.' + ffiat[3].value
     },
     fiatSymbol () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       const fc = configuration.payment.currency
       if (fc === 'EUR') {
         return '&euro;'
@@ -160,16 +155,16 @@ export default {
       }
     },
     amountFiat () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       const amount = configuration.payment.amountFiat * configuration.payment.creditAttributes.start
       return amount
     },
     fiatCurrency () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       return configuration.payment.currency
     },
     currentAmount () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       const precision = 100000000
       return Math.round(configuration.payment.amountBtc * configuration.payment.creditAttributes.start * precision) / precision
     }

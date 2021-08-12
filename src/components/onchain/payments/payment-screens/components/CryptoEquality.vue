@@ -19,7 +19,7 @@ export default {
     return {
     }
   },
-  props: ['paymentOption'],
+  props: ['paymentOption', 'configuration'],
   mounted () {
   },
   methods: {

@@ -3,8 +3,8 @@
   <div>
     <div title="Make Payment" v-if="payment">
       <div class="rpay-countdown mb-3 d-flex justify-content-center">
-        <span class="mr-2">Code is valid for</span>
-        <crypto-countdown class="" v-on="$listeners" />
+        <span class="mr-2 text-message">Scan vode - valid for</span>
+        <CryptoCountdown :configuration="configuration" class="text-danger" v-on="$listeners" />
       </div>
       <div class="mb-1">
         <canvas class="qr-canvas" ref="lndQrcode"></canvas>
@@ -35,14 +35,14 @@
 import QRCode from 'qrcode'
 import Vue from 'vue'
 import { APP_CONSTANTS } from '@/app-constants'
-import CryptoCountdown from '@/views/payment-screens/components/CryptoCountdown'
+import CryptoCountdown from './CryptoCountdown'
 
 export default {
   name: 'LightningPaymentAddress2',
   components: {
     CryptoCountdown
   },
-  props: ['value'],
+  props: ['value', 'configuration'],
   data () {
     return {
       showChannel: false,
@@ -56,6 +56,10 @@ export default {
     // this.$store.dispatch('stopListening')
   },
   mounted () {
+    const invoice = this.$store.getters[APP_CONSTANTS.KEY_INVOICE]
+    if (!invoice) {
+
+    }
     Vue.nextTick(function () {
       this.addQrCode()
     }, this)

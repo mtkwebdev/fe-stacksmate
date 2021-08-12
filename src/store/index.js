@@ -5,18 +5,6 @@ import paymentStore from './paymentStore'
 
 Vue.use(Vuex)
 
-const RISIDIO_API_PATH = process.env.VUE_APP_RISIDIO_API
-const APPLICATION_ID = process.env.VUE_APP_SQUARE_APPLICATION_ID
-const LOCATION_ID = process.env.VUE_APP_SQUARE_LOCATION_ID
-const SQUARE_URL = process.env.VUE_APP_VUE_APP_SQUARE_URL
-const STX_CONTRACT_ADDRESS = process.env.VUE_APP_STACKS_CONTRACT_ADDRESS
-const STX_CONTRACT_NAME = process.env.VUE_APP_STACKS_CONTRACT_NAME
-const STX_MINT_FUNCTION = process.env.VUE_APP_STACKS_MINT_FUNCTION
-const ETH_CONTRACT_ADDRESS = process.env.VUE_APP_NFT_CONTRACT_ADDRESS
-const RISIDIO_WALLET_MAC = process.env.VUE_APP_WALLET_MAC
-const RISIDIO_WALLET_SKY = process.env.VUE_APP_WALLET_SKY
-const RISIDIO_STACKS_API = process.env.VUE_APP_STACKS_API
-
 const precision = 100000000
 const getAmounts = function (currency, amountFiat, tickerRates) {
   try {
@@ -42,18 +30,20 @@ const getAmounts = function (currency, amountFiat, tickerRates) {
 
 const payment = {
   forceNew: false,
-  amountFiat: 5,
-  amountEth: 5,
-  amountBtc: 5,
-  amountStx: 5,
+  amountFiat: 2,
+  amountEth: 2,
+  amountBtc: 2,
+  amountStx: 2,
   currency: 'GBP',
   paymentCode: 'po-12324',
   allowMultiples: false,
   stxPaymentAddress: process.env.VUE_APP_STACKS_PAYMENT_ADDRESS,
   ethPaymentAddress: process.env.VUE_APP_ETH_PAYMENT_ADDRESS,
-  paymentOption: 'unchosen',
+  ethNetworkId: Number(process.env.VUE_APP_ETH_NETWORK_ID),
+  paymentOption: '',
   paymentOptions: [
     { allowFiat: true },
+    { allowPaypal: true },
     { allowBitcoin: true },
     { allowLightning: true },
     { allowStacks: false },
@@ -67,44 +57,11 @@ const payment = {
     max: 20
   },
   squarePay: {
-    applicationId: APPLICATION_ID,
-    locationId: LOCATION_ID,
-    squareUrl: SQUARE_URL
+    applicationId: process.env.VUE_APP_SQUARE_APPLICATION_ID,
+    locationId: process.env.VUE_APP_SQUARE_LOCATION_ID,
+    squareUrl: process.env.VUE_APP_VUE_APP_SQUARE_URL
   }
 }
-const minter = {
-  preferredNetwork: 'stacks risidio',
-  networks: [
-    {
-      network: 'stacks connect',
-      enabled: true,
-      functionName: STX_MINT_FUNCTION,
-      contractAddress: STX_CONTRACT_ADDRESS,
-      contractName: STX_CONTRACT_NAME
-    },
-    {
-      network: 'ethereum',
-      enabled: true,
-      functionName: 'mint-token',
-      contractAddress: ETH_CONTRACT_ADDRESS
-    }
-  ],
-  enableRoyalties: false,
-  beneficiaries: []
-}
-
-const lookAndFeel = {
-  variant0: 'danger',
-  variant1: 'warning',
-  variant2: 'info',
-  variant3: 'light',
-  labels: {
-    title: 'Mint Your Item',
-    numberUnits: 'How many spins?',
-    quantityLabel: 'Tokens'
-  }
-}
-
 const setup = function (data) {
   let risidioCardMode = 'payment-flow'
   if (data.flow) {
@@ -112,21 +69,16 @@ const setup = function (data) {
   }
   const NETWORK = process.env.VUE_APP_NETWORK
   // let beneficiaries = []
-  const risidioBaseApi = RISIDIO_API_PATH
+  const risidioBaseApi = process.env.VUE_APP_RISIDIO_API
   const configuration = {
-    lookAndFeel: lookAndFeel,
-    gaiaAppDomains: null,
-    gaiaAsset: {},
+    minter: {},
     payment: payment,
-    marketConfig: null,
-    selling: null,
-    minter: minter,
     network: NETWORK,
-    risidioProjectId: STX_CONTRACT_ADDRESS + '.' + STX_CONTRACT_NAME,
+    risidioProjectId: process.env.VUE_APP_STACKS_CONTRACT_ADDRESS + '.' + process.env.VUE_APP_STACKS_CONTRACT_NAME,
     risidioBaseApi: risidioBaseApi,
-    risidioStacksApi: RISIDIO_STACKS_API,
-    risidioWalletMac: RISIDIO_WALLET_MAC,
-    risidioWalletSky: RISIDIO_WALLET_SKY,
+    risidioStacksApi: process.env.VUE_APP_STACKS_API,
+    risidioWalletMac: process.env.VUE_APP_WALLET_MAC,
+    risidioWalletSky: process.env.VUE_APP_WALLET_SKY,
     risidioCardMode: risidioCardMode
   }
   // window.risidioPaymentConfig = JSON.stringify(configuration)
@@ -142,9 +94,8 @@ export default new Vuex.Store({
     firefoxLink: 'https://addons.mozilla.org/en-US/firefox/addon/stacks-wallet/',
     webWalletNeeded: false,
     proof: '?proof=0',
-    fiatCurrency: 'USD',
     baseCurrency: 'GBP',
-    baseAmount: 5,
+    baseAmount: 2,
     windims: { innerWidth: window.innerWidth, innerHeight: window.innerHeight }
   },
   getters: {
@@ -154,7 +105,7 @@ export default new Vuex.Store({
     getWebWalletLinkFirefox: state => {
       return state.firefoxLink
     },
-    getRpayConfiguration: state => {
+    getLocalConfiguration: state => {
       state.configuration.payment = payment
       state.configuration.payment.amountFiat = state.baseAmount
       state.configuration.payment.currency = state.baseCurrency
@@ -167,15 +118,15 @@ export default new Vuex.Store({
       return state.modalMessage
     },
     getFiatCurrency: state => {
-      return state.fiatCurrency
+      return state.configuration.payment.currency
     },
     getAmounts: state => tickerRates => {
       const baseRate = tickerRates.find((o) => o.currency === state.baseCurrency)
-      const fiatRate = tickerRates.find((o) => o.currency === state.fiatCurrency)
+      const fiatRate = tickerRates.find((o) => o.currency === state.configuration.payment.currency)
       const fiatAmount = (fiatRate.last / baseRate.last) * 5
       const amounts = {
         baseAmounts: getAmounts(state.baseCurrency, state.baseAmount, tickerRates),
-        fiatAmounts: getAmounts(state.fiatCurrency, fiatAmount, tickerRates)
+        fiatAmounts: getAmounts(state.configuration.payment.currency, fiatAmount, tickerRates)
       }
       return amounts
     }
@@ -197,7 +148,7 @@ export default new Vuex.Store({
       }
     },
     setFiatCurrency (state, fiatCurrency) {
-      state.fiatCurrency = fiatCurrency
+      state.configuration.payment.currency = fiatCurrency
     }
   },
   actions: {
@@ -212,9 +163,10 @@ export default new Vuex.Store({
         })
       })
     },
-    initApplication ({ dispatch }) {
+    initApplication ({ state, dispatch }) {
       return new Promise((resolve) => {
         dispatch('rpayAuthStore/fetchMyAccount', { root: true }).then((profile) => {
+          dispatch('rpayStore/initialisePaymentFlow', state.configuration)
           resolve(profile)
         })
       })

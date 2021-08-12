@@ -60,4 +60,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.ember-view {
+  font-size: 0.8rem;
+}
 </style>

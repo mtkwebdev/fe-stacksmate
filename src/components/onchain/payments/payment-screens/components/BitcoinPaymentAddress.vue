@@ -1,11 +1,11 @@
 <template>
 <div class="d-flex flex-column align-items-center">
+  <div class="rpay-countdown mb-3 d-flex justify-content-center">
+    <span class="text-message mr-1">Scan code - valid for</span>
+    <CryptoCountdown :configuration="configuration" class="text-danger" v-on="$listeners" />
+  </div>
   <div class="mb-3 mx-auto">
     <canvas ref="lndQrcode"></canvas>
-  </div>
-  <div class="rpay-countdown mb-3 d-flex justify-content-center">
-    <span class="mr-2">Code is valid for</span>
-    <crypto-countdown class="" v-on="$listeners" />
   </div>
   <!--
   <div class="rd-text mb-3 d-flex justify-content-center">
@@ -29,13 +29,14 @@
 <script>
 import QRCode from 'qrcode'
 import { APP_CONSTANTS } from '@/app-constants'
-import CryptoCountdown from '@/views/payment-screens/components/CryptoCountdown'
+import CryptoCountdown from './CryptoCountdown'
 
 export default {
   name: 'BitcoinPaymentAddress',
   components: {
     CryptoCountdown
   },
+  props: ['configuration'],
   data () {
     return {
     }

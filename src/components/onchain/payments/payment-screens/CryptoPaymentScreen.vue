@@ -1,22 +1,22 @@
 <template>
-<b-card-text class="">
+<b-card-text class="action-section">
   <div class="" v-if="timedOutOrExpired || expired">
     <div class="d-flex justify-content-center">
       <b>Lightning invoice has expired - {{timedOutOrExpired}}</b>
     </div>
     <div class="d-flex justify-content-center">
-      <b-button @click="prev()" :variant="$globalLookAndFeel.variant1" class="button1 bg-danger">Start Over</b-button>
+      <b-button @click="prev()" variant="warning" class="button1 bg-danger">Start Over</b-button>
     </div>
   </div>
   <div class="" v-else>
-    <div class="text-center text-bold" v-if="desktopWalletSupported">Scan the QR code <a v-if="paymentOption === 'lightning'" href="#" class="text-info" @click.prevent="checkChain()">check payment</a></div>
-    <div class="text-center text-bold" v-if="paymentOption === 'fiat'">Enter your payment information</div>
+    <p class="mt-4 text-center text-message" v-if="desktopWalletSupported === ''">Scan the QR code <a v-if="paymentOption === 'lightning'" href="#" class="text-danger" @click.prevent="checkChain()">check payment</a></p>
+    <p class="mt-4 text-center text-message text-center" v-if="paymentOption === 'fiat'">Enter your card details</p>
     <div class="d-flex justify-content-center">
-      <fiat-payment-screen v-on="$listeners" v-if="paymentOption === 'fiat'"/>
-      <lightning-payment-address v-on="$listeners" v-if="paymentOption === 'lightning'"/>
-      <bitcoin-payment-address v-on="$listeners" v-if="paymentOption === 'bitcoin'"/>
-      <stacks-payment-address :desktopWalletSupported="desktopWalletSupported" v-if="paymentOption === 'stacks'"/>
-      <ethereum-payment-address :desktopWalletSupported="desktopWalletSupported" v-if="paymentOption === 'ethereum'"/>
+      <FiatPaymentScreen :configuration="configuration" v-on="$listeners" v-if="paymentOption === 'fiat'"/>
+      <LightningPaymentAddress :configuration="configuration" v-on="$listeners" v-if="paymentOption === 'lightning'"/>
+      <BitcoinPaymentAddress :configuration="configuration" v-on="$listeners" v-if="paymentOption === 'bitcoin'"/>
+      <StacksPaymentAddress :configuration="configuration" v-on="$listeners" :desktopWalletSupported="desktopWalletSupported" v-if="paymentOption === 'stacks'"/>
+      <EthereumPaymentAddress :configuration="configuration" v-on="$listeners" :desktopWalletSupported="desktopWalletSupported" v-if="paymentOption === 'ethereum'"/>
     </div>
   </div>
 </b-card-text>
@@ -24,11 +24,11 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import LightningPaymentAddress from '@/views/payment-screens/components/LightningPaymentAddress'
-import BitcoinPaymentAddress from '@/views/payment-screens/components/BitcoinPaymentAddress'
-import StacksPaymentAddress from '@/views/payment-screens/components/StacksPaymentAddress'
-import EthereumPaymentAddress from '@/views/payment-screens/components/EthereumPaymentAddress'
-import FiatPaymentScreen from '@/views/payment-screens/FiatPaymentScreen'
+import LightningPaymentAddress from './components/LightningPaymentAddress'
+import BitcoinPaymentAddress from './components/BitcoinPaymentAddress'
+import StacksPaymentAddress from './components/StacksPaymentAddress'
+import EthereumPaymentAddress from './components/EthereumPaymentAddress'
+import FiatPaymentScreen from './FiatPaymentScreen'
 
 export default {
   name: 'CryptoPaymentScreen',
@@ -39,6 +39,7 @@ export default {
     StacksPaymentAddress,
     FiatPaymentScreen
   },
+  props: ['configuration'],
   data () {
     return {
       expired: false,
@@ -64,11 +65,11 @@ export default {
   },
   computed: {
     desktopWalletSupported () {
-      const paymentOption = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTION_VALUE]
+      const paymentOption = this.configuration.payment.paymentOption
       return paymentOption === 'bitcoin' || paymentOption === 'lightning' || paymentOption === 'stacks1'
     },
     paymentOption () {
-      const paymentOption = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTION_VALUE]
+      const paymentOption = this.configuration.payment.paymentOption
       return paymentOption
     },
     timedOutOrExpired () {

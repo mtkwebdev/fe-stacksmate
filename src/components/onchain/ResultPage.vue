@@ -19,18 +19,18 @@
       </div>
     </div>
     <div class="mb-4">
-      <b-button class="cp-btn-order" :variant="$globalLookAndFeel.variant0" @click.prevent="doFinish()">Done</b-button>
+      <b-button class="cp-btn-order" variant="warning" @click.prevent="doFinish()">Done</b-button>
     </div>
   </b-card-text>
   <template v-if="!result" v-slot:footer>
-    <footer-view :rangeValue="getRangeValue()" @rangeEvent="rangeEvent"/>
+    <FooterView :rangeValue="getRangeValue()" @rangeEvent="rangeEvent"/>
   </template>
 </b-card>
 </template>
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import FooterView from '@/views/components/FooterView'
+import FooterView from './FooterView'
 
 export default {
   name: 'ResultPage',
@@ -45,12 +45,11 @@ export default {
     }
   },
   mounted () {
-    this.$store.commit('rpayStore/setDisplayCard', 104)
   },
   methods: {
     doFinish () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
-      window.eventBus.$emit('rpayEvent', { opcode: configuration.payment.paymentOption + '-payment-end' })
+      const configuration = this.configuration
+      this.$emit('rpayEvent', { opcode: configuration.payment.paymentOption + '-payment-end' })
     },
     rangeEvent (displayCard) {
       this.$store.commit('rpayStore/setDisplayCard', displayCard)
@@ -64,11 +63,11 @@ export default {
   },
   computed: {
     numbUnits () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       return configuration.payment.creditAttributes.start
     },
     formattedFiat () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       const amountFiat = (configuration.payment) ? configuration.payment.amountFiat : '0'
       const formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -78,7 +77,7 @@ export default {
       return ffiat[1].value + '.' + ffiat[3].value
     },
     fiatSymbol () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       const fc = (configuration.payment) ? configuration.payment.currency : '???'
       if (fc === 'EUR') {
         return '&euro;'
@@ -89,7 +88,7 @@ export default {
       }
     },
     currentSymbol () {
-      const paymentOption = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTION_VALUE]
+      const paymentOption = this.configuration.payment.paymentOption
       if (paymentOption === 'ethereum') {
         return 'Ξ'
       } else if (paymentOption === 'stacks') {
@@ -99,8 +98,8 @@ export default {
       }
     },
     currentAmount () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
-      const paymentOption = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTION_VALUE]
+      const configuration = this.configuration
+      const paymentOption = this.configuration.payment.paymentOption
       if (configuration && configuration.payment.amountBtc) {
         if (paymentOption === 'ethereum') {
           return configuration.payment.amountEth

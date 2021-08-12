@@ -1,5 +1,5 @@
 <template>
-<div class="rpay-sq-payment-box">
+<div class="rpay-sq-payment-box action-section">
   <div>
     <div id="sq-ccbox">
       <!--
@@ -8,8 +8,10 @@
       -->
     </div>
   </div>
-  <div class="cp-totals loading-container">
-    <div id="spiner" class="loading"><b-icon class="text-info" icon="arrow-clockwise" animation="spin" font-scale="4"></b-icon></div>
+  <div class="pt-5 w-100 cp-totals" v-show="showSpinner">
+    <div class="pt-4" id="spiner"><b-icon class="text-info" icon="arrow-clockwise" animation="spin" font-scale="4"></b-icon></div>
+  </div>
+  <div class="pt-3 mx-auto cp-totals" v-show="!showSpinner">
     <form id="nonce-form" novalidate :action="submitUrl" method="post">
       <div class="errorbox">
         <div class="error" v-for="(error, index) in errors" :key="index">
@@ -29,8 +31,8 @@
         <button v-show=masterpass :id="id+'-sq-masterpass'" class="button-masterpass"></button>
       </div>
     </form>
-    <div class="text-center mx-auto border-radius w-100">
-      <b-button class="sq-btn-order" style="width: 80%;" :variant="$globalLookAndFeel.variant0" @click.prevent="requestCardNonce($event)">Send <span class="" v-html="fiatSymbol"></span> {{formattedFiat}}</b-button>
+    <div class="mt-3 d-flex justify-content-center">
+      <b-button class="button-credit-card" style="width: 40%;" variant="warning" @click.prevent="requestCardNonce($event)">Send <span class="" v-html="fiatSymbol"></span> {{formattedFiat}}</b-button>
     </div>
   </div>
   <b-card-text>
@@ -38,26 +40,23 @@
       <div v-if="testMode" ><a href="#" class="rpay-text-secondary" @click.prevent="showTestPayments = !showTestPayments">Test Numbers</a></div>
     </div>
   </b-card-text>
-  <test-payments v-if="showTestPayments" />
+  <TestPayments class="text-small" v-if="showTestPayments" />
 </div>
 </template>
 
 <script>
-import { APP_CONSTANTS } from '@/app-constants'
-import TestPayments from '@/views/payment-screens/components/TestPayments'
+import TestPayments from './components/TestPayments'
 
 export default {
   name: 'paymentForm',
   components: {
     TestPayments
   },
-  props: {
-    id: String,
-    showPaymentForm: Boolean
-  },
+  props: ['id', 'configuration', 'showPaymentForm'],
   data () {
     return {
       errors: [],
+      showSpinner: true,
       showTestPayments: false,
       applePay: false,
       masterpass: false,
@@ -74,7 +73,7 @@ export default {
     }
   },
   mounted: function () {
-    const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+    const configuration = this.configuration
     this.internalId = this.id // + '_' + Math.floor(Math.random() * Math.floor(1000000))
     const idempotencyKey = this.uuidv4()
     const locationId = configuration.payment.squarePay.locationId
@@ -178,7 +177,7 @@ export default {
 
           // POST the nonce form to the payment processing page
           // document.getElementById('nonce-form').submit()
-          const configuration = that.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+          const configuration = that.configuration
           const amountFiat = configuration.payment.amountFiat * configuration.payment.creditAttributes.start * 100
           fetch(configuration.risidioBaseApi + that.submitUrl, {
             method: 'POST',
@@ -223,7 +222,8 @@ export default {
            */
         paymentFormLoaded: function () {
           // console.log('paymentFormLoaded')
-          document.getElementById('spiner').classList.add('loaded')
+          // document.getElementById('spiner').classList.add('loaded')
+          that.showSpinner = false
         }
       }
     })
@@ -249,7 +249,7 @@ export default {
   },
   computed: {
     formattedFiat () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       // const amountFiat = (configuration.payment) ? configuration.payment.amountFiat : '0'
       const amountFiat = configuration.payment.amountFiat * configuration.payment.creditAttributes.start
       const formatter = new Intl.NumberFormat('en-US', {
@@ -260,7 +260,7 @@ export default {
       return ffiat[1].value + '.' + ffiat[3].value
     },
     fiatSymbol () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       const fc = (configuration.payment) ? configuration.payment.currency : '???'
       if (fc === 'EUR') {
         return '&euro;'
@@ -271,7 +271,7 @@ export default {
       }
     },
     testMode () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       return configuration.payment.squarePay.applicationId.indexOf('sandbox') > -1
     }
   },
@@ -299,150 +299,89 @@ export default {
 .loaded {
   display: none;
 }
-.sq-input--error {
-  border-radius: 18px;
+#form-container {
+  position: relative;
+  width: 380px;
+  margin: 0 auto;
+  top: 50%;
+  transform: translateY(-50%);
 }
+
+.third {
+  float: left;
+  width: calc((100% - 32px) / 3);
+  padding: 0;
+  margin: 0 16px 16px 0;
+}
+
+.third:last-of-type {
+  margin-right: 0;
+}
+
+/* Define how SqPaymentForm iframes should look */
 .sq-input {
-  height: 35px;
-  background-color: #fff;
-  border: 2px solid rgb(223, 223, 223);
-  margin-bottom: 15px;
-  display: block;
-  padding: 8px;
-  line-height: 18px;
-  font-size: 16px;
-  margin: 0 0px 0px 0px;
-  border-radius: 18px;
+  height: 56px;
+  padding: 17px 10px;
+  box-sizing: border-box;
+  border: 1px solid #E0E2E3;
+  background-color: white;
+  border-radius: 6px;
+  display: inline-block;
+  -webkit-transition: border-color .2s ease-in-out;
+     -moz-transition: border-color .2s ease-in-out;
+      -ms-transition: border-color .2s ease-in-out;
+          transition: border-color .2s ease-in-out;
 }
-.sq-input:first-child {
-  width: 100% !important;
-  margin-bottom: 15px;
-}
-.sq-input:nth-child(2) {
-  width: 32% !important;
-  margin-right: 2%;
-}
-.sq-input:nth-child(3) {
-  width: 31% !important;
-  margin-right: 2%;
-}
-.sq-input:nth-child(4) {
-  width: 33% !important;
-  margin-right: 0px;
-}
-.sq-input ::placeholder {
-  color: #aab7c4;
-  opacity: 0.5;
-}
+
 /* Define how SqPaymentForm iframes should look when they have focus */
+.sq-input--focus {
+  border: 1px solid #4A90E2;
+}
+
 /* Define how SqPaymentForm iframes should look when they contain invalid values */
 .sq-input--error {
-  outline: 3px auto rgb(255, 97, 97);
+  border: 1px solid #E02F2F;
 }
-.errorbox {
-  line-height: 14px;
-  text-align: left;
+
+#sq-card-number {
+  margin-bottom: 16px;
 }
-.error {
-  font-size: 10px;
-  color: rgb(164, 0, 30);
-  width: 45%;
-  display: inline-block;
-  margin-top: -10px;
-  font-weight: 400;
-}
+
 /* Customize the "Pay with Credit Card" button */
 .button-credit-card {
-  min-width: 200px;
-  min-height: 20px;
-  padding: 0;
-  margin: 5px;
-  line-height: 20px;
-  box-shadow: 2px 2px 1px rgb(200, 200, 200);
-  background: rgb(255, 255, 255);
-  border-radius: 5px;
-  border: 1px solid rgb(200, 200, 200);
-  font-weight: bold;
+  position: relative;
+  bottom: -20px;
+  width: 100%;
+  height: 36px;
+  margin-top: 10px;
+  background: #4A90E2;
+  border-radius: 6px;
   cursor: pointer;
-}
-.card-number {
-  width: 100%;
-}
-.payButton {
-  width: 100%;
-}
-/* Customize the "{{Wallet}} not enabled" message */
-.wallet-not-enabled {
-  min-width: 200px;
-  min-height: 20px;
-  max-height: 64px;
-  padding: 0;
-  margin: 10px;
-  line-height: 40px;
-  background: #eee;
-  border-radius: 5px;
-  font-weight: lighter;
-  font-style: italic;
-  font-family: inherit;
   display: block;
-}
-/* Customize the Apple Pay on the Web button */
-.button-apple-pay {
-  min-width: 200px;
-  min-height: 40px;
-  max-height: 64px;
-  padding: 0;
-  margin: 10px;
-  background-image: -webkit-named-image(apple-pay-logo-white);
-  background-color: black;
-  background-size: 100% 60%;
-  background-repeat: no-repeat;
-  background-position: 50% 50%;
-  border-radius: 5px;
-  cursor: pointer;
-  display: none;
-}
-/* Customize the Masterpass button */
-.button-masterpass button:hover {
-  background-image: url(https://static.masterpass.com/dyn/img/btn/global/mp_chk_btn_147x034px.svg);
-  border: 1pt solid rgb(44, 57, 240);
-}
-.button-masterpass {
-  min-width: 200px;
-  min-height: 40px;
-  max-height: 40px;
-  padding: 0;
-  margin: 10px;
-  background-image: url(https://static.masterpass.com/dyn/img/btn/global/mp_chk_btn_147x034px.svg);
-  background-color: black;
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  background-position: 50% 50%;
-  border-radius: 5px;
-  border-color: rgb(255, 255, 255);
-  cursor: pointer;
-}
-#sq-walletbox {
+  color: #FFFFFF;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
+  letter-spacing: 0;
   text-align: center;
-  font-weight: bold;
+  -webkit-transition: background .2s ease-in-out;
+     -moz-transition: background .2s ease-in-out;
+      -ms-transition: background .2s ease-in-out;
+          transition: background .2s ease-in-out;
 }
-#sq-ccbox {
-  margin: 5px;
-  padding: 0px 10px;
+
+.button-credit-card:hover {
+  background-color: #4281CB;
+}
+.cp-totals {
+  min-width: 300px;
+  height: 230px;
+  background: #F0EFEF 0% 0% no-repeat padding-box;
+  border-radius: 16px;
+  opacity: 1;
+  padding: 5px 20px;
+  margin-bottom: 80px;
   text-align: center;
-  vertical-align: top;
-  font-weight: bold;
 }
-.expiration-date,
-.cvv,
-.postal-code {
-  width: 30%;
-  display: inline-block;
-}
-#card-tainer {
-  max-width: 70vw;
-  min-height: 80px;
-  text-align: left;
-  margin-top: 8px;
-}
+
 </style>

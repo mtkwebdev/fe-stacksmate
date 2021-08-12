@@ -1,31 +1,56 @@
 <template>
-<section class="" id="section-upload">
-  <b-container class="mt-5 pt-5">
-    <b-row style="min-height: 10vh" v-if="profile.loggedIn">
+<section class="" id="section-upload" v-if="!loading">
+  <b-container fluid class="mt-5">
+    <b-row class="text-small" v-if="profile.loggedIn">
       <b-col cols="12" v-if="getBalance < 0">
         <p>You have {{getBalance}} STX tokens in this account - more than enough to pay the
           mint fees!</p>
         <p><a target="_blank" href="https://thisisnumberone.com/nft-gallery">Mint NFTs and display them here</a></p>
         <ExchangeRates :displayMode="'homepage'"/>
       </b-col>
-      <b-col md="8" offset-md="2" sm="10" offset-sm="1" v-else>
-        <p class="mb-5 text-center">Your account has 0 STX tokens</p>
-        <p class="mb-2 text-center">A small amount of STX token is needed to mint a new NFT.
-          This is to cover
-        </p>
-        <ul class="ml-5">
-          <li>The minting fee charged by the app <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'light' }" :title="'This is set by the app where you do you minting and will vary from app to app'" class="text-white ml-3" variant="outline-success"><b-icon class="ml-0" icon="question-circle"/></b-link></li>
-          <li>The network (also known as the gas) fee <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'light' }" :title="'This is a small fee that is shared by all the people who are working to keep the network secure and transparent'" class="text-white ml-3" variant="outline-success"><b-icon class="ml-0" icon="question-circle"/></b-link></li>
-        </ul>
-        <label class="mt-5" for="item-name">Recipient Address (<a href="#" @click.prevent="useMyAddress">use mine</a>)</label>
-        <b-form-input
-          id="item-name"
-          v-model="stxAddress"
-          aria-describedby="item-name-help item-name-feedback"
-          placeholder="Recipient address - where to send the STX tokens for the swap"
-          trim></b-form-input>
-          <p class="my-2 text-right"><b-button variant="outline-warning" @click="showPayment">Continue</b-button>
-        </p>
+      <b-col md="12" sm="12" v-else>
+        <div class="w-md-75">
+          <p class="mb-3">Your account has {{getBalance}} STX tokens</p>
+          <p class="mb-2">This service lets you swap other currency for a small amount of STX tokens to get you started
+            exploring the user owned Internet. With this you can;</p>
+          <ul>
+            <li>pay the (very small) transaction fees to deploy smart contracts <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'warning' }" :title="'A small gas fee used to incentivise the network and keep it running'" class="text-white ml-3" variant="outline-success"><b-icon class="ml-0" icon="question-circle"/></b-link></li>
+            <li>pay the (very small) transaction fees to call smart contracts <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'warning' }" :title="'This is a small fee that is shared by all the people who are working to keep the network secure and transparent'" class="text-white ml-3" variant="outline-success"><b-icon class="ml-0" icon="question-circle"/></b-link></li>
+            <li>cover minting fees charged by apps - e.g. to create NFTs <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'warning' }" :title="'This is set by the app where you do you minting and will vary from app to app'" class="text-white ml-3" variant="outline-success"><b-icon class="ml-0" icon="question-circle"/></b-link></li>
+          </ul>
+        </div>
+        <b-jumbotron bg-variant="dark">
+          <template #lead>
+            <p class="text-small" v-html="paymentMessage"></p>
+          </template>
+          <hr class="my-4">
+        <div class="w-md-75">
+          <label class="mt-5 d-flex justify-content-between" for="item-name">
+            <span>Send the STX to</span>
+            <b-link v-if="recipient !== profile.stxAddress" class="text-info" @click.prevent="useMyAddress">use my address</b-link>
+          </label>
+          <b-form-input
+            id="item-name"
+            v-model="recipient"
+            aria-describedby="item-name-help item-name-feedback"
+            placeholder="Recipient address - where to send the STX tokens for the swap"
+            trim></b-form-input>
+          <p class="my-2 text-right"><b-button variant="outline-warning" @click="showPayment">Continue</b-button></p>
+        </div>
+        <b-row v-if="smWallet">
+          <b-col cols="12"><b-link class="text-info" @click.prevent="showSMWallet = !showSMWallet">StacksMate Wallet Info <b-icon :icon="(showSMWallet) ? 'arrow-down' : 'arrow-up'"/></b-link></b-col>
+        </b-row>
+        <b-row v-if="showSMWallet" class="text-small py-3">
+          <b-col cols="2">Balance:</b-col>
+          <b-col cols="10">{{smWallet.accountInfo.balance}}</b-col>
+          <b-col cols="2">Counter:</b-col>
+          <b-col cols="10">{{smWallet.accountInfo.nonce}}
+            <b-link router-tag="span" v-b-tooltip.hover="{ variant: 'danger' }" :title="'The tx counter (nonce) keeps track of the transactions sent from our address - it is incremented by the network once the transaction is mined. For our purposes it limits the number of StacksMate payments we can make at a given time - for this reason we prevent payments while a transfer is in progress. This slows down our service right now because of slow Stacks Tx times. This issue will be resolved soon.'" class="text-white ml-3" variant="outline-success"><b-icon class="ml-0" icon="question-circle"/></b-link>
+          </b-col>
+          <b-col md="2" sm="12">Address:</b-col>
+          <b-col md="10" sm="12">{{smWallet.stxAddress}}</b-col>
+        </b-row>
+      </b-jumbotron>
       </b-col>
     </b-row>
     <b-row style="min-height: 30vh" class="text-center" v-else-if="webWalletNeeded">
@@ -36,15 +61,15 @@
     <b-row  class="text-center" v-else>
       <b-col cols="12"><p>Please login to get started!</p></b-col>
     </b-row>
-    <b-row>
+    <b-row v-if="nottrue">
       <b-col><TokenConversions/></b-col>
     </b-row>
-    <b-row class="text-right" v-if="redirectUrl">
+    <b-row v-if="redirectUrl">
       <b-col><a :href="redirectUrl">Go Home</a></b-col>
     </b-row>
   </b-container>
   <b-modal size="md" id="payment-modal" centered>
-    <RisidioPay v-if="showRpay" :configuration="configuration"/>
+    <PaymentFlow v-if="showRpay" :configuration="configuration" :recipient="recipient"/>
     <template #modal-footer class="text-center"><div class="w-100"></div></template>
   </b-modal>
 </section>
@@ -52,20 +77,24 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import RisidioPay from 'risidio-pay'
+import PaymentFlow from '@/components/onchain/payments/PaymentFlow'
 import TokenConversions from '@/components/tokens/TokenConversions'
 
 export default {
   name: 'Homepage',
   components: {
-    RisidioPay,
+    PaymentFlow,
     TokenConversions
   },
   data () {
     return {
+      loading: true,
+      showSMWallet: false,
       configuration: null,
-      stxAddress: null,
+      stacksMateAccount: null,
+      recipient: null,
       redirectUrl: null,
+      nottrue: false,
       showRpay: false,
       amountFiat: 5
     }
@@ -77,64 +106,24 @@ export default {
     configuration.risidioCardMode = 'payment-flow'
     this.configuration = configuration
     this.loading = false
+    const data = { stxAddress: process.env.VUE_APP_STACKS_TRANSFER_ADDRESS }
+    this.$store.dispatch('rpayAuthStore/fetchAccountInfo', data)
     if (this.$route.query && this.$route.query.stxAddress) {
-      this.stxAddress = this.$route.query.stxAddress
+      this.recipient = this.$route.query.stxAddress
     }
-    if (!this.stxAddress && this.profile.loggedIn) {
-      this.stxAddress = this.profile.stxAddress
+    if (!this.recipient && this.profile.loggedIn) {
+      this.recipient = this.profile.stxAddress
     }
     if (this.$route.query.redirectUrl) {
       this.redirectUrl = this.$route.query.redirectUrl
     }
-    this.setupEventListener()
+    this.loading = false
   },
   methods: {
-    setupEventListener () {
-      const $self = this
-      this.loading = false
-      if (window.eventBus && window.eventBus.$on) {
-        window.eventBus.$on('rpayEvent', function (data) {
-          if (data.opcode === 'stx-transaction-finished') {
-            const txResult = $self.$store.getters[APP_CONSTANTS.KEY_TRANSACTION_DIALOG_MESSAGE]({ dKey: data.opcode, txId: data.txId })
-            $self.$store.commit('setModalMessage', txResult)
-            $self.closeModal()
-          } else if (data.opcode.indexOf('-payment-end') > -1) {
-            const txResult = $self.$store.getters[APP_CONSTANTS.KEY_TRANSACTION_DIALOG_MESSAGE]({ dKey: data.opcode })
-            $self.$store.commit('setModalMessage', txResult)
-            $self.closeModal()
-          } else if (data.opcode === 'configured-logged-in') {
-            $self.$store.commit('setModalMessage', 'Welcome to stacksmate - getting started with NFTs')
-            $self.closeModal()
-          } else if (data.opcode.indexOf('-payment-success') > -1) {
-            const payment = $self.$store.getters[APP_CONSTANTS.KEY_PAYMENT_CONVERT](data)
-            $self.$store.dispatch('paymentStore/newPayment', payment).then((payment) => {
-              $self.$bvModal.hide('payment-modal')
-              $self.showRpay = false
-              $self.$store.commit('setModalMessage', 'Thank you for your support. ')
-              $self.$root.$emit('bv::show::modal', 'waiting-modal')
-            }).catch(() => {
-              $self.$store.commit('setModalMessage', 'Payment error - we will check into it - thank you for your support.')
-              $self.$root.$emit('bv::show::modal', 'waiting-modal')
-            })
-          } else {
-            $self.$store.commit('setModalMessage', 'Payment error - unkown code - ', data)
-            $self.$root.$emit('bv::show::modal', 'waiting-modal')
-          }
-        })
-      }
-    },
-    closeModal () {
-      this.$root.$emit('bv::hide::modal', 'waiting-modal')
-      this.$bvModal.hide('payment-modal')
-    },
-    paymentEvent: function (ev) {
-      const data = ev.detail[0]
-      this.$store.dispatch('paymentStore/receivePayment', data).then(() => {
-        this.$emit('paymentEvent', data)
-      })
-    },
     showPayment () {
-      this.$store.dispatch('fetchAddressInfo', this.stxAddress).then(() => {
+      this.showRpay = true
+      this.$bvModal.show('payment-modal')
+      this.$store.dispatch('fetchAddressInfo', this.recipient).then(() => {
         this.showRpay = true
         this.$bvModal.show('payment-modal')
       }).catch((err) => {
@@ -142,13 +131,22 @@ export default {
       })
     },
     useMyAddress: function () {
-      this.stxAddress = this.profile.stxAddress
+      this.recipient = this.profile.stxAddress
     }
   },
   computed: {
+    paymentMessage () {
+      const configuration = this.$store.getters[APP_CONSTANTS.KEY_RPAY_CONFIGURATION]
+      if (!configuration) return ''
+      return '<div>Swap <span class="text-warning">' + configuration.payment.amountFiat + '</span> ' + configuration.payment.currency + ' for <span class="text-warning">' + configuration.payment.amountStx + '</span> STX</div><div class="mt-3">Send the STX to:</span> <span class="text-warning">' + this.recipient + '</div>'
+    },
     getBalance () {
-      const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
-      return (profile && profile.accountInfo) ? profile.accountInfo.balance : 0
+      return (this.profile && this.profile.accountInfo) ? this.profile.accountInfo.balance : 0
+    },
+    smWallet () {
+      const stxAddress = process.env.VUE_APP_STACKS_TRANSFER_ADDRESS
+      const accountInfo = this.$store.getters[APP_CONSTANTS.KEY_ACCOUNT_INFO](stxAddress)
+      return accountInfo
     },
     webWalletLink () {
       if (this.$browserDetect.isFirefox) {

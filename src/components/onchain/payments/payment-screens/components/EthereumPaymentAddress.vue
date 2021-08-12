@@ -9,57 +9,44 @@
   <div class="text-center" v-if="desktopWalletSupported">
     <canvas ref="lndQrcode"></canvas>
   </div>
-
   <div class="mt-5 mb-3 text-center">
-    <b-button class="cp-btn-order" :variant="$globalLookAndFeel.variant0" @click.prevent="sendPayment()">Connect via Meta Mask</b-button>
+    <b-button class="cp-btn-order" variant="warning" @click.prevent="sendPayment()">Connect via Meta Mask</b-button>
   </div>
-  <div class="mb-2 text-center" style="" v-if="loading">
-     <span class="text-danger" v-html="waitingMessage"></span>
-  </div>
-  <div class="mb-3 text-center">
-    <span class="text-danger">{{errorMessage}}</span>
+  <div class="mb-1 text-center" style="" v-if="loading">
+     <span class="text-message text-info" v-html="waitingMessage"></span>
   </div>
   <div class="text-center">
-    <span><a class="text-small text-info" target="_blank" href="https://metamask.io/download.html">Install Meta Mask</a></span>
+    <span><a class="text-message text-warning" target="_blank" href="https://metamask.io/download.html">Install Meta Mask</a></span>
   </div>
 </div>
 </template>
 
 <script>
-import { APP_CONSTANTS } from '@/app-constants'
 import QRCode from 'qrcode'
 
 export default {
   name: 'EthereumPaymentAddress',
   components: {
   },
-  props: ['desktopWalletSupported'],
+  props: ['desktopWalletSupported', 'configuration'],
   data () {
     return {
       loading: false,
       fullPage: true,
       errorMessage: null,
-      waitingMessage: 'Open Meta Mask to proceed (sending transactions to the ethereum network takes a minute or so...)',
-      processingMessage: '<div class="mx-5 text-center"><h6>Processing payments</h6><p>Processing payments on the Ethereum takes a few minutes - please sit tight!</p></div>'
+      waitingMessage: 'Check your Meta Mask wallet to proceed'
     }
   },
   watch: {
   },
   mounted () {
     this.addQrCode()
-    const $self = this
-    window.eventBus.$on('rpayEvent', function (data) {
-      $self.errorMessage = data
-    })
   },
   computed: {
   },
-
   methods: {
     paymentUri () {
-      // const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
-      return configuration.payment.ethPaymentAddress
+      return this.configuration.payment.ethPaymentAddress
     },
     addQrCode () {
       const element = this.$refs.lndQrcode
@@ -69,10 +56,9 @@ export default {
         function () {})
     },
     sendPayment () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       this.loading = true
-      this.waitingMessage = this.processingMessage
-      this.$store.dispatch('rpayEthereumStore/transact', { opcode: 'send-payment', ethPaymentAddress: configuration.payment.ethPaymentAddress, amount: configuration.payment.amountEth }).then((result) => {
+      this.$store.dispatch('rpayEthereumStore/transact', { opcode: 'send-payment', ethNetworkId: configuration.payment.ethNetworkId, ethPaymentAddress: configuration.payment.ethPaymentAddress, amount: configuration.payment.amountEth }).then((result) => {
         const data = {
           status: 10,
           numbCredits: configuration.payment.creditAttributes.start,
@@ -82,14 +68,9 @@ export default {
         this.waitingMessage = 'Processed Payment'
         this.loading = false
         // this.$emit('rpayEvent', data)
-        window.eventBus.$emit('rpayEvent', data)
-        this.$store.commit('rpayStore/setDisplayCard', 104)
+        this.$emit('rpayEvent', data)
       }).catch((e) => {
-        if (e.message.indexOf('cancelled') === -1) {
-          this.errorMessage = 'Please ensure you are logged into your meta mask account on the network'
-        }
-        this.waitingMessage = ''
-        this.loading = false
+        this.$emit('rpayEvent', { opcode: 'eth-crypto-payment-cancelled' })
       })
     },
     onCancel () {

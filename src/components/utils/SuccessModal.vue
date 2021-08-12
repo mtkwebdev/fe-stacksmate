@@ -31,7 +31,7 @@ export default {
   data () {
     return {
       cross: require('@/assets/img/cross.svg'),
-      logoRainbow: require('@/assets/img/passport.png')
+      logoRainbow: require('@/assets/img/logo/logo.png')
     }
   },
   methods: {

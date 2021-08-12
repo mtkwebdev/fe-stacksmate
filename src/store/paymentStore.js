@@ -2,6 +2,7 @@ import axios from 'axios'
 import { APP_CONSTANTS } from '@/app-constants'
 
 const MESH_API_PATH = process.env.VUE_APP_RISIDIO_API + '/mesh'
+const SM_API_PATH = process.env.VUE_APP_RISIDIO_API
 const contractAddress = process.env.VUE_APP_STACKS_CONTRACT_ADDRESS
 const contractName = process.env.VUE_APP_STACKS_CONTRACT_NAME
 
@@ -75,6 +76,7 @@ const paymentStore = {
   state: {
     payments: [],
     backers: [],
+    transaction: null,
     anon: 'anon',
     squareType: 'fiat-payment-success',
     paypalType: 'paypal-payment-success'
@@ -87,11 +89,17 @@ const paymentStore = {
         return convertStxPayment(rawPayment)
       }
       return convertOpenNodePayment(rawPayment)
+    },
+    getTxInProgress: state => {
+      return state.transaction
     }
   },
   mutations: {
     addBacker (state, backer) {
       if (backer) state.backers.splice(0, 0, backer)
+    },
+    setTxInProgress (state, transaction) {
+      state.transaction = transaction
     },
     addPayment (state, payment) {
       if (payment) state.payments.splice(0, 0, payment)
@@ -118,6 +126,44 @@ const paymentStore = {
           resolve(response.data)
         }).catch((error) => {
           reject(new Error('Unable to fetch asset: ' + error))
+        })
+      })
+    },
+    fetchStacksMateTransaction ({ commit }) {
+      return new Promise(function (resolve, reject) {
+        axios.get(MESH_API_PATH + '/v2/stacksmate/transactions').then((response) => {
+          commit('setTxInProgress', response.data)
+          resolve(response.data)
+        }).catch((error) => {
+          reject(new Error('Unable to fetch asset: ' + error))
+        })
+      })
+    },
+    sendStacksMateTransaction ({ commit, rootGetters }, payment) {
+      return new Promise(function (resolve, reject) {
+        const stxAddress = process.env.VUE_APP_STACKS_TRANSFER_ADDRESS
+        const wallet = rootGetters[APP_CONSTANTS.KEY_ACCOUNT_INFO](stxAddress)
+        axios.post(SM_API_PATH + '/stacksmate/' + payment.recipient + '/' + wallet.accountInfo.nonce + '/' + payment.microstx).then((response) => {
+          const smTransaction = {
+            timeSent: new Date().getTime(),
+            recipient: payment.recipient,
+            nonce: wallet.accountInfo.nonce,
+            microstx: payment.microstx,
+            txId: response.data
+          }
+          axios.post(MESH_API_PATH + '/stacksmate/transactions', smTransaction).then((txResp) => {
+            commit('setTxInProgress', txResp.data)
+            resolve(response.data)
+          })
+        }).catch((err) => {
+          if (typeof err === 'object' && err !== null) {
+            console.log(Object.keys(err))
+            console.log(err.response.data)
+            reject(new Error('Unable to fetch asset: ' + err.response.data.message))
+          } else {
+            console.log('error not object')
+            reject(new Error('Unable to fetch asset: ' + err))
+          }
         })
       })
     }

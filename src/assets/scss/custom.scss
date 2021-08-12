@@ -115,6 +115,7 @@ $font-dir: "/fonts/";
 
 body {
   margin: 0;
+  font-size: 1.0rem;
   font-family: 'Montserrat', Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -141,7 +142,7 @@ body {
   border: 1pt solid #fff;
 }
 
-.footer{
+.footer {
   /*position: fixed;
   bottom: 0;*/
   width: 100%;
@@ -149,14 +150,14 @@ body {
   padding: 0;
 }
 h1 {
-  font-size: 17px;
+  font-size: 2.5rem;
   font-weight: 700;
   letter-spacing: 0px;
   text-transform: capitalize;
   opacity: 1;
 }
 h2 {
-  font-size: 36px;
+  font-size: 2.0rem;
   font-weight: 200;
   letter-spacing: 0px;
   text-transform: capitalize;
@@ -164,19 +165,19 @@ h2 {
   white-space: normal;
 }
 h3 {
-  font-size: 17px;
+  font-size: 1.8rem;
   font-weight: 700;
   letter-spacing: 0px;
   opacity: 1;
 }
 h4 {
-  font-size: 15px;
+  font-size: 1.8rem;
   font-weight: 700;
   letter-spacing: 0px;
   opacity: 1;
 }
 p {
-  font-size: 1.2rem;
+  font-size: 1.0rem;
   font-weight: 300;
   letter-spacing: 0px;
   opacity: 1;
@@ -190,12 +191,30 @@ p {
   text-shadow: 0px 3px 6px #00000029;
   opacity: 1;
 }
+.text-pay-h1 {
+  letter-spacing: 2px;
+  font-weight: 300;
+  text-transform: uppercase;
+}
+.text-message {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
 .text-black {
   color: #000000;
 }
 .text-large {
   font-size: 14px;
 }
+.text-small {
+  font-size: 0.9rem;
+}
+@media only screen and (max-width: 475px) {
+  .text-small {
+    font-size: 0.65rem;
+  }
+}
+
 .bg-lighter {
   background-color: #F5F5F5;
 }
@@ -236,15 +255,84 @@ a:hover {
   opacity: 1;
   padding-top: 20px;
 }
+.modal-dialog {
+  padding: 20px auto;
+  margin: 0vh auto;
+}
 .modal-content {
+  margin: auto;
   border: none !important;
   border-radius: 0px !important;
-  min-height: 200px;
-  color: rgb(7, 0, 0);
-  padding: 10px;
-  background-color: rgb(0, 62, 128) !important;
+  min-height: 100px;
+  background-color: transparent !important;
+  color: #000;
+  padding: 20px;
+}
+.modal-header {
+  display: none;
+}
+.modal-footer {
+  display: none;
+}
+.vue-notification-template {
+  background: none;
 }
 .r-notifs {
+  padding: 5px !important;
+  margin: 5px !important;
+  font-size: 0.9rem !important;
+  background: $success !important;
+  color: #000 !important;
+}
+.success {
+  background: $success !important;
+  color: #000 !important;
+}
+.error {
+  background: $danger !important;
+  color: #fff !important;
+}
+.danger {
+  background: $danger !important;
+  color: #fff !important;
+}
+.warning {
+  background: $warning !important;
+}
+.btn-pay {
+  margin: 0 5px;
+  width: 8rem;
+  border-radius: 10rem;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+@media only screen and (max-width: 475px) {
+  .btn-pay {
+    width: 6rem;
+  }
+}
+
+.action-section {
+  min-height: 300px;
+}
+#rpay-pay-card .rpay-sq-logo {
+  padding: 20px;
+  max-width: 250px;
+  background-color: #fff;
+  border-radius: 5px;
+}
+#rpay-pay-card .rpay-sq-payment-box {
+  border-radius: 5px;
   padding: 10px;
-  margin: 10px;
+  min-width: 400px;
+  max-width: 400px;
+}
+#rpay-pay-card .rpay-countdown {
+  position: relative;
+  top: 0px;
+  text-align: left;
+  font-size: 1.2rem;
+  font-weight: 200;
+  letter-spacing: 0px;
+  opacity: 1;
 }

@@ -22,8 +22,7 @@
       <b-icon class="text-two" width="20px" height="20px" icon="file-earmark"/>
     </div>
     <div class="mt-5 text-center">
-      <!--<b-button v-if="!loggedIn" class="cp-btn-order" :variant="$globalLookAndFeel.variant0" @click.prevent="doLogin()">Connect to Stacks</b-button> -->
-      <b-button class="cp-btn-order" :variant="$globalLookAndFeel.variant0" @click.prevent="sendPayment()">{{buttonLabel}}</b-button>
+      <b-button class="cp-btn-order" variant="warning" @click.prevent="sendPayment()">{{buttonLabel}}</b-button>
     </div>
     <div class="my-3 text-center">
       <span class="text-small text-danger">{{errorMessage}}</span>
@@ -43,7 +42,7 @@ export default {
   name: 'StacksPaymentAddress',
   components: {
   },
-  props: ['desktopWalletSupported'],
+  props: ['desktopWalletSupported', 'configuration'],
   data () {
     return {
       webWalletNeeded: false,
@@ -80,7 +79,7 @@ export default {
       }
     },
     transfer () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      const configuration = this.configuration
       this.loading = true
       this.waitingMessage = 'Processing Payment'
       const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
@@ -99,14 +98,14 @@ export default {
         this.waitingMessage = 'Processed Payment'
         this.loading = false
         data.txId = (result && result.result) ? result.result.txId : 'unknown'
-        window.eventBus.$emit('rpayEvent', data)
+        this.$emit('rpayEvent', data)
         this.$store.commit('rpayStore/setDisplayCard', 104)
       }).catch((e) => {
         this.$store.dispatch('rpayStacksStore/makeTransferRisidio', { amountStx: configuration.payment.amountStx, paymentAddress: configuration.payment.stxPaymentAddress }).then((result) => {
           this.waitingMessage = 'Processed Payment'
           this.loading = false
           data.txId = result.txId
-          window.eventBus.$emit('rpayEvent', data)
+          this.$emit('rpayEvent', data)
           this.$store.commit('rpayStore/setDisplayCard', 104)
         }).catch((e) => {
           this.errorMessage = 'Unable to transfer funds at the moment - please try later or choose an alternate payment method'
@@ -116,7 +115,6 @@ export default {
       })
     },
     paymentUri () {
-      // const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
       return STACKS_PAYMENT_ADDRESS
     },
     addQrCode () {
@@ -147,7 +145,7 @@ export default {
       return 'Send ' + this.currentAmount
     },
     currentSymbol () {
-      const paymentOption = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTION_VALUE]
+      const paymentOption = this.configuration.payment.paymentOption
       if (paymentOption === 'ethereum') {
         return 'Ξ'
       } else if (paymentOption === 'stacks') {
@@ -157,8 +155,8 @@ export default {
       }
     },
     currentAmount () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
-      const paymentOption = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTION_VALUE]
+      const configuration = this.configuration
+      const paymentOption = this.configuration.payment.paymentOption
       if (configuration && configuration.payment.amountBtc) {
         if (paymentOption === 'ethereum') {
           return configuration.payment.amountEth + ' ETH'

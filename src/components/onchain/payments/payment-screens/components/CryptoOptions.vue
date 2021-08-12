@@ -1,12 +1,24 @@
 <template>
-<b-card-text class="text-center mx-4">
+<b-card-text class="text-center mx-4 border-bottom mb-5">
+  <!--
   <div class="mb-3 d-flex justify-content-center">
-    <img height="70px" class="rpay-sq-logo" :src="logo"/>
+    <img width="30%" class="rpay-sq-logo" :src="logo"/>
   </div>
-  <div class="text-center text-bold" v-if="options.length > 1">Select your payment method</div>
-  <div class="mx-5">
-    <span v-for="(option, index) in options" :key="index">
-      <b-button @click="changePaymentOption(option.value)" :variant="$globalLookAndFeel.variant0" :class="(currentOption === option.value) ? 'co-option-on' : 'co-option-off'"><span v-if="option.value === 'fiat'">Card</span><span v-else>{{option.value}}</span></b-button>
+  -->
+  <h1 class="text-pay-h1">Payment Method</h1>
+  <p class="mt-4 text-message">Choose preferred payment option</p>
+  <div class="border-bottom mt-4 mb-4 mx-0 d-flex justify-content-center text-small">
+    <span v-for="(option) in fiatOptions()" :key="option.value" class="mb-3">
+      <b-button :disabled="(!sufficientFunds || option.value === 'paypal')" class="btn-pay" @click="changePaymentOption(option.value)" :variant="payBtnVariant(option.value)">
+        <span><img width="15px" class="mr-2" :src="cardImg(option.value)"/> <span v-if="option.value === 'fiat'">Card</span><span v-else>{{option.value}}</span></span>
+      </b-button>
+    </span>
+  </div>
+  <div class="mx-0 d-flex justify-content-center text-small">
+    <span v-for="(option) in cryptoOptions()" :key="option.value" class="mb-3">
+      <b-button :disabled="(!sufficientFunds)" class="btn-pay mb-2" @click="changePaymentOption(option.value)" :variant="payBtnVariant(option.value)">
+        <span><img width="15px" class="mr-2" :src="cardImg(option.value)"/></span><span>{{option.value}}</span>
+      </b-button>
     </span>
   </div>
 </b-card-text>
@@ -19,9 +31,15 @@ export default {
   name: 'CryptoOptions',
   components: {
   },
+  props: ['configuration'],
   data () {
     return {
       selected: 'bitcoin',
+      cardEthereumImg: require('@/assets/img/payments/ethereum.png'),
+      cardBitcoinImg: require('@/assets/img/payments/bitcoin.png'),
+      cardLightningImg: require('@/assets/img/payments/lightning.png'),
+      cardFiatImg: require('@/assets/img/payments/credit-card.png'),
+      cardPaypalImg: require('@/assets/img/payments/paypal.png'),
       logoSq: 'https://images.prismic.io/risidio-journal/6da1afe7-fb24-4cff-be77-144d4354f41d_square.png?auto=compress,format',
       logoOn: 'https://images.prismic.io/risidio-journal/65a893ce-421d-45bf-b883-8cb77fda2763_Sans-titre-1+%283%29.png?auto=compress,format',
       logoEth: 'https://images.prismic.io/risidio-journal/6b859d7d-c60e-470f-994c-ab2ae1bff130_eht.png?auto=compress,format',
@@ -29,25 +47,64 @@ export default {
     }
   },
   mounted () {
-    const paymentOption = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTION_VALUE]
+    const paymentOption = this.configuration.payment.paymentOption
     this.selected = paymentOption
   },
   methods: {
+    cardImg (method) {
+      if (method === 'fiat') {
+        return this.cardFiatImg
+      } else if (method === 'paypal') {
+        return this.cardPaypalImg
+      } else if (method === 'ethereum') {
+        return this.cardEthereumImg
+      } else if (method === 'lightning') {
+        return this.cardLightningImg
+      } else if (method === 'bitcoin') {
+        return this.cardBitcoinImg
+      } else {
+        return this.cardFiatImg
+      }
+    },
+    payBtnVariant (value) {
+      if (!this.sufficientFunds) {
+        return 'outline-danger'
+      }
+      if (value === this.selected) {
+        return 'warning'
+      } else {
+        return 'outline-warning'
+      }
+    },
+    fiatOptions () {
+      const options = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTIONS]
+      return options.filter((o) => o.value === 'fiat' || o.value === 'paypal')
+    },
+    cryptoOptions () {
+      const options = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTIONS]
+      return options.filter((o) => o.value !== 'fiat' && o.value !== 'paypal')
+    },
     changePaymentOption: function (method) {
-      this.$store.commit(APP_CONSTANTS.SET_PAYMENT_OPTION_VALUE, method)
+      if (this.configuration.payment.paymentOption === method) {
+        this.configuration.payment.paymentOption = null
+      } else {
+        this.configuration.payment.paymentOption = method
+      }
+      this.$emit('rpayEvent', { opcode: 'change-payment-method' })
     }
   },
   computed: {
-    options () {
-      const paymentOptions = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTIONS]
-      return paymentOptions
+    sufficientFunds () {
+      const stxAddress = process.env.VUE_APP_STACKS_TRANSFER_ADDRESS
+      const wallet = this.$store.getters[APP_CONSTANTS.KEY_ACCOUNT_INFO](stxAddress)
+      return (wallet && wallet.accountInfo.balance >= (this.configuration.payment.amountStx * 4))
     },
     currentOption () {
-      const paymentOption = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTION_VALUE]
+      const paymentOption = this.configuration.payment.paymentOption
       return paymentOption
     },
     logo () {
-      const paymentOption = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTION_VALUE]
+      const paymentOption = this.configuration.payment.paymentOption
       let logo = this.logoSq
       if (paymentOption === 'stacks') {
         logo = this.logoStx

@@ -1,14 +1,14 @@
 <template>
-  <b-modal size="lg" id="waiting-modal">
+  <b-modal size="sm" id="waiting-modal">
     <b-card-group>
       <b-card>
         <template #header>
           <b-row>
             <b-col cols="1" offset="0">
-              <img :src="passport" width="50px;"/>
+              <img :src="logoRainbow" width="50px;"/>
             </b-col>
-            <b-col cols="6" class="ml-4 text-small">
-              <br/>Watch out for your Digital PROM Passport <br/>and invite to the launch party $10
+            <b-col cols="6" class="mt-4 ml-3">
+              <span>Your STX will arrive shortly</span>
             </b-col>
           </b-row>
         </template>
@@ -39,7 +39,7 @@ export default {
   },
   data () {
     return {
-      passport: require('@/assets/img/passport.png'),
+      logoRainbow: require('@/assets/img/logo/logo.png'),
       cross: require('@/assets/img/cross.svg')
     }
   },

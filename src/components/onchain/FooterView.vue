@@ -1,10 +1,10 @@
 <template>
 <div class="footer-container">
-  <b-form-input disabled id="range-2" :value="rangeValue" type="range" min="0" max="2" step="1"></b-form-input>
-  <div class="d-flex justify-content-between" style="font-size: 11px;">
-    <div :class="(displayCard === 100) ? 'text-bold' : 'text-300'" class="click-effect" @click="skipAhead(0)">Select Amount</div>
-    <div :class="(displayCard === 102) ? 'text-bold' : 'text-300'" class="click-effect" @click="skipAhead(1)">Make Payment</div>
-    <div :class="(displayCard === 104) ? 'text-bold' : 'text-300'" class="click-effect" @click="skipAhead(2)">Confirmation</div>
+  <b-form-input class="text-warning" disabled id="range-2" :value="paymentStage" type="range" min="0" max="2" step="1"></b-form-input>
+  <div class="d-flex justify-content-between" style="font-size: 0.7rem;">
+    <div :class="(paymentStage === 0) ? 'text-danger' : ''" @click="skipAhead(0)">Select Currency</div>
+    <div :class="(paymentStage === 1) ? 'text-danger' : ''" @click="skipAhead(1)">Make Payment</div>
+    <div :class="(paymentStage === 2) ? 'text-danger' : ''" @click="skipAhead(2)">Confirmation</div>
   </div>
 </div>
 </template>
@@ -16,6 +16,7 @@ export default {
   name: 'FooterView',
   components: {
   },
+  props: ['paymentStage'],
   data () {
     return {
     }
@@ -28,10 +29,9 @@ export default {
       this.$emit('rangeEvent', disp)
     },
     isSelected () {
-      const displayCard = this.$store.getters[APP_CONSTANTS.KEY_DISPLAY_CARD]
-      if (this.rangeValue === 0 && displayCard === 100) return true
-      else if (this.rangeValue === 1 && displayCard === 102) return true
-      else if (this.rangeValue === 2 && displayCard === 104) return true
+      if (this.paymentStage === 0) return true
+      else if (this.paymentStage === 1) return true
+      else if (this.paymentStage === 2) return true
       return false
     }
   },
@@ -49,43 +49,96 @@ export default {
   }
 }
 </script>
-<style lang="scss" >
+<style >
 
 input[type=range] {
-  -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
-  width: 100%; /* Specific width is required for Firefox. */
-  background: transparent; /* Otherwise white in Chrome */
-}
-
-input[type=range]::-webkit-slider-thumb {
+  width: 100%;
+  margin: 13.8px 0;
+  background-color: transparent;
   -webkit-appearance: none;
 }
-
 input[type=range]:focus {
-  outline: none; /* Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though. */
-}
-
-input[type=range]::-ms-track {
-  width: 100%;
-  cursor: default;
-
-  /* Hides the slider so custom styles can be added */
-  background: transparent;
-  border-color: transparent;
-  color: transparent;
-}
-input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #ccc;
+  outline: none;
 }
 input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 4.2px;
-  background: #ccc;
+  background: #3071a9;
+  border: 0.2px solid #010101;
   border-radius: 1.3px;
-  border: 0.2px solid #ccc;
-}
-
-.click-effect {
+  width: 100%;
+  height: 1.4px;
   cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  margin-top: -8px;
+  width: 15px;
+  height: 15px;
+  background: #dfffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #000;
+}
+input[type=range]::-moz-range-track {
+  background: #3071a9;
+  border: 0.2px solid #010101;
+  border-radius: 1.3px;
+  width: 100%;
+  height: 3.4px;
+  cursor: pointer;
+}
+input[type=range]::-moz-range-thumb {
+  width: 8px;
+  height: 8px;
+  background: #dfffff;
+  border: 1px solid #000000;
+  border-radius: 3px;
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  background: transparent;
+  border-color: transparent;
+  border-width: 14.8px 0;
+  color: transparent;
+  width: 100%;
+  height: 8.4px;
+  cursor: pointer;
+}
+input[type=range]::-ms-fill-lower {
+  background: #2a6495;
+  border: 0.2px solid #010101;
+  border-radius: 2.6px;
+}
+input[type=range]::-ms-fill-upper {
+  background: #3071a9;
+  border: 0.2px solid #010101;
+  border-radius: 2.6px;
+}
+input[type=range]::-ms-thumb {
+  width: 8px !important;
+  height: 16px !important;
+  background: #dfffff;
+  border: 1px solid #000000;
+  border-radius: 50% !important;
+  cursor: pointer;
+  margin-top: 0px;
+  /*Needed to keep the Edge thumb centred*/
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #3071a9;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #367ebd;
+}
+/*TODO: Use one of the selectors from https://stackoverflow.com/a/20541859/7077589 and figure out
+how to remove the virtical space around the range input in IE*/
+@supports (-ms-ime-align:auto) {
+  /* Pre-Chromium Edge only styles, selector taken from hhttps://stackoverflow.com/a/32202953/7077589 */
+  input[type=range] {
+    margin: 0;
+    /*Edge starts the margin from the thumb, not the track as other browsers do*/
+  }
 }
 </style>

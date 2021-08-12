@@ -2,37 +2,35 @@
 <div v-if="!loading" class="d-flex justify-content-center" :key="componentKey">
   <div class="mx-auto">
     <b-card-group class="">
-      <b-card v-if="page === 'payment-page'" header-tag="header" footer-tag="footer" class="rpay-card">
+      <b-card v-if="page === 'payment-page'" header-tag="header" footer-tag="footer">
         <template #header>
-          <b-row>
-            <b-col cols="3">
-              <img :src="passport" width="100px;"/>
-            </b-col>
-            <b-col cols="8" style="font-size: 1.0rem;" v-if="paymentMessage">
-              {{paymentMessage}}
-            </b-col>
-            <b-col cols="8" style="font-size: 1.0rem;" v-else>
-              Digital PROM Passport <br/>and invite to the launch party $10
+          <b-row class="mx-2">
+            <b-col cols="12" style="font-size: 1.0rem;">
+              <div v-html="paymentMessage"></div>
             </b-col>
           </b-row>
         </template>
         <div>
-          <crypto-picker v-if="displayCard === 100" @rpayEvent="rpayEvent($event)"/>
-          <div v-else-if="displayCard === 102" :style="offsetTop()">
-            <order-info v-if="showOrderInfo" class="pb-4"/>
+          <!-- <CryptoPicker :configuration="configuration" v-if="displayCard === 100" @rpayEvent="rpayEvent($event)"/> -->
+          <div v-if="displayCard === 102">
+            <OrderInfo :configuration="configuration" v-if="configuration.payment.allowMultiples" class="pb-4" @rpayEvent="rpayEvent($event)"/>
             <div class="d-flex flex-column align-items-center">
-              <crypto-options class=""/>
-              <crypto-payment-screen @rpayEvent="rpayEvent($event)"/>
+              <CryptoOptions :configuration="configuration" @rpayEvent="rpayEvent($event)"/>
+              <p class="mt-4 mx-4 text-center text-message" v-html="swapMessage"></p>
+              <p v-if="paying" class="mt-4 mx-4 text-center text-message">
+                <b-icon icon="circle-fill" animation="throb" font-scale="2"></b-icon> Payment in Progress
+              </p>
+              <CryptoPaymentScreen :configuration="configuration" @rpayEvent="rpayEvent($event)"/>
             </div>
           </div>
-          <result-page :result="'error'" v-else @rpayEvent="rpayEvent($event)"/>
+          <ResultPage :configuration="configuration" :result="'error'" v-else @rpayEvent="rpayEvent($event)"/>
         </div>
         <template v-slot:footer>
-          <footer-view :rangeValue="getRangeValue()" @rangeEvent="rangeEvent"/>
+          <FooterView class="mx-4" :paymentStage="paymentStage" @rangeEvent="rangeEvent"/>
         </template>
       </b-card>
       <div v-else>
-        <result-page/>
+        <ResultPage :configuration="configuration"/>
       </div>
     </b-card-group>
   </div>
@@ -42,41 +40,43 @@
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
 import CryptoPaymentScreen from './payment-screens/CryptoPaymentScreen'
-import CryptoPicker from './payment-screens/CryptoPicker'
 import CryptoOptions from './payment-screens/components/CryptoOptions'
 import OrderInfo from './payment-screens/components/OrderInfo'
 import ResultPage from '../ResultPage'
 import FooterView from '../FooterView'
+import utils from '@/store/utils'
 
 export default {
   name: 'PaymentFlow',
   components: {
     FooterView,
     CryptoPaymentScreen,
-    CryptoPicker,
     OrderInfo,
     CryptoOptions,
     ResultPage
   },
+  props: ['configuration', 'recipient'],
   data () {
     return {
+      paymentStage: 0,
       passport: 'https://images.prismic.io/digirad/ba438fd3-a07d-4fce-8483-aaf46b975c4b_alexander-sinn-KgLtFCgfC28-unsplash+%281%29%402x.png?auto=compress,format',
       page: 'payment-page',
       message: null,
       paying: false,
       componentKey: 0,
-      loading: true
+      loading: true,
+      successMessage1: 'Payment is being precessed.',
+      successMessage2: 'Stacks transfer is being sent now.',
+      errorMessage: 'Payment may have been cancelled - please check you are connected to the right network and have sufficient funds in your wallet.'
     }
   },
   mounted () {
     this.initPayment()
     const $self = this
     window.eventBus.$on('rpayEvent', function (data) {
-      if (data.opcode.indexOf('-payment-success') > -1) {
-        $self.page = 'payment-result'
-        $self.$store.commit('rpayStore/setDisplayCard', 104)
+      if (data.opcode === 'eth-payment-pending') {
+        $self.paying = true
       }
-      $self.componentKey += 1
     })
   },
   beforeDestroy () {
@@ -84,82 +84,96 @@ export default {
   },
   methods: {
     initPayment: function (config) {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
       const displayCard = this.$store.getters[APP_CONSTANTS.KEY_DISPLAY_CARD]
-      if (configuration.payment.allowMultiples && displayCard === 100) {
+      if (this.configuration.payment.allowMultiples && displayCard === 100) {
         this.$store.commit('rpayStore/setDisplayCard', 100)
       } else {
         this.$store.commit('rpayStore/setDisplayCard', 102)
       }
-      this.$store.dispatch('rpayStore/initialisePaymentFlow', configuration).then((invoice) => {
+      this.$store.dispatch('rpayStore/initialisePaymentFlow', this.configuration).then((invoice) => {
         this.page = 'payment-page'
         if (invoice) {
           if (invoice.data && (invoice.data.status === 'paid' || invoice.data.status === 'processing')) {
             this.page = 'payment-result'
-            window.eventBus.$emit('rpayEvent', { opcode: 'payment-detected' })
           }
         }
         this.loading = false
       })
     },
-    rangeEvent (displayCard) {
-      this.$store.commit('rpayStore/setDisplayCard', displayCard)
-    },
-    getRangeValue () {
-      const displayCard = this.$store.getters[APP_CONSTANTS.KEY_DISPLAY_CARD]
-      if (displayCard === 100) return 0
-      else if (displayCard === 102) return 1
-      else if (displayCard === 104) return 2
+    rangeEvent () {
+      this.paymentStage = this.paymentStage++
+      this.componentKey++
     },
     rpayEvent: function (data) {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
+      this.paying = false
       if (data.opcode === 'crypto-payment-expired') {
         this.paymentExpired()
       } else if (data.opcode === 'payment-restart') {
         this.paymentExpired()
+      } else if (data.opcode.indexOf('-payment-cancelled') > -1 || data.opcode.indexOf('-payment-error') > -1) {
+        this.$notify({ type: 'warning', title: 'Payments', text: this.errorMessage })
+      } else if (data.opcode.indexOf('-crypto-payment-success') > -1) {
+        this.$notify({ type: 'success', title: 'Payments', text: this.successMessage1 })
+      } else if (data.opcode.indexOf('fiat-payment-success') > -1) {
+        this.$notify({ type: 'success', title: 'Payments', text: this.successMessage1 })
+      } else if (data.opcode.indexOf('btc-payment-success') > -1) {
+        this.$notify({ type: 'success', title: 'Payments', text: 'Bitcoin..' })
+      } else if (data.opcode === 'change-payment-method') {
+        this.paymentStage = 1
+        this.componentKey++
       }
+
       if (data.opcode.indexOf('-payment-success') > -1) {
-        data.numbCredits = configuration.payment.creditAttributes.start
-        this.page = 'result'
+        const payment = {
+          microstx: utils.toOnChainAmount(this.configuration.payment.amountStx),
+          recipient: this.recipient
+        }
+        this.$store.dispatch('paymentStore/sendStacksMateTransaction', payment).then((transfer) => {
+          this.transfer = transfer
+          this.$notify({ type: 'success', title: 'Payments', text: this.successMessage2 })
+          this.$notify({ type: 'success', title: 'Payments', text: transfer })
+        }).catch((err) => {
+          this.$notify({ type: 'danger', title: 'Payments', text: err })
+        })
       }
-      window.eventBus.$emit('rpayEvent', data)
-    },
-    prev () {
-      let displayCard = this.$store.getters[APP_CONSTANTS.KEY_DISPLAY_CARD]
-      if (displayCard === 102) {
-        displayCard = 100
-        window.eventBus.$emit('rpayEvent', 'payment-cancelled')
-      } else if (displayCard === 104) {
-        displayCard = 102
-      } else {
-        displayCard = 100
-      }
-      this.rangeValue = displayCard
-      this.$store.commit('rpayStore/setDisplayCard', displayCard)
     },
     paymentExpired () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
-      this.$store.dispatch('rpayStore/initialisePaymentFlow', configuration).then(() => {
+      this.$store.dispatch('rpayStore/initialisePaymentFlow', this.configuration).then(() => {
         this.componentKey += 1
         this.loading = false
       })
-    },
-    offsetTop () {
-      const paymentOption = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_OPTION_VALUE]
-      if (paymentOption !== 'fiat') {
-        return '' // 'position:relative; top: 52px;'
-      }
-      return '' // 'position:relative; top: -60px;'
     }
   },
   computed: {
-    showOrderInfo () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
-      return configuration.payment.allowMultiples
+    swapMessage () {
+      if (!this.sufficientFunds) {
+        return 'Funds in the StacksMate Wallet are too low to make transfers at this time'
+      }
+      let sm = 'You send <span class="text-danger">'
+      if (this.configuration.payment.paymentOption === 'ethereum') {
+        sm += this.configuration.payment.amountEth + '</span> ETH to us. '
+      } else if (this.configuration.payment.paymentOption === 'bitcoin' || this.configuration.payment.paymentOption === 'lightning') {
+        sm += this.configuration.payment.amountBtc + '</span> BTC to us. '
+      } else {
+        sm += this.configuration.payment.amountFiat + '</span> ' + this.configuration.payment.currency + ' to us. '
+      }
+      sm += '<br/>We send <span class="text-danger">' + this.configuration.payment.amountStx + '</span> STX to you. '
+      return sm
+    },
+    payingMessage () {
+      let sm = 'You send <span class="text-danger">'
+      if (this.paying) {
+        sm += '<br/><br/><b-icon icon="circle-fill" animation="throb" font-scale="2"></b-icon> Payment Pending'
+      }
+      return sm
+    },
+    sufficientFunds () {
+      const stxAddress = process.env.VUE_APP_STACKS_TRANSFER_ADDRESS
+      const wallet = this.$store.getters[APP_CONSTANTS.KEY_ACCOUNT_INFO](stxAddress)
+      return (wallet && wallet.accountInfo.balance >= (this.configuration.payment.amountStx * 4))
     },
     paymentMessage () {
-      const configuration = this.$store.getters[APP_CONSTANTS.KEY_CONFIGURATION]
-      return 'Swap ' + configuration.payment.amountFiat + ' ' + configuration.payment.currency + ' for ' + configuration.payment.amountStx + ' STX'
+      return 'Swap <span class="text-danger">' + this.configuration.payment.amountFiat + '</span> ' + this.configuration.payment.currency + ' for <span class="text-danger">' + this.configuration.payment.amountStx + '</span> STX<br/><span style="font-size: 0.8rem;">to:</span> <span class="text-danger" style="font-size: 0.8rem;">' + this.recipient + '</span>'
     },
     displayCard () {
       const displayCard = this.$store.getters[APP_CONSTANTS.KEY_DISPLAY_CARD]

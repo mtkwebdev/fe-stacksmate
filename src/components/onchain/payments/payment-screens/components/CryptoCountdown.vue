@@ -3,7 +3,7 @@
       Timeout - <a href="#" @click.prevent="evPaymentExpired">please start again</a>
     </div>
     <div v-else>
-      <div class="">
+      <div class="text-message">
         {{currentCountdown}}
       </div>
       <div v-if="showExpires">Expires {{expires()}}</div>
@@ -19,6 +19,7 @@ export default {
   name: 'CryptoCountdown',
   components: {
   },
+  props: ['configuration'],
   data () {
     return {
       countdown: null,
