@@ -2,10 +2,10 @@
 <b-card-text class="action-section">
   <div class="" v-if="timedOutOrExpired || expired">
     <div class="d-flex justify-content-center">
-      <b>Lightning invoice has expired - {{timedOutOrExpired}}</b>
+      <p class="mt-4 text-center text-message">Lightning invoice has expired - {{timedOutOrExpired}}</p>
     </div>
     <div class="d-flex justify-content-center">
-      <b-button @click="prev()" variant="warning" class="button1 bg-danger">Start Over</b-button>
+      <b-button class="btn-pay" @click="$emit('rpayEvent', { opcode: 'crypto-payment-expired' })" variant="outline-danger">Start Over</b-button>
     </div>
   </div>
   <div class="" v-else>
@@ -52,9 +52,6 @@ export default {
     this.loading = false
   },
   methods: {
-    prev () {
-      this.$emit('prev')
-    },
     checkChain () {
       this.$store.dispatch('rpayStore/checkPayment').then((invoice) => {
         if (invoice && invoice.opcode === 'btc-crypto-payment-success') {

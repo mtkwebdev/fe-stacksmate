@@ -16,9 +16,12 @@
             <OrderInfo :configuration="configuration" v-if="configuration.payment.allowMultiples" class="pb-4" @rpayEvent="rpayEvent($event)"/>
             <div class="d-flex flex-column align-items-center">
               <CryptoOptions :configuration="configuration" @rpayEvent="rpayEvent($event)"/>
-              <p class="mt-4 mx-4 text-center text-message" v-html="swapMessage"></p>
-              <p v-if="paying" class="mt-4 mx-4 text-center text-message">
-                <b-icon icon="circle-fill" animation="throb" font-scale="2"></b-icon> Payment in Progress
+              <p class="mt-2 mx-4 text-center text-message" v-html="swapMessage"></p>
+              <p v-if="paying" class="mt-2 mx-4 text-center text-message">
+                <b-icon icon="circle" animation="throb" font-scale="1"></b-icon> Payment in Progress
+              </p>
+              <p v-if="nonceBlocked" class="mt-2 mx-4 text-center text-message">
+                <b-icon icon="circle" animation="throb" font-scale="1"></b-icon> Waiting for previous transaction to confirm
               </p>
               <CryptoPaymentScreen :configuration="configuration" @rpayEvent="rpayEvent($event)"/>
             </div>
@@ -44,7 +47,6 @@ import CryptoOptions from './payment-screens/components/CryptoOptions'
 import OrderInfo from './payment-screens/components/OrderInfo'
 import ResultPage from '../ResultPage'
 import FooterView from '../FooterView'
-import utils from '@/store/utils'
 
 export default {
   name: 'PaymentFlow',
@@ -65,8 +67,7 @@ export default {
       paying: false,
       componentKey: 0,
       loading: true,
-      successMessage1: 'Payment is being precessed.',
-      successMessage2: 'Stacks transfer is being sent now.',
+      successMessage1: 'Payment made - thank you.',
       errorMessage: 'Payment may have been cancelled - please check you are connected to the right network and have sufficient funds in your wallet.'
     }
   },
@@ -104,38 +105,41 @@ export default {
       this.paymentStage = this.paymentStage++
       this.componentKey++
     },
+    getPaymentId (data) {
+      if (data.opcode === 'eth-crypto-payment-success') {
+        return data.txId
+      }
+    },
     rpayEvent: function (data) {
       this.paying = false
       if (data.opcode === 'crypto-payment-expired') {
         this.paymentExpired()
       } else if (data.opcode === 'payment-restart') {
         this.paymentExpired()
-      } else if (data.opcode.indexOf('-payment-cancelled') > -1 || data.opcode.indexOf('-payment-error') > -1) {
+      } else if (data.opcode.indexOf('-payment-error') > -1) {
+        this.$notify({ type: 'danger', title: 'Payments', text: 'Payment was not recieved due to an unexpected error.' })
+      } else if (data.opcode.indexOf('-payment-cancelled') > -1) {
         this.$notify({ type: 'warning', title: 'Payments', text: this.errorMessage })
-      } else if (data.opcode.indexOf('-crypto-payment-success') > -1) {
-        this.$notify({ type: 'success', title: 'Payments', text: this.successMessage1 })
-      } else if (data.opcode.indexOf('fiat-payment-success') > -1) {
-        this.$notify({ type: 'success', title: 'Payments', text: this.successMessage1 })
-      } else if (data.opcode.indexOf('btc-payment-success') > -1) {
-        this.$notify({ type: 'success', title: 'Payments', text: 'Bitcoin..' })
       } else if (data.opcode === 'change-payment-method') {
         this.paymentStage = 1
         this.componentKey++
+      } else if (data.opcode.indexOf('-payment-success') > -1) {
+        this.doTransfer(data)
       }
-
-      if (data.opcode.indexOf('-payment-success') > -1) {
-        const payment = {
-          microstx: utils.toOnChainAmount(this.configuration.payment.amountStx),
-          recipient: this.recipient
-        }
-        this.$store.dispatch('paymentStore/sendStacksMateTransaction', payment).then((transfer) => {
-          this.transfer = transfer
-          this.$notify({ type: 'success', title: 'Payments', text: this.successMessage2 })
-          this.$notify({ type: 'success', title: 'Payments', text: transfer })
-        }).catch((err) => {
-          this.$notify({ type: 'danger', title: 'Payments', text: err })
+    },
+    doTransfer (data) {
+      data.recipient = this.recipient
+      const payment = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_CONVERT](data)
+      this.$notify({ type: 'success', title: 'Payments', text: this.successMessage1 })
+      const addr = { force: true, stxAddress: process.env.VUE_APP_STACKS_TRANSFER_ADDRESS }
+      this.$store.dispatch('rpayAuthStore/fetchAccountInfo', addr).then((accountInfo) => {
+        payment.nonce = accountInfo.nonce
+        this.$store.dispatch('paymentStore/sendStacksMateTransaction', payment).then((transaction) => {
+          this.$emit('stacksMateEvent', transaction)
+        }).catch(() => {
+          this.$notify({ type: 'danger', title: 'Payments', text: 'Waiting for the previous stacks transaction to confirm...' })
         })
-      }
+      })
     },
     paymentExpired () {
       this.$store.dispatch('rpayStore/initialisePaymentFlow', this.configuration).then(() => {
@@ -159,6 +163,12 @@ export default {
       }
       sm += '<br/>We send <span class="text-danger">' + this.configuration.payment.amountStx + '</span> STX to you. '
       return sm
+    },
+    nonceBlocked () {
+      const stxAddress = process.env.VUE_APP_STACKS_TRANSFER_ADDRESS
+      const wallet = this.$store.getters[APP_CONSTANTS.KEY_ACCOUNT_INFO](stxAddress)
+      const lastNonce = this.$store.getters[APP_CONSTANTS.KEY_LAST_NONCE] || -1
+      return wallet.accountInfo.nonce <= lastNonce
     },
     payingMessage () {
       let sm = 'You send <span class="text-danger">'

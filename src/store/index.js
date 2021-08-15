@@ -2,10 +2,13 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
 import paymentStore from './paymentStore'
+import contentStore from './contentStore'
+import { APP_CONSTANTS } from '@/app-constants'
 
 Vue.use(Vuex)
 
 const precision = 100000000
+const precisionStx = 1000000
 const getAmounts = function (currency, amountFiat, tickerRates) {
   try {
     const rate = tickerRates.find((o) => o.currency === currency)
@@ -16,11 +19,12 @@ const getAmounts = function (currency, amountFiat, tickerRates) {
     })
     const amounts = {
       currency: currency,
-      amountFiat: formatter.format(amountFiat),
+      amountFiatFormatted: formatter.format(amountFiat),
+      amountFiat: amountFiat,
       amountBtc: Math.round(amountBtc * precision) / precision,
       amountSat: Math.round(amountBtc * precision),
       amountEth: Math.round((amountFiat / rate.ethPrice) * precision) / precision,
-      amountStx: Math.round((amountFiat / rate.stxPrice) * precision) / precision
+      amountStx: Math.round((amountFiat / rate.stxPrice) * precisionStx) / precisionStx
     }
     return amounts
   } catch {
@@ -42,13 +46,13 @@ const payment = {
   ethNetworkId: Number(process.env.VUE_APP_ETH_NETWORK_ID),
   paymentOption: '',
   paymentOptions: [
-    { allowFiat: true },
-    { allowPaypal: true },
-    { allowBitcoin: true },
-    { allowLightning: true },
-    { allowStacks: false },
-    { allowLSAT: false },
-    { allowEthereum: true }
+    { allowFiat: true, disabled: false },
+    { allowPaypal: true, disabled: true },
+    { allowBitcoin: true, disabled: true },
+    { allowLightning: true, disabled: true },
+    { allowStacks: false, disabled: true },
+    { allowLSAT: false, disabled: true },
+    { allowEthereum: true, disabled: false }
   ],
   creditAttributes: {
     start: 1,
@@ -87,7 +91,8 @@ const setup = function (data) {
 
 export default new Vuex.Store({
   modules: {
-    paymentStore
+    paymentStore,
+    contentStore
   },
   state: {
     chromeLink: 'https://chrome.google.com/webstore/detail/stacks-wallet/ldinpeekobnhjjdofggfgjlcehhmanlj',
@@ -120,10 +125,11 @@ export default new Vuex.Store({
     getFiatCurrency: state => {
       return state.configuration.payment.currency
     },
-    getAmounts: state => tickerRates => {
+    getAmounts: (state, getters, rootState, rootGetters) => {
+      const tickerRates = rootGetters[APP_CONSTANTS.KEY_TICKER_RATES_UNFILTERED]
       const baseRate = tickerRates.find((o) => o.currency === state.baseCurrency)
       const fiatRate = tickerRates.find((o) => o.currency === state.configuration.payment.currency)
-      const fiatAmount = (fiatRate.last / baseRate.last) * 5
+      const fiatAmount = (fiatRate.last / baseRate.last) * state.baseAmount
       const amounts = {
         baseAmounts: getAmounts(state.baseCurrency, state.baseAmount, tickerRates),
         fiatAmounts: getAmounts(state.configuration.payment.currency, fiatAmount, tickerRates)

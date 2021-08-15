@@ -1,19 +1,11 @@
 <template>
 <div class="mt-4 d-flex flex-column align-items-center">
-  <!--
-    <loading :active.sync="loading"
-    :can-cancel="true"
-    :on-cancel="onCancel"
-    :is-full-page="fullPage"></loading>
-    -->
   <div class="text-center" v-if="desktopWalletSupported">
     <canvas ref="lndQrcode"></canvas>
   </div>
   <div class="mt-5 mb-3 text-center">
-    <b-button class="cp-btn-order" variant="warning" @click.prevent="sendPayment()">Connect via Meta Mask</b-button>
-  </div>
-  <div class="mb-1 text-center" style="" v-if="loading">
-     <span class="text-message text-info" v-html="waitingMessage"></span>
+    <b-button v-if="!loading" class="cp-btn-order" variant="warning" @click.prevent="sendPayment()">Connect via Meta Mask</b-button>
+    <span v-else class="text-message text-info" v-html="waitingMessage"></span>
   </div>
   <div class="text-center">
     <span><a class="text-message text-warning" target="_blank" href="https://metamask.io/download.html">Install Meta Mask</a></span>
@@ -34,7 +26,7 @@ export default {
       loading: false,
       fullPage: true,
       errorMessage: null,
-      waitingMessage: 'Check your Meta Mask wallet to proceed'
+      waitingMessage: 'Follow transaction in your Meta Mask wallet'
     }
   },
   watch: {
@@ -70,6 +62,7 @@ export default {
         // this.$emit('rpayEvent', data)
         this.$emit('rpayEvent', data)
       }).catch((e) => {
+        this.loading = false
         this.$emit('rpayEvent', { opcode: 'eth-crypto-payment-cancelled' })
       })
     },

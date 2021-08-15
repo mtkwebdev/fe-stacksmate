@@ -10,13 +10,30 @@ export const APP_CONSTANTS = {
   KEY_WEB_WALLET_LINK_CHROME: 'getWebWalletLinkChrome',
   KEY_WEB_WALLET_LINK_FIREFOX: 'getWebWalletLinkFirefox',
 
-  KEY_TX_IN_PROGRESS: 'paymentStore/getTxInProgress',
+  KEY_PAYMENT_CONVERT: 'paymentStore/convertToPayment',
+  KEY_LAST_NONCE: 'paymentStore/getLastNonce',
+  KEY_USER_TRANSACTIONS: 'paymentStore/getStacksMateUserTransactions',
 
   KEY_PROFILE: 'rpayAuthStore/getMyProfile',
   KEY_TICKER_RATES: 'rpayStore/getTickerRates',
   KEY_TICKER_RATES_UNFILTERED: 'rpayStore/getUnfilteredTickerRates',
 
   KEY_ACCOUNT_INFO: 'rpayAuthStore/getAccountInfo',
+
+  KEY_TRANSACTION_DIALOG_MESSAGE: 'contentStore/getTransactionDialogMessage',
+  KEY_WAITING_IMAGE: 'contentStore/getWaitingImage',
+  KEY_EMAIL_TEXT: 'contentStore/getEmail',
+  KEY_TOOL_TIP: 'contentStore/getTooltip',
+  KEY_DIALOG_CONTENT: 'contentStore/getDialog',
+  KEY_CONTENT_COLLABORATION: 'contentStore/getCollaboration',
+  KEY_CONTENT_CHARITY_BY_ARTIST_ID: 'contentStore/getCharityByArtistId',
+  KEY_CONTENT_ARTIST_BY_ID: 'contentStore/getArtistById',
+  KEY_CONTENT_ARTIST_ID: 'contentStore/getArtistId',
+  KEY_CONTENT_ARTISTS: 'contentStore/getArtists',
+  KEY_CONTENT_CHARITIES: 'contentStore/getCharities',
+  KEY_CONTENT_INFO_PAGE: 'contentStore/getInformationById',
+  KEY_BREAK_LINE: 'contentStore/getBreakLine',
+  KEY_PIXEL_BACKGROUND: 'contentStore/getPixelBackground',
 
   KEY_DISPLAY_CARD: 'rpayStore/getDisplayCard',
   SET_DISPLAY_CARD: 'rpayStore/setDisplayCard',

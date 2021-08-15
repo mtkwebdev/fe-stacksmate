@@ -1,6 +1,6 @@
 <template>
 <div>
-<div class="bg-black navbar play-mode">
+<div class="">
   <div class="container">
 
   <b-navbar toggleable="md" type="dark" style="width: 100%; margin: 0; padding-right:0;padding-left:0;">

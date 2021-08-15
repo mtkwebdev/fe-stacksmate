@@ -1,6 +1,6 @@
 <template>
     <div v-if="expired" class="">
-      Timeout - <a href="#" @click.prevent="evPaymentExpired">please start again</a>
+      <b-button class="btn-pay" @click="$emit('rpayEvent', { opcode: 'crypto-payment-expired' })" variant="outline-danger">Timeout - Start Over</b-button>
     </div>
     <div v-else>
       <div class="text-message">

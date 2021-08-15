@@ -3,7 +3,7 @@ const precision = 1000000
 const utils = {
   fromOnChainAmount: function (amountMicroStx) {
     try {
-      amountMicroStx = parseInt(amountMicroStx, 16)
+      // amountMicroStx = parseInt(amountMicroStx, 16)
       if (typeof amountMicroStx === 'string') {
         amountMicroStx = Number(amountMicroStx)
       }

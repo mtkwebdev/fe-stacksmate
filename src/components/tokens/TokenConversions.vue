@@ -55,7 +55,7 @@ export default {
       return (exchangeRate.stxPrice) ? (exchangeRate.stxPrice).toFixed(4) : 0
     },
     getAmounts () {
-      const amounts = this.$store.getters[APP_CONSTANTS.KEY_AMOUNTS](this.tickerRates)
+      const amounts = this.$store.getters[APP_CONSTANTS.KEY_AMOUNTS]
       return amounts
     },
     exchangeRate () {
@@ -68,10 +68,6 @@ export default {
     baseAmounts () {
       const baseAmounts = this.$store.getters[APP_CONSTANTS.KEY_AMOUNTS]
       return baseAmounts
-    },
-    tickerRates () {
-      const rates = this.$store.getters[APP_CONSTANTS.KEY_TICKER_RATES_UNFILTERED]
-      return rates
     }
   }
 }

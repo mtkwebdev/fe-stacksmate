@@ -209,6 +209,9 @@ p {
 .text-small {
   font-size: 0.9rem;
 }
+.text-xsmall {
+  font-size: 0.7rem;
+}
 @media only screen and (max-width: 475px) {
   .text-small {
     font-size: 0.65rem;
@@ -286,7 +289,7 @@ a:hover {
 }
 .success {
   background: $success !important;
-  color: #000 !important;
+  color: #fff !important;
 }
 .error {
   background: $danger !important;
@@ -313,7 +316,7 @@ a:hover {
 }
 
 .action-section {
-  min-height: 300px;
+  min-height: 150px;
 }
 #rpay-pay-card .rpay-sq-logo {
   padding: 20px;

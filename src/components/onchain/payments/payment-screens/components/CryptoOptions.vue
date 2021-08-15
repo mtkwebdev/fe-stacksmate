@@ -9,15 +9,17 @@
   <p class="mt-4 text-message">Choose preferred payment option</p>
   <div class="border-bottom mt-4 mb-4 mx-0 d-flex justify-content-center text-small">
     <span v-for="(option) in fiatOptions()" :key="option.value" class="mb-3">
-      <b-button :disabled="(!sufficientFunds || option.value === 'paypal')" class="btn-pay" @click="changePaymentOption(option.value)" :variant="payBtnVariant(option.value)">
+      <b-button :disabled="(!sufficientFunds || option.disabled)" class="btn-pay" @click="changePaymentOption(option.value)" :variant="payBtnVariant(option)">
         <span><img width="15px" class="mr-2" :src="cardImg(option.value)"/> <span v-if="option.value === 'fiat'">Card</span><span v-else>{{option.value}}</span></span>
       </b-button>
     </span>
   </div>
   <div class="mx-0 d-flex justify-content-center text-small">
     <span v-for="(option) in cryptoOptions()" :key="option.value" class="mb-3">
-      <b-button :disabled="(!sufficientFunds)" class="btn-pay mb-2" @click="changePaymentOption(option.value)" :variant="payBtnVariant(option.value)">
-        <span><img width="15px" class="mr-2" :src="cardImg(option.value)"/></span><span>{{option.value}}</span>
+      <b-button :disabled="(option.disabled || !sufficientFunds)" class="btn-pay mb-2" @click="changePaymentOption(option.value)" :variant="payBtnVariant(option)">
+        <span>
+          <img width="15px" class="mr-2" :src="cardImg(option.value)"/></span>
+          <span>{{option.value}}</span>
       </b-button>
     </span>
   </div>
@@ -66,11 +68,11 @@ export default {
         return this.cardFiatImg
       }
     },
-    payBtnVariant (value) {
-      if (!this.sufficientFunds) {
-        return 'outline-danger'
+    payBtnVariant (option) {
+      if (!this.sufficientFunds || option.disabled) {
+        return 'outline-light'
       }
-      if (value === this.selected) {
+      if (option.value === this.selected) {
         return 'warning'
       } else {
         return 'outline-warning'

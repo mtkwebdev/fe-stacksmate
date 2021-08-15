@@ -1,5 +1,5 @@
 <template>
-<div id="app">
+<div id="app" :style="'z-index: -40; min-height: 100vh; background-size: contain; background-image: url(' + bgpixel + ')'">
   <div v-if="!configured">
     <RisidioPay :configuration="appConfig"/>
   </div>
@@ -33,6 +33,7 @@ export default {
   },
   data () {
     return {
+      bgpixel: require('@/assets/img/bgpixel.svg'),
       componentKey: 0,
       loading: true,
       configured: false
@@ -51,7 +52,17 @@ export default {
       }
     })
   },
+  mounted () {
+    this.readPrismicContent()
+  },
   methods: {
+    readPrismicContent () {
+      this.$prismic.client.getSingle('mainfooter').then((document) => {
+        if (document) {
+          this.$store.commit('contentStore/addMainFooter', document.data)
+        }
+      })
+    }
   },
   computed: {
     appConfig () {

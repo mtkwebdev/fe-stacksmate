@@ -10,7 +10,7 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'swaps',
+    name: 'home',
     components: { default: Homepage, header: MainNavbar, footer: MainFooter }
   },
   {
