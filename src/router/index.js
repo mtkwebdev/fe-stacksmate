@@ -4,6 +4,7 @@ import Homepage from '@/views/Homepage.vue'
 import Login from '@/views/Login.vue'
 import MainNavbar from '@/layout/MainNavbar.vue'
 import MainFooter from '@/layout/MainFooter.vue'
+import ApplicationAdmin from '../views/admin/ApplicationAdmin.vue'
 
 Vue.use(VueRouter)
 
@@ -37,6 +38,15 @@ const routes = [
     },
     props: {
       header: { colorOnScroll: 400 }
+    }
+  },
+  {
+    path: '/admin/transactions',
+    name: 'transactions',
+    components: { default: ApplicationAdmin, header: MainNavbar, footer: MainFooter },
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true
     }
   },
   {

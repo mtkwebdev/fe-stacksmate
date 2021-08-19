@@ -58,10 +58,6 @@ export default {
       }
       return null
     },
-    baseAmounts () {
-      const baseAmounts = this.$store.getters[APP_CONSTANTS.KEY_AMOUNTS]
-      return baseAmounts
-    },
     tickerRates () {
       const rates = this.$store.getters[APP_CONSTANTS.KEY_TICKER_RATES_UNFILTERED]
       return rates

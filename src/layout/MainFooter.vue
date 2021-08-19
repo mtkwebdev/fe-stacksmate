@@ -1,17 +1,34 @@
 <template>
   <div class="mx-0 text-small bg-black" v-if="content">
     <div class="footer-break-line" :style="'background-image: url(' + getBreakLine + ')'"></div>
-
-    <div class="footer-container">
-
-      <div class="row footer-top">
-
-        <div class="footer-logo col-12 col-lg-4">
-          <h1><b-link to="/home"><br/>Stacks Mate</b-link></h1>
-        </div>
-
-        <div class="col-3 offset-2 col-lg-2 footer-top--content">
+    <b-container align-h="center">
+      <b-row align-h="start" class="footer-top">
+        <b-col md="4" sm="12" class="">
+          <h1><b-link class="text-warning" to="/home"><br/>Stacks Mate</b-link></h1>
+        </b-col>
+        <b-col md="2" sm="6" class="footer-top--content">
+          <div class="column-header">Code</div>
+          <div>
+            Fork us or raise PRs / issues
+          </div>
+          <div>
+            <a :href="'https://github.com/radicleart/fe-stacksmate/issues'" target="_blank">Issues</a>
+          </div>
+          <div>
+            <a :href="'https://github.com/radicleart/fe-stacksmate/pulls'" target="_blank">Pull Requests</a>
+          </div>
+          <div>
+            <a :href="'https://github.com/radicleart/fe-stacksmate'" target="_blank">StacksMate Client</a>
+          </div>
+          <div>
+            <a :href="'https://github.com/radicleart/ms-stacksmate'" target="_blank">StacksMate Service</a>
+          </div>
+        </b-col>
+        <b-col md="2" sm="6"  class="footer-top--content">
           <div class="column-header">Videos</div>
+          <div>
+            Help Wanted!
+          </div>
           <div v-scroll-to="{ offset: -60, element: '#thisisone', duration: 1000 }">
             <a target="_blank" href="https://www.youtube.com/watch?v=oVEddTQ-95k">Why Stacks</a>
           </div>
@@ -21,51 +38,21 @@
           <div v-scroll-to="{ offset: -60, element: '#chemicalx', duration: 1000 }">
             <a target="_blank" href="https://www.youtube.com/watch?v=oJCys8ESqEc">Lightning Wallet</a>
           </div>
-        </div>
-
-        <!--
-          <div class="col-3 col-lg-2 footer-top--content">
-          <div class="column-header">#1</div>
-          <div v-for="(item,index) of content.column__1" :key="index">
-            <div v-if="item.title_of_the_link[0].type === 'paragraph'"><a :href="item.link.url" target="_blank">{{ item.title_of_the_link[0].text }}</a></div>
-            <div v-else-if="item.title_of_the_link[0].type === 'image'">
-              <a :href="item.link.url" target="_blank" ><img width="50px" :src=item.title_of_the_link[0].url :alt=item.title_of_the_link[0].alt></a>
-            </div>
-          </div>
-        </div>
-        -->
-
-        <div class="col-3 col-lg-2 footer-top--content">
+        </b-col>
+        <b-col md="2" sm="6"  class="footer-top--content">
           <div class="column-header">Contact</div>
           <div>
-            <a :href="'mailto:press@risidio.com'" target="_blank">Press enquiries</a>
+            Social media coming soon!
           </div>
           <div>
-            <a :href="'mailto:enquiries@risidio.com'" target="_blank">Get in touch</a>
+            <a :href="'mailto:mike@thisisnumberone.com'" target="_blank">Enquiries</a>
           </div>
-          <div>
-            <b-link to="/information/faq">Read FAQ</b-link>
-          </div>
-          <!--
-          <div v-for="(item,index) of content.news_column" :key="index">
-            <div v-if="item.title_of_the_link[0].type === 'paragraph'"><a :href="item.link.url" target="_blank">{{ item.title_of_the_link[0].text }}</a></div>
-            <div v-else-if="item.title_of_the_link[0].type === 'image'">
-              <a :href="item.link.url" target="_blank"><img width="50px" :src=item.title_of_the_link[0].url :alt=item.title_of_the_link[0].alt></a>
-            </div>
-          </div>
-          -->
-          <div class="social-links">
-            <!--
-            <a href="#"><b-icon width="23px" height="23px" icon="facebook"></b-icon></a>
-            <a href="#"><b-icon width="23px" height="23px" icon="twitter"></b-icon></a>
-            <a class="mr-3" href="https://www.instagram.com/this_is_no.1" target="_blank"><b-icon width="20px" height="20px" icon="instagram"></b-icon></a>
-            <a :href="'mailto:enquiries@thisisnumberone.com'" target="_blank"><b-icon width="23px" height="23px" icon="mailbox"></b-icon></a>
-            -->
-          </div>
-        </div>
-
-        <div class="col-3 col-lg-2 footer-top--content">
+        </b-col>
+        <b-col md="2" sm="6"  class="footer-top--content">
           <div class="column-header">Partners</div>
+          <div>
+            Projects we are indebted to..
+          </div>
           <div v-for="(item,index) of content.partners_column" :key="index">
             <div v-if="item.title_of_the_link[0].type === 'paragraph'"><a :href="item.link.url" target="_blank">{{ item.title_of_the_link[0].text }}</a></div>
             <div v-else-if="item.title_of_the_link[0].type === 'image'">
@@ -74,18 +61,13 @@
           </div>
           <div><a href="https://lightning.engineering/" target="_blank">Lightning Labs</a></div>
           <div><a :href="webWalletLink" target="_blank">Hiro Wallet</a></div>
-          <div>
-            <div v-if="!loggedIn"><b-link variant="light" @click.prevent="startLogin()">Own NFTs here?</b-link></div>
-            <div v-else><b-link variant="light" @click.prevent="startLogout()">Logout</b-link></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="d-none d-sm-flex justify-content-between footer-bottom">
+        </b-col>
+      </b-row>
+      <b-row class="d-none d-sm-flex justify-content-center footer-bottom">
         <div class="footer-bottom--left">
           For the <b-icon icon="heart-fill" class="text-danger"/> of crypto!
         </div>
-      </div>
+      </b-row>
         <!--
       <div class="d-none d-sm-flex justify-content-between footer-bottom">
         <div class="footer-bottom--left">
@@ -110,7 +92,7 @@
       </div>
         -->
 
-    </div>
+    </b-container>
   </div>
 </template>
 
@@ -170,8 +152,8 @@ export default {
 }
 </script>
 
-<style>
-/* TOP BREAK LINE */
+<style lang="scss">
+@import "@/assets/scss/custom.scss";
 .footer-break-line {
   height: 10px;
 }
@@ -189,24 +171,28 @@ export default {
 .footer-top--content {
   text-align: top;
 }
+.footer-top--content a {
+  color: $info;
+}
 .footer-top--content div:not(:last-child) {
   margin-bottom: 15px;
 }
 /* Column headers */
-.footer-container .footer-top--content .column-header {
+.column-header {
   font-weight: 700;
   margin-bottom: 25px;
+  color: $warning;
 }
 /* Social icons */
 .social-links {
-  margin-top: 30px;
+  margin-top: 0px;
 }
 .social-links a:not(:last-child){
   margin-right: 30px;
 }
 /* Logo */
 .footer-logo {
-  text-align: center;
+  text-align: left;
 }
 .footer-logo img {
   margin-left: 0;

@@ -1,7 +1,7 @@
 <template>
 <div class="d-flex flex-column align-items-center">
   <div class="rpay-countdown mb-3 d-flex justify-content-center">
-    <span class="text-message mr-1">Scan code - valid for</span>
+    <span class="text-message mr-1">valid for</span>
     <CryptoCountdown :configuration="configuration" class="text-danger" v-on="$listeners" />
   </div>
   <div class="mb-3 mx-auto">
@@ -14,14 +14,12 @@
   -->
 
   <div class="d-flex justify-content-center">
-    <a ref="myPaymentAddress" class="copyAddress" href="#" @click.prevent="copyAddress(paymentAmount)">
-      <span ref="myPaymentAddress" class="mr-2 text-two">&#8383; {{paymentAmount}}</span>
-    </a>
+    <input class="fake-input" id="copy-amount" readonly v-model="paymentAmount"/>
+    <a href="#" class="pointer" @click.prevent="copyAmount()"><b-icon icon="file-earmark"/></a>
   </div>
   <div class="d-flex justify-content-center">
-    <a ref="myPaymentAddress" class="copyAddress" href="#" @click.prevent="copyAddress(paymentAddress)">
-      <span ref="myPaymentAddress" class="mr-2 text-two">{{paymentAddress}}</span>
-    </a>
+    <input class="fake-input" id="copy-address" readonly v-model="paymentAddress"/>
+    <a href="#" class="pointer" @click.prevent="copyAddress()"><b-icon icon="file-earmark"/></a>
   </div>
 </div>
 </template>
@@ -39,6 +37,8 @@ export default {
   props: ['configuration'],
   data () {
     return {
+      paymentAmount: 0,
+      paymentAddress: null
     }
   },
   watch: {
@@ -47,17 +47,12 @@ export default {
     }
   },
   mounted () {
+    const invoice = this.$store.getters[APP_CONSTANTS.KEY_INVOICE]
+    this.paymentAmount = invoice.data.amount / 100000000
+    this.paymentAddress = invoice.data.address
     this.addQrCode()
   },
   computed: {
-    paymentAmount () {
-      const invoice = this.$store.getters[APP_CONSTANTS.KEY_INVOICE]
-      return invoice.data.amount / 100000000
-    },
-    paymentAddress () {
-      const invoice = this.$store.getters[APP_CONSTANTS.KEY_INVOICE]
-      return invoice.data.address
-    }
   },
 
   methods: {
@@ -76,35 +71,24 @@ export default {
         function () {})
     },
     copyAmount () {
-      const copyText = this.$refs.paymentAmountBtc
+      const copyText = document.querySelector('#copy-amount')
       copyText.select()
       document.execCommand('copy')
+      this.doFlash()
       this.$notify({ type: 'success', title: 'Copied Address', text: 'Copied the address to clipboard: ' + copyText.value })
     },
     copyAddress (value) {
-      // const invoice = this.$store.getters[APP_CONSTANTS.KEY_INVOICE]
-      const tempInput = document.createElement('input')
-      // tempInput.style = 'position: absolute; left: -1000px; top: -1000px'
-      tempInput.value = value // invoice.data.address
-      document.body.appendChild(tempInput)
-      tempInput.select()
+      const copyText = document.querySelector('#copy-address')
+      copyText.select()
       document.execCommand('copy')
-      document.body.removeChild(tempInput)
-      // const flasher = document.getElementById('flash-me')
+      this.doFlash()
+    },
+    doFlash () {
       const flasher = this.$refs.lndQrcode
       flasher.classList.add('flasher')
       setTimeout(function () {
         flasher.classList.remove('flasher')
       }, 1000)
-      // copyText.select()
-      // document.execCommand('copy')
-    },
-
-    copyAddress2 () {
-      const copyText = this.$refs.paymentAddressBtc
-      copyText.select()
-      document.execCommand('copy')
-      this.$notify({ type: 'success', title: 'Copied Address', text: 'Copied the address to clipboard: ' + copyText.value })
     }
   }
 }
@@ -112,5 +96,11 @@ export default {
 <style lang="scss" scoped>
 .tab-content {
   padding-top: 0px;
+}
+.fake-input {
+  border: none;
+  font-size: 0.6rem;
+  width: 200px;
+  text-align: center;
 }
 </style>

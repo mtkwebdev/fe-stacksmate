@@ -5,10 +5,8 @@
   </div>
   <div :key="componentKey" v-else>
     <RouterView name="header"/>
-    <div>
-      <div class="container">
-        <RouterView id="nav"/>
-      </div>
+    <div class="container">
+      <RouterView id="nav"/>
     </div>
     <RouterView name="footer" />
   </div>
@@ -22,6 +20,7 @@ import { APP_CONSTANTS } from '@/app-constants'
 import RisidioPay from 'risidio-pay'
 import SuccessModal from '@/components/utils/SuccessModal'
 import WaitingModal from '@/components/utils/WaitingModal'
+
 // const RisidioPay = () => import('risidio-pay')
 
 export default {
@@ -48,6 +47,8 @@ export default {
       if (data.opcode === 'configured') {
         $self.$store.dispatch('initApplication').then(() => {
           $self.configured = true
+          const profile = $self.$store.getters[APP_CONSTANTS.KEY_PROFILE]
+          $self.$store.dispatch('paymentStore/fetchStacksMateTransactions', profile.stxAddress)
         })
       }
     })

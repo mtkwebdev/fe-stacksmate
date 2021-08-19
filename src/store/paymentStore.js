@@ -24,14 +24,14 @@ const paymentAmount = function (configuration) {
   }
 }
 
-const watchTransaction = function (dispatch, commit, recipient, transaction) {
+const watchTransaction = function (dispatch, commit, transaction) {
   if (transaction.txStatus === 'pending') {
     dispatch('rpayTransactionStore/watchTransactionInfo', transaction.txId, { root: true }).then((result) => {
       if (result && result.txStatus !== 'pending') {
         result.opcode = 'stx-transaction-update'
         const mergedTx = Object.assign(transaction, result)
-        dispatch('paymentStore/updateStacksMateTransaction', result, { root: true }).then(() => {
-          commit('addStacksMateUserTransactions', { stxAddress: recipient, transaction: mergedTx })
+        dispatch('paymentStore/updateStacksMateTransaction', mergedTx, { root: true }).then(() => {
+          commit('addStacksMateUserTransactions', mergedTx)
         }).catch((err) => {
           console.log(err)
         })
@@ -39,96 +39,32 @@ const watchTransaction = function (dispatch, commit, recipient, transaction) {
     })
   }
 }
+const updateTransactions = function (dispatch, commit, transactions) {
+  transactions.forEach((transaction) => {
+    watchTransaction(dispatch, commit, transaction)
+  })
+}
 const watchTransactions = function (dispatch, state, commit, recipient) {
+  let transactions = state.stacksMateTransactions[recipient] || []
+  updateTransactions(dispatch, commit, transactions)
   setInterval(function () {
-    const transactions = state.stacksMateTransactions[recipient] || []
-    transactions.forEach((transaction) => {
-      watchTransaction(dispatch, commit, recipient, transaction)
-    })
+    transactions = state.stacksMateTransactions[recipient] || []
+    updateTransactions(dispatch, commit, transactions)
   }, 15000)
 }
-
-/**
-const convertSquarePayment = function (rawPayment) {
-  const payment = {
-    paymentType: 'square',
-    amountMoney: {
-      amount: rawPayment.amount_money.amount,
-      currency: rawPayment.amount_money.currency
-    },
-    totalMoney: {
-      amount: rawPayment.total_money.amount,
-      currency: rawPayment.total_money.currency
-    },
-    createdAt: rawPayment.created_at,
-    customerId: rawPayment.customer_id,
-    squareId: rawPayment.id,
-    locationId: rawPayment.location_id,
-    numbCredits: rawPayment.numbCredits,
-    orderId: rawPayment.order_id,
-    sourceType: rawPayment.source_type,
-    receiptNumber: rawPayment.receipt_number,
-    receiptUrl: rawPayment.receipt_url,
-    updatedAt: rawPayment.updated_at,
-    projectId: contractAddress + '.' + contractName
-  }
-  return payment
-}
-const convertOpenNodePayment = function (rawPayment) {
-  const payment = {
-    paymentType: 'opennode',
-    amountMoney: {
-      amountBtc: rawPayment.amountBtc,
-      amountStx: rawPayment.amountStx,
-      amount: rawPayment.amountFiat,
-      currency: rawPayment.currency
-    },
-    createdAt: new Date().getTime(),
-    numbCredits: rawPayment.numbCredits,
-    receiptNumber: rawPayment.txId,
-    updatedAt: new Date().getTime(),
-    projectId: contractAddress + '.' + contractName
-  }
-  return payment
-}
-const convertStxPayment = function (rawPayment) {
-  const payment = {
-    paymentType: 'stacks',
-    amountMoney: {
-      amountBtc: rawPayment.amountBtc,
-      amountStx: rawPayment.amountStx,
-      amount: rawPayment.amountFiat,
-      currency: rawPayment.currency
-    },
-    status: rawPayment.status,
-    paymentAddress: rawPayment.paymentAddress,
-    sendingAddress: rawPayment.sendingAddress,
-    createdAt: new Date().getTime(),
-    numbCredits: rawPayment.numbCredits,
-    receiptNumber: rawPayment.txId,
-    updatedAt: new Date().getTime(),
-    projectId: contractAddress + '.' + contractName
-  }
-  return payment
-}
-const convertEthPayment = function (rawPayment) {
-  const payment = {
-    updatedAt: new Date().getTime(),
-    projectId: contractAddress + '.' + contractName
-  }
-  return payment
-}
-**/
 
 const paymentStore = {
   namespaced: true,
   state: {
     payments: [],
+    nonces: null,
     backers: [],
     stacksMateTransaction: null,
+    allStacksMateTransactions: [],
     stacksMateTransactions: {},
     anon: 'anon',
     squareType: 'fiat-payment-success',
+    bitcoinType: 'btc-crypto-payment-success',
     paypalType: 'paypal-payment-success'
   },
   getters: {
@@ -137,26 +73,56 @@ const paymentStore = {
       const payment = {
         opcode: rawPayment.opcode,
         txStatus: 'unsent',
-        txId: 'unknown',
+        txId: null,
         nonce: null,
         microstx: utils.toOnChainAmount(configuration.payment.amountStx),
         recipient: rawPayment.recipient,
         stxAddress: process.env.VUE_APP_STACKS_TRANSFER_ADDRESS,
-        paymentId: (rawPayment.opcode === state.squareType) ? rawPayment.id : rawPayment.txId,
+        paymentId: rawPayment.txId,
+        paymentTx: rawPayment.txId,
         paymentAmount: paymentAmount(configuration),
         paymentCurrency: paymentCurrency(configuration),
         paymentCode: rawPayment.opcode,
         paymentStatus: 'paid'
       }
       if (rawPayment.opcode === state.squareType) {
+        payment.paymentId = rawPayment.id
         payment.paymentOrderId = rawPayment.order_id
         payment.paymentUrl = rawPayment.receipt_url
         payment.paymentStatus = rawPayment.status
+      } else if (rawPayment.opcode === state.bitcoinType) {
+        const precision = 100000000
+        payment.paymentUrl = rawPayment.uri
+        const invoice = rootGetters[APP_CONSTANTS.KEY_INVOICE]
+        payment.paymentUrl = (invoice.data.uri) ? invoice.data.uri : invoice.data.address
+        if (rawPayment.data) {
+          payment.paymentCurrency = (rawPayment.data.auto_settle) ? 'L/BTC' : 'BTC'
+          payment.paymentId = rawPayment.data.id
+          payment.paymentAmount = Math.round(rawPayment.data.price / precision)
+          payment.amountSat = rawPayment.data.price
+          if (rawPayment.data.transactions && rawPayment.data.transactions > 0) {
+            payment.paymentTx = rawPayment.data.transactions[0].tx
+          }
+          payment.paymentStatus = rawPayment.data.status
+        }
       }
       return payment
     },
+    getPending: state => stxAddress => {
+      const transactions = state.stacksMateTransactions[stxAddress]
+      if (transactions) {
+        return transactions.filter((o) => o.txStatus === 'pending')
+      }
+      return false
+    },
+    getNonces: state => {
+      return state.nonces
+    },
     getLastNonce: state => {
       return state.stacksMateTransaction
+    },
+    getAllStacksMateTransactions: state => {
+      return state.allStacksMateTransactions
     },
     getStacksMateUserTransactions: state => stxAddress => {
       return state.stacksMateTransactions[stxAddress]
@@ -166,16 +132,27 @@ const paymentStore = {
     addBacker (state, backer) {
       if (backer) state.backers.splice(0, 0, backer)
     },
+    setNonces (state, nonces) {
+      state.nonces = nonces
+    },
+    setAllStacksMateTransactions (state, allStacksMateTransactions) {
+      state.allStacksMateTransactions = allStacksMateTransactions
+    },
     setStacksMateTransaction (state, stacksMateTransaction) {
       state.stacksMateTransaction = stacksMateTransaction
     },
     setStacksMateUserTransactions (state, data) {
       state.stacksMateTransactions[data.stxAddress] = data.transactions
     },
-    addStacksMateUserTransactions (state, data) {
-      if (data.stxAddress) {
-        const transactions = state.stacksMateTransactions[data.recipient] || []
-        transactions.splice(0, 0, data)
+    addStacksMateUserTransactions (state, transaction) {
+      if (transaction.stxAddress) {
+        const transactions = state.stacksMateTransactions[transaction.recipient] || []
+        const index = transactions.findIndex((o) => o.id === transaction.id)
+        if (index > -1) {
+          transactions.splice(index, 1, transaction)
+        } else {
+          transactions.splice(0, 0, transaction)
+        }
       }
     },
     addPayment (state, payment) {
@@ -183,23 +160,22 @@ const paymentStore = {
     }
   },
   actions: {
-    fetchPaymentsForUser ({ commit, rootGetters }) {
-      return new Promise(function (resolve, reject) {
-        const profile = rootGetters[APP_CONSTANTS.KEY_PROFILE]
-        const userKey = (profile.stxAddress) ? 'stxAddress' : 'email'
-        const userVal = (profile.stxAddress) ? profile.stxAddress : profile.email
-        axios.get(MESH_API_PATH + '/v2/backerByUserKey/' + userKey + '/' + userVal).then((response) => {
-          commit('addBacker', response.data)
+    fetchNoncesForStacksMateWallet ({ commit, rootGetters }, stxAddress) {
+      return new Promise(resolve => {
+        const configuration = rootGetters['rpayStore/getConfiguration']
+        const url = configuration.risidioStacksApi + '/extended/v1/address/' + stxAddress + '/nonces'
+        axios.get(url).then((response) => {
+          commit('setNonces', response.data)
           resolve(response.data)
-        }).catch((error) => {
-          reject(new Error('Unable to fetch asset: ' + error))
+        }).catch(() => {
+          resolve()
         })
       })
     },
-    newPayment ({ commit }, payment) {
+    fetchAllStacksMateTransactions ({ dispatch, state, commit }) {
       return new Promise(function (resolve, reject) {
-        axios.post(MESH_API_PATH + '/v2/payment', payment).then((response) => {
-          commit('addPayment', response.data)
+        axios.get(MESH_API_PATH + '/v2/stacksmate/transactions').then((response) => {
+          commit('setAllStacksMateTransactions', response.data)
           resolve(response.data)
         }).catch((error) => {
           reject(new Error('Unable to fetch asset: ' + error))
@@ -236,8 +212,14 @@ const paymentStore = {
         })
       })
     },
-    saveStacksMateTransaction ({ rootGetters }, smTransaction) {
+    saveStacksMateTransaction ({ state, commit }, smTransaction) {
       return new Promise(function (resolve, reject) {
+        const txs = state.stacksMateTransactions[smTransaction.recipient]
+        const index = txs.findIndex((o) => o.paymentId === smTransaction.paymentId)
+        if (index > -1) {
+          reject(new Error('Transaction with payment id already registered? ' + smTransaction.paymentId))
+          return
+        }
         smTransaction.timeSent = new Date().getTime()
         axios.post(MESH_API_PATH + '/v2/stacksmate/transactions', smTransaction).then((response) => {
           resolve(response.data)
@@ -275,15 +257,20 @@ const paymentStore = {
             dispatch('rpayAuthStore/fetchAccountInfo', { stxAddress: payment.stxAddress }, { root: true })
             if (typeof err === 'object' && err !== null) {
               console.log(Object.keys(err))
-              console.log(err.response.data)
-              reject(new Error('Unable to fetch asset: ' + err.response.data.message))
+              if (err.response) {
+                console.log(err.response.data)
+                reject(new Error('Unable to fetch asset: ' + err.response.data.message))
+              } else {
+                reject(new Error('Unable to fetch asset: ' + err))
+              }
             } else {
               console.log('error not object')
               reject(new Error('Unable to fetch asset: ' + err))
             }
           })
         }).catch(() => {
-          reject(new Error('Transaction with counter=' + payment.nonce + ' - counter already used'))
+          payment.error('TX_PREV_SAVED')
+          resolve(payment)
         })
       })
     }

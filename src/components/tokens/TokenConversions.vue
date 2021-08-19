@@ -1,5 +1,5 @@
 <template>
-<div class="w-50 flex-columns align-items-middle">
+<div class="w-50 flex-columns align-items-middle" v-if="getAmounts">
   <div class="d-flex justify-content-between">
     <div>You send</div>
     <div>You receive</div>
@@ -7,7 +7,7 @@
   <div class="d-flex justify-content-between">
     <div>{{getAmounts.baseAmounts.amountFiat}} {{getAmounts.baseAmounts.currency}} ({{getAmounts.fiatAmounts.amountFiat}} {{getAmounts.fiatAmounts.currency}})</div>
     <div>to</div>
-    <div>{{getAmounts.fiatAmounts.amountStx}} STX</div>
+    <div>{{getAmounts.fiatAmounts.amountStx}} setSuperAdminSTX</div>
   </div>
 </div>
 </template>

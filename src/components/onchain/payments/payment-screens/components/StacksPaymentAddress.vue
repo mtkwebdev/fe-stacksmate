@@ -97,7 +97,7 @@ export default {
       this.$store.dispatch('rpayStacksStore/makeTransferBlockstack', { amountStx: configuration.payment.amountStx, paymentAddress: configuration.payment.stxPaymentAddress }).then((result) => {
         this.waitingMessage = 'Processed Payment'
         this.loading = false
-        data.txId = (result && result.result) ? result.result.txId : 'unknown'
+        if (result && result.result) data.txId = result.result.txId
         this.$emit('rpayEvent', data)
         this.$store.commit('rpayStore/setDisplayCard', 104)
       }).catch((e) => {

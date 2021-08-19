@@ -1,5 +1,4 @@
 export const APP_CONSTANTS = {
-  KEY_FIAT_CURRENCY: 'getFiatCurrency',
   SET_FIAT_CURRENCY: 'setFiatCurrency',
   KEY_RPAY_CONFIGURATION: 'rpayStore/getConfiguration',
   KEY_APP_CONFIGURATION: 'getLocalConfiguration',
@@ -10,9 +9,12 @@ export const APP_CONSTANTS = {
   KEY_WEB_WALLET_LINK_CHROME: 'getWebWalletLinkChrome',
   KEY_WEB_WALLET_LINK_FIREFOX: 'getWebWalletLinkFirefox',
 
+  KEY_STACKS_MATE_NONCES: 'paymentStore/getNonces',
   KEY_PAYMENT_CONVERT: 'paymentStore/convertToPayment',
   KEY_LAST_NONCE: 'paymentStore/getLastNonce',
   KEY_USER_TRANSACTIONS: 'paymentStore/getStacksMateUserTransactions',
+  KEY_ALL_TRANSACTIONS: 'paymentStore/getAllStacksMateTransactions',
+  KEY_MY_PENDING: 'paymentStore/getPending',
 
   KEY_PROFILE: 'rpayAuthStore/getMyProfile',
   KEY_TICKER_RATES: 'rpayStore/getTickerRates',

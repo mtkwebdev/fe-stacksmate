@@ -9,7 +9,7 @@ Vue.use(Vuex)
 
 const precision = 100000000
 const precisionStx = 1000000
-const getAmounts = function (currency, amountFiat, tickerRates) {
+const getAmounts = function (currency, amountFiat, tickerRates, cryptoFixed) {
   try {
     const rate = tickerRates.find((o) => o.currency === currency)
     const amountBtc = amountFiat / rate.last
@@ -48,8 +48,8 @@ const payment = {
   paymentOptions: [
     { allowFiat: true, disabled: false },
     { allowPaypal: true, disabled: true },
-    { allowBitcoin: true, disabled: true },
-    { allowLightning: true, disabled: true },
+    { allowBitcoin: true, disabled: false },
+    { allowLightning: true, disabled: false },
     { allowStacks: false, disabled: true },
     { allowLSAT: false, disabled: true },
     { allowEthereum: true, disabled: false }
@@ -100,6 +100,7 @@ export default new Vuex.Store({
     webWalletNeeded: false,
     proof: '?proof=0',
     baseCurrency: 'GBP',
+    fiatCurrency: 'GBP',
     baseAmount: 2,
     windims: { innerWidth: window.innerWidth, innerHeight: window.innerHeight }
   },
@@ -122,17 +123,16 @@ export default new Vuex.Store({
     getModalMessage: state => {
       return state.modalMessage
     },
-    getFiatCurrency: state => {
-      return state.configuration.payment.currency
-    },
     getAmounts: (state, getters, rootState, rootGetters) => {
       const tickerRates = rootGetters[APP_CONSTANTS.KEY_TICKER_RATES_UNFILTERED]
+      if (!tickerRates || tickerRates.length === 0) return
       const baseRate = tickerRates.find((o) => o.currency === state.baseCurrency)
-      const fiatRate = tickerRates.find((o) => o.currency === state.configuration.payment.currency)
+      const fiatRate = tickerRates.find((o) => o.currency === state.fiatCurrency)
       const fiatAmount = (fiatRate.last / baseRate.last) * state.baseAmount
       const amounts = {
-        baseAmounts: getAmounts(state.baseCurrency, state.baseAmount, tickerRates),
-        fiatAmounts: getAmounts(state.configuration.payment.currency, fiatAmount, tickerRates)
+        baseAmounts: getAmounts(state.baseCurrency, state.baseAmount, tickerRates, false),
+        // fiatAmounts: getAmounts(state.configuration.payment.currency, fiatAmount, tickerRates)
+        fiatAmounts: getAmounts(state.fiatCurrency, fiatAmount, tickerRates, true)
       }
       return amounts
     }
@@ -154,7 +154,7 @@ export default new Vuex.Store({
       }
     },
     setFiatCurrency (state, fiatCurrency) {
-      state.configuration.payment.currency = fiatCurrency
+      state.fiatCurrency = fiatCurrency
     }
   },
   actions: {
@@ -171,8 +171,8 @@ export default new Vuex.Store({
     },
     initApplication ({ state, dispatch }) {
       return new Promise((resolve) => {
-        dispatch('rpayAuthStore/fetchMyAccount', { root: true }).then((profile) => {
-          dispatch('rpayStore/initialisePaymentFlow', state.configuration)
+        dispatch('rpayAuthStore/fetchMyAccount').then((profile) => {
+          // dispatch('rpayStore/initialisePaymentFlow', state.configuration)
           resolve(profile)
         })
       })

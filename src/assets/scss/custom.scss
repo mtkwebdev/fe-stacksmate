@@ -264,10 +264,11 @@ a:hover {
 }
 .modal-content {
   margin: auto;
+  margin-top: 30px;
   border: none !important;
   border-radius: 0px !important;
   min-height: 100px;
-  background-color: transparent !important;
+  background-color: #000 !important;
   color: #000;
   padding: 20px;
 }
@@ -275,6 +276,25 @@ a:hover {
   display: none;
 }
 .modal-footer {
+  display: none;
+}
+#payment-modal .modal-dialog {
+  padding: 20px auto;
+  margin: 0vh auto;
+}
+#payment-modal .modal-content {
+  margin: auto;
+  border: none !important;
+  border-radius: 0px !important;
+  min-height: 100px;
+  background-color: transparent !important;
+  color: #000;
+  padding: 20px;
+}
+#payment-modal .modal-header {
+  display: none;
+}
+#payment-modal .modal-footer {
   display: none;
 }
 .vue-notification-template {

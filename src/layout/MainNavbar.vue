@@ -5,7 +5,7 @@
 
   <b-navbar toggleable="md" type="dark" style="width: 100%; margin: 0; padding-right:0;padding-left:0;">
     <b-navbar-brand href="#">
-      <div class="tagline"><img width="30px" :src="stxIcon"/> Stacks<span class="tagline1">Mate</span></div>
+      <div class="tagline"><b-link class="text-white" to="/"><img class="mr-2" width="30px" :src="stxIcon"/> Stacks<span class="tagline1">Mate</span></b-link></div>
       <!--
       <div class="d-block d-md-none">
         <router-link to="/" class="navbar-brand"><img height="30px" :src="logo"/></router-link>
@@ -34,6 +34,9 @@
           </template>
           <b-dropdown-item>{{username}}</b-dropdown-item>
           <b-dropdown-divider />
+          <b-dropdown-item v-if="profile.superAdmin">
+            <span><b-link to="/admin/transactions">Admin</b-link></span>
+          </b-dropdown-item>
           <b-dropdown-item>
             <span>{{profile.stxAddress}}</span>
           </b-dropdown-item>
@@ -107,12 +110,7 @@ export default {
     },
     startLogout () {
       // this.$emit('updateEventCode', { eventCode: 'connect-logout' })
-      this.$store.dispatch('rpayAuthStore/startLogout').then(() => {
-        if (this.$route.name !== 'swaps') {
-          this.$router.push('/')
-        }
-        // sessionStorage.clear()
-      }).catch((err) => {
+      this.$store.dispatch('rpayAuthStore/startLogout').catch((err) => {
         console.log(err)
         this.$store.commit(APP_CONSTANTS.SET_WEB_WALLET_NEEDED)
       })
@@ -161,10 +159,6 @@ export default {
     // const playMode = this.$store.getters[APP_CONSTANTS.KEY_PLAY_MODE]
     // return playMode
     // },
-    fiatCurrency () {
-      const fiatCurrency = this.$store.getters[APP_CONSTANTS.KEY_FIAT_CURRENCY]
-      return fiatCurrency
-    },
     provider () {
       const provider = this.$store.getters[APP_CONSTANTS.KEY_PROVIDER]
       return provider

@@ -12,12 +12,12 @@
       aria-describedby="item-name-help item-name-feedback"
       placeholder="Recipient address - where to send the STX tokens for the swap"
       trim></b-form-input>
-    <p class="mt-3 text-left"><b-button variant="outline-warning" @click="showPayment">Get STX</b-button></p>
+    <p class="mt-3 text-left"><b-button :disabled="pending" variant="warning" @click="showPayment">Get STX</b-button></p>
   </div>
   <b-row class="mt-5" v-if="smWallet" :key="componentKey">
     <b-col class="mb-4" cols="12">
       <b-link class="text-info" @click.prevent="showUserTransactions = !showUserTransactions"><b-icon :icon="(showUserTransactions) ? 'arrow-down' : 'arrow-right'"/> My Transactions</b-link>
-      <UserTransactions v-if="showUserTransactions" class="text-xsmall py-3" />
+      <UserTransactions v-if="showUserTransactions" class="text-small py-3" />
     </b-col>
     <b-col cols="12">
       <b-link class="text-info" @click.prevent="showSMWallet = !showSMWallet"><b-icon :icon="(showSMWallet) ? 'arrow-down' : 'arrow-right'"/> StacksMate Wallet Info</b-link>
@@ -57,9 +57,8 @@ export default {
   },
   props: ['configuration'],
   mounted () {
-    this.$store.dispatch('paymentStore/fetchStacksMateTransactions', this.profile.stxAddress)
     const configuration = this.$store.getters[APP_CONSTANTS.KEY_RPAY_CONFIGURATION]
-    configuration.payment = Object.assign(configuration.payment, this.getAmounts.fiatAmounts)
+    if (this.getAmounts) configuration.payment = Object.assign(configuration.payment, this.getAmounts.fiatAmounts)
     configuration.payment.paymentOption = ''
     configuration.risidioCardMode = 'payment-flow'
     this.configuration = configuration
@@ -74,16 +73,21 @@ export default {
   },
   methods: {
     stacksMateEvent (transaction) {
+      if (transaction.error !== 'TX_PREV_SAVED') {
+        this.$notify({ type: 'success', title: 'Stacks Transfer', text: 'Your STX tokens are on their way!' })
+      }
       this.$bvModal.hide('payment-modal')
       this.showUserTransactions = true
-      this.$notify({ type: 'success', title: 'Payments', text: 'Stacks transfer is being sent now.' })
-      this.$notify({ type: 'success', title: 'Transfers', text: 'Status is ' + transaction.txStatus + ' - stacks transactions currently take a few minutes to process.' })
       this.componentKey++
     },
     useMyAddress: function () {
       this.recipient = this.profile.stxAddress
     },
     showPayment () {
+      if (this.pending) {
+        this.$notify({ type: 'warning', title: 'Pending', text: 'Please wait for current transactions to confirm' })
+        return
+      }
       this.showRpay = true
       this.$bvModal.show('payment-modal')
       this.$store.dispatch('fetchAddressInfo', this.recipient).then(() => {
@@ -100,14 +104,19 @@ export default {
       if (!configuration) return ''
 
       const amounts = this.getAmounts
+      if (!amounts) return ''
       // return '<div>Swap <span class="text-warning">' + configuration.payment.amountFiat + '</span> ' + configuration.payment.currency + ' for <span class="text-warning">' + configuration.payment.amountStx + '</span> STX</div><div class="mt-3">Send the STX to:</span> <span class="text-warning">' + this.recipient + '</div>'
       const baseMessage = '<h3 class="mb-4">' + amounts.baseAmounts.currency + ' <span class="text-warning">' + amounts.baseAmounts.amountFiatFormatted + '</span> Swap</h3>'
-      return baseMessage + '<div>Swap <span class="text-warning">' + amounts.fiatAmounts.amountFiatFormatted + '</span> ' + amounts.fiatAmounts.currency + ' for <span class="text-warning">' + amounts.fiatAmounts.amountStx + '</span> STX</div>'
+      return baseMessage + '<div>Swap <span class="text-warning">' + amounts.fiatAmounts.amountFiatFormatted + '</span> ' + amounts.fiatAmounts.currency + ' for <span class="text-warning">' + amounts.baseAmounts.amountStx + '</span> STX</div>'
       // <div class="mt-3">Send the STX to:</span> <span class="text-warning">' + this.recipient + '</div>'
     },
     getAmounts () {
       const amounts = this.$store.getters[APP_CONSTANTS.KEY_AMOUNTS]
       return amounts
+    },
+    pending () {
+      const pending = this.$store.getters[APP_CONSTANTS.KEY_MY_PENDING](this.profile.stxAddress)
+      return pending
     },
     smWallet () {
       const stxAddress = process.env.VUE_APP_STACKS_TRANSFER_ADDRESS

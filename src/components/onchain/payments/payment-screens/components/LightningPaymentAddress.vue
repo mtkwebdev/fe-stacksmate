@@ -3,17 +3,16 @@
   <div>
     <div title="Make Payment" v-if="payment">
       <div class="rpay-countdown mb-3 d-flex justify-content-center">
-        <span class="mr-2 text-message">Scan vode - valid for</span>
+        <span class="mr-2 text-message">valid for</span>
         <CryptoCountdown :configuration="configuration" class="text-danger" v-on="$listeners" />
       </div>
-      <div class="mb-1">
+      <div class="mb-1 d-flex justify-content-center">
         <canvas class="qr-canvas" ref="lndQrcode"></canvas>
       </div>
       <!-- <input v-show="false" class="input2" readonly="true" ref="paymentAddressBtc"  @click="copyAddress($event)" :value="paymentRequest" placeholder="Lightning invoice"/> -->
-      <div class="mb-3 d-flex justify-content-center">
-        <a ref="myPaymentAddress" class="copyAddress" href="#" @click.prevent="copyAddress($event)" style="text-decoration: underline;">
-          <span ref="myPaymentAddress" class="mr-2 text-one">Copy the address</span>
-        </a>
+      <div class="d-flex justify-content-center">
+        <input class="fake-input" id="copy-address" readonly v-model="paymentUri"/>
+        <a href="#" class="pointer" @click.prevent="copyAddress()"><b-icon icon="file-earmark"/></a>
       </div>
     </div>
     <div title="Open Channel" v-else>
@@ -49,7 +48,8 @@ export default {
       token: null,
       channel: null,
       peerAddress: null,
-      payment: true
+      payment: true,
+      paymentUri: null
     }
   },
   beforeDestroy () {
@@ -57,9 +57,7 @@ export default {
   },
   mounted () {
     const invoice = this.$store.getters[APP_CONSTANTS.KEY_INVOICE]
-    if (!invoice) {
-
-    }
+    this.paymentUri = (invoice.data.uri) ? invoice.data.uri : invoice.data.address
     Vue.nextTick(function () {
       this.addQrCode()
     }, this)
@@ -72,7 +70,7 @@ export default {
     addQrCode () {
       const element = this.$refs.lndQrcode
       const invoice = this.$store.getters[APP_CONSTANTS.KEY_INVOICE]
-      const paymentUri = invoice.data.uri
+      const paymentUri = (invoice.data.uri) ? invoice.data.uri : invoice.data.address
       QRCode.toCanvas(element, paymentUri, { errorCorrectionLevel: 'H' },
         function (error) {
           if (error) console.error(error)
@@ -87,29 +85,24 @@ export default {
           if (error) console.error(error)
         })
     },
-    copyAddress () {
-      const invoice = this.$store.getters[APP_CONSTANTS.KEY_INVOICE]
-      const tempInput = document.createElement('input')
-      // tempInput.style = 'position: absolute; left: -1000px; top: -1000px'
-      tempInput.value = invoice.data.lightning_invoice.payreq
-      document.body.appendChild(tempInput)
-      tempInput.select()
-      document.execCommand('copy')
-      document.body.removeChild(tempInput)
-      // const flasher = document.getElementById('flash-me')
-      const flasher = this.$refs.lndQrcode
-      flasher.classList.add('flasher')
-      setTimeout(function () {
-        flasher.classList.remove('flasher')
-      }, 1000)
-      // copyText.select()
-      // document.execCommand('copy')
-    },
     copyUri () {
       const copyText = this.$refs.paymentUriBtc
       copyText.select()
       document.execCommand('copy')
       // this.$notify({ type: 'success', title: 'Copied Channel Uri', text: 'Copied the channel uri to clipboard: ' + copyText.value })
+    },
+    copyAddress (value) {
+      const copyText = document.querySelector('#copy-address')
+      copyText.select()
+      document.execCommand('copy')
+      this.doFlash()
+    },
+    doFlash () {
+      const flasher = this.$refs.lndQrcode
+      flasher.classList.add('flasher')
+      setTimeout(function () {
+        flasher.classList.remove('flasher')
+      }, 1000)
     }
   },
   computed: {
@@ -129,6 +122,12 @@ export default {
 }
 </script>
 <style lang="scss" >
+.fake-input {
+  border: none;
+  font-size: 0.6rem;
+  width: 200px;
+  text-align: center;
+}
 .flasher {
   font-size: 16px;
   border: 2pt solid #FFCE00;

@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <!-- <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet"> -->
-    <link rel="icon" href="<%= BASE_URL %>img/icons/favicon-16x161.png">
-    <script integrity="" type="text/javascript" src="https://js.squareupsandbox.com/v2/paymentform"></script>
-    <script src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <!-- <script integrity="" type="text/javascript" src="https://js.squareupsandbox.com/v2/paymentform"></script> -->
+    <script integrity="" type="text/javascript" src="https://<%= process.env.VUE_APP_BASE_SQUARE_URL %>/v1/square.js"></script>
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>

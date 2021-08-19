@@ -12,13 +12,14 @@
         </template>
         <div>
           <!-- <CryptoPicker :configuration="configuration" v-if="displayCard === 100" @rpayEvent="rpayEvent($event)"/> -->
-          <div v-if="displayCard === 102">
+          <div>
             <OrderInfo :configuration="configuration" v-if="configuration.payment.allowMultiples" class="pb-4" @rpayEvent="rpayEvent($event)"/>
             <div class="d-flex flex-column align-items-center">
               <CryptoOptions :configuration="configuration" @rpayEvent="rpayEvent($event)"/>
               <p class="mt-2 mx-4 text-center text-message" v-html="swapMessage"></p>
               <p v-if="paying" class="mt-2 mx-4 text-center text-message">
                 <b-icon icon="circle" animation="throb" font-scale="1"></b-icon> Payment in Progress
+                <br/><span class="text-danger text-small">Please leave this tab open until we get the response</span>
               </p>
               <p v-if="nonceBlocked" class="mt-2 mx-4 text-center text-message">
                 <b-icon icon="circle" animation="throb" font-scale="1"></b-icon> Waiting for previous transaction to confirm
@@ -26,7 +27,7 @@
               <CryptoPaymentScreen :configuration="configuration" @rpayEvent="rpayEvent($event)"/>
             </div>
           </div>
-          <ResultPage :configuration="configuration" :result="'error'" v-else @rpayEvent="rpayEvent($event)"/>
+          <!-- <ResultPage :configuration="configuration" :result="'error'" v-else @rpayEvent="rpayEvent($event)"/> -->
         </div>
         <template v-slot:footer>
           <FooterView class="mx-4" :paymentStage="paymentStage" @rangeEvent="rangeEvent"/>
@@ -77,6 +78,8 @@ export default {
     window.eventBus.$on('rpayEvent', function (data) {
       if (data.opcode === 'eth-payment-pending') {
         $self.paying = true
+      } else if (data.opcode === 'btc-crypto-payment-success') {
+        $self.doTransfer(data)
       }
     })
   },
@@ -84,18 +87,12 @@ export default {
     this.$store.dispatch('rpayStore/stopCheckPayment')
   },
   methods: {
-    initPayment: function (config) {
-      const displayCard = this.$store.getters[APP_CONSTANTS.KEY_DISPLAY_CARD]
-      if (this.configuration.payment.allowMultiples && displayCard === 100) {
-        this.$store.commit('rpayStore/setDisplayCard', 100)
-      } else {
-        this.$store.commit('rpayStore/setDisplayCard', 102)
-      }
+    initPayment: function () {
       this.$store.dispatch('rpayStore/initialisePaymentFlow', this.configuration).then((invoice) => {
         this.page = 'payment-page'
         if (invoice) {
           if (invoice.data && (invoice.data.status === 'paid' || invoice.data.status === 'processing')) {
-            this.page = 'payment-result'
+            // this.page = 'payment-result'
           }
         }
         this.loading = false
@@ -130,10 +127,12 @@ export default {
     doTransfer (data) {
       data.recipient = this.recipient
       const payment = this.$store.getters[APP_CONSTANTS.KEY_PAYMENT_CONVERT](data)
-      this.$notify({ type: 'success', title: 'Payments', text: this.successMessage1 })
-      const addr = { force: true, stxAddress: process.env.VUE_APP_STACKS_TRANSFER_ADDRESS }
-      this.$store.dispatch('rpayAuthStore/fetchAccountInfo', addr).then((accountInfo) => {
-        payment.nonce = accountInfo.nonce
+      this.$store.dispatch('paymentStore/fetchNoncesForStacksMateWallet', payment.stxAddress).then((nonces) => {
+        if (nonces) {
+          payment.nonce = nonces.possible_next_nonce
+        } else {
+          payment.nonce = -1
+        }
         this.$store.dispatch('paymentStore/sendStacksMateTransaction', payment).then((transaction) => {
           this.$emit('stacksMateEvent', transaction)
         }).catch(() => {
@@ -169,13 +168,6 @@ export default {
       const wallet = this.$store.getters[APP_CONSTANTS.KEY_ACCOUNT_INFO](stxAddress)
       const lastNonce = this.$store.getters[APP_CONSTANTS.KEY_LAST_NONCE] || -1
       return wallet.accountInfo.nonce <= lastNonce
-    },
-    payingMessage () {
-      let sm = 'You send <span class="text-danger">'
-      if (this.paying) {
-        sm += '<br/><br/><b-icon icon="circle-fill" animation="throb" font-scale="2"></b-icon> Payment Pending'
-      }
-      return sm
     },
     sufficientFunds () {
       const stxAddress = process.env.VUE_APP_STACKS_TRANSFER_ADDRESS

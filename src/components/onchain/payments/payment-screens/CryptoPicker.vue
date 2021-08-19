@@ -56,10 +56,6 @@ export default {
   },
   methods: {
     continueToPayment () {
-      const config = this.configuration
-      this.$store.dispatch('rpayStore/initialisePaymentFlow', config).then(() => {
-        this.$store.commit('rpayStore/setDisplayCard', 102)
-      })
     },
     rpayCancel () {
       this.$emit('rpayEvent', { opcode: 'payment-canceled' })

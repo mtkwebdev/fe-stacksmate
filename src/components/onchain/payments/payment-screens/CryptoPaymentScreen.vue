@@ -9,10 +9,11 @@
     </div>
   </div>
   <div class="" v-else>
-    <p class="mt-4 text-center text-message" v-if="desktopWalletSupported === ''">Scan the QR code <a v-if="paymentOption === 'lightning'" href="#" class="text-danger" @click.prevent="checkChain()">check payment</a></p>
+    <p v-if="!checkingChain && paymentOption === 'bitcoin' || paymentOption === 'lightning'" class="mt-4 text-center text-message">Scan the QR code <b-icon icon="arrow-right"/> <a v-if="paymentOption === 'lightning' || paymentOption === 'bitcoin'" href="#" class="text-warning" @click.prevent="doCheckChain()">check payment</a></p>
+    <p v-if="checkingChain" class="mt-4 text-center text-message"><b-icon icon="circle" animation="throb"/> Checking for paid invoice</p>
     <p class="mt-4 text-center text-message text-center" v-if="paymentOption === 'fiat'">Enter your card details</p>
     <div class="d-flex justify-content-center">
-      <FiatPaymentScreen :configuration="configuration" v-on="$listeners" v-if="paymentOption === 'fiat'"/>
+      <CardPaymentScreen :configuration="configuration" v-on="$listeners" v-if="paymentOption === 'fiat'"/>
       <LightningPaymentAddress :configuration="configuration" v-on="$listeners" v-if="paymentOption === 'lightning'"/>
       <BitcoinPaymentAddress :configuration="configuration" v-on="$listeners" v-if="paymentOption === 'bitcoin'"/>
       <StacksPaymentAddress :configuration="configuration" v-on="$listeners" :desktopWalletSupported="desktopWalletSupported" v-if="paymentOption === 'stacks'"/>
@@ -28,7 +29,7 @@ import LightningPaymentAddress from './components/LightningPaymentAddress'
 import BitcoinPaymentAddress from './components/BitcoinPaymentAddress'
 import StacksPaymentAddress from './components/StacksPaymentAddress'
 import EthereumPaymentAddress from './components/EthereumPaymentAddress'
-import FiatPaymentScreen from './FiatPaymentScreen'
+import CardPaymentScreen from './CardPaymentScreen'
 
 export default {
   name: 'CryptoPaymentScreen',
@@ -37,23 +38,36 @@ export default {
     BitcoinPaymentAddress,
     EthereumPaymentAddress,
     StacksPaymentAddress,
-    FiatPaymentScreen
+    CardPaymentScreen
   },
   props: ['configuration'],
   data () {
     return {
       expired: false,
+      checkingChain: false,
       message: null,
       paying: false,
-      loading: true
+      loading: true,
+      myChainChecker: null
     }
   },
   mounted () {
+    this.checkChain()
     this.loading = false
+  },
+  beforeDestroy () {
+    clearInterval(this.myChainChecker)
   },
   methods: {
     checkChain () {
-      this.$store.dispatch('rpayStore/checkPayment').then((invoice) => {
+      // const $self = this
+      this.myChainChecker = setInterval(function () {
+        // $self.doCheckChain()
+      }, 15000)
+    },
+    doCheckChain (paymentId) {
+      this.checkingChain = true
+      this.$store.dispatch('rpayStore/checkPayment', paymentId).then((invoice) => {
         if (invoice && invoice.opcode === 'btc-crypto-payment-success') {
           this.$store.commit('rpayStore/setDisplayCard', 104)
         }
@@ -63,7 +77,7 @@ export default {
   computed: {
     desktopWalletSupported () {
       const paymentOption = this.configuration.payment.paymentOption
-      return paymentOption === 'bitcoin' || paymentOption === 'lightning' || paymentOption === 'stacks1'
+      return paymentOption === 'bitcoin' || paymentOption === 'lightning' || paymentOption === 'stacks'
     },
     paymentOption () {
       const paymentOption = this.configuration.payment.paymentOption

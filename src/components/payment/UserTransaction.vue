@@ -1,52 +1,101 @@
 <template>
-<b-container>
-<b-row class="mb-1 border-bottom text-small py-1">
-  <b-col md="3" sm="12">
-    <div>Recipient</div>
+  <b-card bg-variant="primary">
+<b-row class="text-small">
+  <b-col cols="2">
+    <div v-if="transaction.txStatus === 'pending'">Sending</div>
+    <div v-else-if="transaction.txStatus === 'success'">Sent</div>
+    <div v-else>Attempted</div>
   </b-col>
-  <b-col md="8" sm="12">
-    <div>{{transaction.recipient}}</div>
-  </b-col>
-</b-row>
-<b-row class="text-small pb-3">
-  <b-col cols="3">
-    <div>Transfer Amount</div>
-  </b-col>
-  <b-col cols="8">
+  <b-col cols="10">
     <div>{{amount()}} STX</div>
   </b-col>
-  <b-col cols="3">
-    <div>Stacks Tx Status</div>
+</b-row>
+<b-row class="text-small">
+  <b-col md="2" sm="12">
+    <div>To</div>
   </b-col>
-  <b-col cols="8">
-    <div><span v-if="transaction.status !== 'success'"><b-icon icon="circle" animation="throb" font-scale="1"/></span> {{transaction.txStatus}} <a class="text-info" :href="stacksUri()" target="_blank">view on stacks explorer</a></div>
-  </b-col>
-  <b-col cols="3">
-    <div>Transaction Counter</div>
-  </b-col>
-  <b-col cols="8">
-    <div>{{transaction.nonce}}</div>
-  </b-col>
-  <b-col cols="3">
-    <div>Date</div>
-  </b-col>
-  <b-col cols="8">
-    <div>{{timeSent()}}</div>
-  </b-col>
-  <b-col cols="3">
-    <div>Payment Code</div>
-  </b-col>
-  <b-col cols="8">
-    <div>{{transaction.paymentCode}}</div>
-  </b-col>
-  <b-col cols="3">
-    <div>Payment Amount</div>
-  </b-col>
-  <b-col cols="8">
-    <div>{{transaction.paymentAmount}} {{transaction.paymentCurrency}} <a class="text-info" :href="paymentUri()" target="_blank">{{paymentUriLabel()}}</a></div>
+  <b-col md="10" sm="12">
+    <div class="">{{transaction.recipient}}</div>
   </b-col>
 </b-row>
-</b-container>
+<b-row class="text-small">
+  <b-col cols="2">
+    <div>For</div>
+  </b-col>
+  <b-col cols="10" class="d-flex justify-content-between">
+    <div>{{transaction.paymentAmount}} {{transaction.paymentCurrency}}</div>
+    <div v-if="transaction.paymentCurrency.indexOf('L/BTC') === -1">
+      <a class="text-info" :href="paymentUri()" target="_blank">{{paymentUriLabel()}} <b-icon icon="arrow-up-right-circle" font-scale="1"/></a>
+    </div>
+    <div v-else>
+      <div><a class="text-info" href="#" @click.prevent="showLightningInvoice = !showLightningInvoice">Lightning Invoice</a></div>
+    </div>
+  </b-col>
+  <b-col cols="12">
+    <div class="wrapme" v-if="showLightningInvoice">{{transaction.paymentUrl}}</div>
+  </b-col>
+</b-row>
+<b-row class="text-small">
+  <b-col cols="2">
+    <div>on</div>
+  </b-col>
+  <b-col cols="10">
+    <div>{{timeSent()}}</div>
+  </b-col>
+</b-row>
+<b-row class="text-small">
+  <b-col cols="2">
+    <div>
+      <b-link class="text-white pointer" @click.prevent="showAllFields = !showAllFields">Status</b-link>
+    </div>
+  </b-col>
+  <b-col cols="10">
+    <div v-if="transaction.txStatus === 'success'" class="text-info d-flex justify-content-between">
+      <div><b-icon class="mr-2" icon="check-circle" font-scale="1"/> {{transaction.txStatus}}</div>
+      <div v-if="transaction.txId && transaction.txId.length > 8"><a class="text-info" :href="stacksUri()" target="_blank">stacks explorer <b-icon icon="arrow-up-right-circle" font-scale="1"/></a></div>
+    </div>
+    <div v-else-if="transaction.txStatus === 'pending'" class="text-warning d-flex justify-content-between">
+      <div><b-icon class="mr-2" icon="circle" animation="throb" font-scale="1"/> {{transaction.txStatus}}</div>
+      <div v-if="transaction.txId && transaction.txId.length > 8"><a class="text-info" :href="stacksUri()" target="_blank">stacks explorer <b-icon icon="arrow-up-right-circle" font-scale="1"/></a></div>
+    </div>
+    <div v-else class="text-danger d-flex justify-content-between">
+      <div @click="showAllFields = !showAllFields"><b-icon class="mr-2" icon="x-circle" font-scale="1"/>{{transaction.txStatus}}</div>
+      <div v-if="transaction.txId && transaction.txId.length > 8"><a class="text-info" :href="stacksUri()" target="_blank">stacks explorer <b-icon icon="arrow-up-right-circle" font-scale="1"/></a></div>
+    </div>
+  </b-col>
+</b-row>
+<b-row class="text-small" v-if="showAllFields">
+  <b-col cols="2">
+    <div>Reference</div>
+  </b-col>
+  <b-col cols="10">
+    <div>{{transaction.id}}</div>
+  </b-col>
+  <b-col cols="2">
+    <div>Payment Id</div>
+  </b-col>
+  <b-col cols="10">
+    <div>{{transaction.paymentId}}</div>
+  </b-col>
+  <b-col cols="2">
+    <div>Payment Tx</div>
+  </b-col>
+  <b-col cols="10">
+    <div>{{transaction.paymentTx}}</div>
+  </b-col>
+  <b-col cols="2">
+    <div>Stacks Tx Counter</div>
+  </b-col>
+  <b-col cols="10">
+    <div>{{transaction.nonce}}</div>
+  </b-col>
+</b-row>
+<b-row class="text-small">
+  <b-col cols="12" class="mt-3 text-right">
+    <div><b-link class="text-warning" @click.prevent="$emit('txEvent', transaction)">feedback? <b-icon icon="arrow-up-square" font-scale="1"/></b-link></div>
+  </b-col>
+</b-row>
+  </b-card>
 </template>
 
 <script>
@@ -61,9 +110,10 @@ export default {
   props: ['transaction'],
   data () {
     return {
+      cross: require('@/assets/img/cross.svg'),
+      showLightningInvoice: false,
+      showAllFields: false
     }
-  },
-  mounted () {
   },
   methods: {
     paymentUri () {
@@ -72,19 +122,23 @@ export default {
         uri = process.env.VUE_APP_ETHERSCAN_API + this.transaction.paymentId
       } else if (this.transaction.paymentCode === 'fiat-payment-success') {
         uri = this.transaction.paymentUrl
+      } else if (this.transaction.paymentCurrency === 'BTC') {
+        uri = process.env.VUE_APP_BITCOIN_API + this.payment.paymentTx
       } else {
-        uri = process.env.VUE_APP_BITCOIN_API + this.transaction.paymentId
+        uri = '#'
       }
       return uri
     },
     paymentUriLabel () {
       let uri = null
-      if (this.transaction.paymentCode === 'eth-crypto-payment-success') {
-        uri = 'view transaction'
+      if (this.transaction.paymentCode.indexOf('eth') > -1) {
+        uri = 'view on etherscan'
       } else if (this.transaction.paymentCode === 'fiat-payment-success') {
         uri = 'view reciept'
+      } else if (this.transaction.paymentCurrency === 'BTC') {
+        uri = 'view on blockchain'
       } else {
-        uri = 'view transaction'
+        uri = '#'
       }
       return uri
     },
@@ -108,4 +162,8 @@ export default {
 }
 </script>
 <style lang="scss">
+.wrapme {
+  overflow-y: scroll;
+  margin: 10px 5px;
+}
 </style>
