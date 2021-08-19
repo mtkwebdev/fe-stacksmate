@@ -5,7 +5,7 @@
 No-nonsense service to help users get started with the User Owned Internet care of the Stacks Blockchain.
 With STX users can get involved in the next generation of decentralised applications working with
 Bitcoin backed Smart Contracts (aka Clarity Contracts) anyone can now own NFTs minted on the most
-stabler and robust blockchain going.
+stable and secure permissionless blockchain going.
 
 ## Unit Testing
 
