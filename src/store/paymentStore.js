@@ -26,7 +26,7 @@ const paymentAmount = function (configuration) {
 
 const watchTransaction = function (dispatch, commit, transaction) {
   if (transaction.txStatus === 'pending') {
-    dispatch('rpayTransactionStore/watchTransactionInfo', transaction.txId, { root: true }).then((result) => {
+    dispatch('rpayTransactionStore/readTransactionInfo', transaction.txId, { root: true }).then((result) => {
       if (result && result.txStatus !== 'pending') {
         result.opcode = 'stx-transaction-update'
         const mergedTx = Object.assign(transaction, result)

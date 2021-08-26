@@ -123,7 +123,7 @@ export default {
       } else if (this.transaction.paymentCode === 'fiat-payment-success') {
         uri = this.transaction.paymentUrl
       } else if (this.transaction.paymentCurrency === 'BTC') {
-        uri = process.env.VUE_APP_BITCOIN_API + this.payment.paymentTx
+        uri = process.env.VUE_APP_BITCOIN_API + this.transaction.paymentTx
       } else {
         uri = '#'
       }
