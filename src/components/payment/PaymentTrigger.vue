@@ -33,7 +33,7 @@
 
 <script>
 import { APP_CONSTANTS } from '@/app-constants'
-import PaymentFlow from '@/components/onchain/payments/PaymentFlow'
+import PaymentFlow from '@/components/toolkit/payments/PaymentFlow'
 import StacksMateWallet from './StacksMateWallet'
 import UserTransactions from './UserTransactions'
 

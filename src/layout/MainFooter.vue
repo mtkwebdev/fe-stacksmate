@@ -63,7 +63,7 @@
           <div><a :href="webWalletLink" target="_blank">Hiro Wallet</a></div>
         </b-col>
       </b-row>
-      <b-row class="d-none d-sm-flex justify-content-center footer-bottom">
+      <b-row class="py-4 justify-content-start footer-bottom">
         <div class="footer-bottom--left">
           For the <b-icon icon="heart-fill" class="text-danger"/> of crypto!
         </div>

@@ -359,3 +359,9 @@ a:hover {
   letter-spacing: 0px;
   opacity: 1;
 }
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
+  -webkit-text-fill-color: black !important;
+}
+input {
+  color: black !important;
+}

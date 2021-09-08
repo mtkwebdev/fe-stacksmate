@@ -26,7 +26,7 @@ const paymentAmount = function (configuration) {
 
 const watchTransaction = function (dispatch, commit, transaction) {
   if (transaction.txStatus === 'pending') {
-    dispatch('rpayTransactionStore/readTransactionInfo', transaction.txId, { root: true }).then((result) => {
+    dispatch('rpayTransactionStore/fetchTransactionFromChainByTxId', transaction.txId, { root: true }).then((result) => {
       if (result && result.txStatus !== 'pending') {
         result.opcode = 'stx-transaction-update'
         const mergedTx = Object.assign(transaction, result)
@@ -91,14 +91,14 @@ const paymentStore = {
         payment.paymentUrl = rawPayment.receipt_url
         payment.paymentStatus = rawPayment.status
       } else if (rawPayment.opcode === state.bitcoinType) {
-        const precision = 100000000
+        // const precision = 100000000
         payment.paymentUrl = rawPayment.uri
         const invoice = rootGetters[APP_CONSTANTS.KEY_INVOICE]
         payment.paymentUrl = (invoice.data.uri) ? invoice.data.uri : invoice.data.address
         if (rawPayment.data) {
-          payment.paymentCurrency = (rawPayment.data.auto_settle) ? 'L/BTC' : 'BTC'
+          payment.paymentCurrency = (rawPayment.data.status === 'processing') ? 'BTC' : 'L/BTC'
           payment.paymentId = rawPayment.data.id
-          payment.paymentAmount = Math.round(rawPayment.data.price / precision)
+          // payment.paymentAmount = Math.round(rawPayment.data.price / precision)
           payment.amountSat = rawPayment.data.price
           if (rawPayment.data.transactions && rawPayment.data.transactions > 0) {
             payment.paymentTx = rawPayment.data.transactions[0].tx

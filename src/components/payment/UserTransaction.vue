@@ -24,11 +24,13 @@
   </b-col>
   <b-col cols="10" class="d-flex justify-content-between">
     <div>{{transaction.paymentAmount}} {{transaction.paymentCurrency}}</div>
-    <div v-if="transaction.paymentCurrency.indexOf('L/BTC') === -1">
-      <a class="text-info" :href="paymentUri()" target="_blank">{{paymentUriLabel()}} <b-icon icon="arrow-up-right-circle" font-scale="1"/></a>
-    </div>
-    <div v-else>
-      <div><a class="text-info" href="#" @click.prevent="showLightningInvoice = !showLightningInvoice">Lightning Invoice</a></div>
+    <div v-if="transaction.paymentTx">
+      <div v-if="transaction.paymentCurrency.indexOf('L/BTC') === -1">
+        <a class="text-info" :href="paymentUri()" target="_blank">{{paymentUriLabel()}} <b-icon icon="arrow-up-right-circle" font-scale="1"/></a>
+      </div>
+      <div v-else>
+        <div><a class="text-info" href="#" @click.prevent="showLightningInvoice = !showLightningInvoice">Lightning Invoice</a></div>
+      </div>
     </div>
   </b-col>
   <b-col cols="12">
@@ -122,8 +124,11 @@ export default {
         uri = process.env.VUE_APP_ETHERSCAN_API + this.transaction.paymentId
       } else if (this.transaction.paymentCode === 'fiat-payment-success') {
         uri = this.transaction.paymentUrl
-      } else if (this.transaction.paymentCurrency === 'BTC') {
-        uri = process.env.VUE_APP_BITCOIN_API + this.transaction.paymentTx
+      } else if (this.transaction.paymentCurrency.indexOf('BTC') > -1) {
+        const baseUri = 'https://www.blockchain.com/btc/address/'
+        let btcAddress = this.transaction.paymentUrl.split('bitcoin:')[1]
+        btcAddress = btcAddress.split('?')[0]
+        uri = baseUri + btcAddress
       } else {
         uri = '#'
       }
@@ -135,8 +140,8 @@ export default {
         uri = 'view on etherscan'
       } else if (this.transaction.paymentCode === 'fiat-payment-success') {
         uri = 'view reciept'
-      } else if (this.transaction.paymentCurrency === 'BTC') {
-        uri = 'view on blockchain'
+      } else if (this.transaction.paymentCurrency.indexOf('BTC') > -1) {
+        uri = (this.transaction.paymentUrl) ? 'view on blockchain' : null
       } else {
         uri = '#'
       }

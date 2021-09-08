@@ -55,7 +55,7 @@ const payment = {
     { allowEthereum: true, disabled: false }
   ],
   creditAttributes: {
-    start: 1,
+    start: 2,
     step: 2,
     min: 2,
     max: 20
@@ -65,6 +65,10 @@ const payment = {
     locationId: process.env.VUE_APP_SQUARE_LOCATION_ID,
     squareUrl: process.env.VUE_APP_VUE_APP_SQUARE_URL
   }
+}
+const appDetails = {
+  name: 'StacksMate and the User Owned Internet',
+  icon: origin + '/img/logo/logo.png'
 }
 const setup = function (data) {
   let risidioCardMode = 'payment-flow'
@@ -76,6 +80,7 @@ const setup = function (data) {
   const risidioBaseApi = process.env.VUE_APP_RISIDIO_API
   const configuration = {
     minter: {},
+    appDetails: appDetails,
     payment: payment,
     network: NETWORK,
     risidioProjectId: process.env.VUE_APP_STACKS_CONTRACT_ADDRESS + '.' + process.env.VUE_APP_STACKS_CONTRACT_NAME,

@@ -156,7 +156,7 @@ export default {
     formattedFiat () {
       const configuration = this.configuration
       // const amountFiat = (configuration.payment) ? configuration.payment.amountFiat : '0'
-      const amountFiat = configuration.payment.amountFiat * configuration.payment.creditAttributes.start
+      const amountFiat = configuration.payment.amountFiat // * configuration.payment.creditAttributes.start
       const formatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'EUR'
@@ -291,5 +291,10 @@ export default {
   margin-bottom: 80px;
   text-align: center;
 }
-
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
+    -webkit-text-fill-color: black !important;
+}
+input {
+    color: black !important;
+}
 </style>

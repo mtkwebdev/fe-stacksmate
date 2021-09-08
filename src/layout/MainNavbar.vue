@@ -3,7 +3,7 @@
 <div class="">
   <div class="container">
 
-  <b-navbar toggleable="md" type="dark" style="width: 100%; margin: 0; padding-right:0;padding-left:0;">
+  <b-navbar toggleable="md" type="dark" style="font-size: 1.5rem; width: 100%; margin: 0; padding-right:0;padding-left:0;">
     <b-navbar-brand href="#">
       <div class="tagline"><b-link class="text-white" to="/"><img class="mr-2" width="30px" :src="stxIcon"/> Stacks<span class="tagline1">Mate</span></b-link></div>
       <!--
