@@ -17,7 +17,7 @@
     "prismic-javascript": "^3.0.2",
     "prismic-vue": "^2.0.1",
     "qrcode": "^1.4.4",
-    "risidio-pay": "^0.5.97",
+    "risidio-pay": "^0.6.27",
     "square": "^8.1.1",
     "vue": "^2.6.11",
     "vue-browser-detect-plugin": "^0.1.13",

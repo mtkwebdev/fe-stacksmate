@@ -13,7 +13,7 @@
 import Transactions from '@/components/admin/Transactions'
 
 export default {
-  name: 'UserAdmin',
+  name: 'ApplicationAdmin',
   components: {
     Transactions
   },

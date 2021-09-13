@@ -29,7 +29,7 @@ export default {
   computed: {
     transactions () {
       const transactions = this.$store.getters[APP_CONSTANTS.KEY_ALL_TRANSACTIONS]
-      return transactions
+      return transactions.reverse()
     },
     profile () {
       const profile = this.$store.getters[APP_CONSTANTS.KEY_PROFILE]
